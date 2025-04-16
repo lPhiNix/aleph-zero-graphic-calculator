@@ -131,7 +131,7 @@
 						<configuration>
 							<archive>
 								<manifest>
-									<mainClass>com.placeholder.placeholder.db.models.PlaceholderApplication</mainClass>
+									<mainClass>com.placeholder.placeholder.PlaceholderApplication</mainClass>
 								</manifest>
 								<manifestEntries>
 									<Multi-Release>true</Multi-Release>

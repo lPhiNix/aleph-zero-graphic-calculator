@@ -1,4 +1,4 @@
-package com.placeholder.placeholder.db.models;
+package com.placeholder.placeholder;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
