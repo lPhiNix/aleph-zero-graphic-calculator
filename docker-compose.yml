@@ -1,0 +1,44 @@
+version: '3.8'
+
+# NOTA: NO EJECUTAR COMPOSE UP DENTRO DEL PROYECTO, COPIA ESTE ARCHIVO A UNA CARPETA A PARTE
+# NOTA: DURANTE EL DESARROLLO HAZ SOLO COMPOSE DE LA BASE DE DATOS
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql-db
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: mysqldb
+      MYSQL_ROOT_PASSWORD: 1234
+    volumes:
+      - db-data:/var/lib/mysql
+
+  backend:
+    build: ./backend
+    container_name: springboot-app
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/appdb?useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 1234
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    container_name: react-frontend
+    ports:
+      - "5173:5173"
+    restart: always
+    depends_on:
+      - backend
+    environment:
+      VITE_API_URL: http://backend:8080 # acceso interno dentro de la red de Docker
+
+volumes:
+  db-data:
