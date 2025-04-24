@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 @Component
 public class MathEclipseWrapper {
 
+    private static final int DEFAULT_DECIMAL_SIZE = 10;
+
     private final ExprEvaluator mathEclipse;
 
     public MathEclipseWrapper() {
@@ -20,7 +22,12 @@ public class MathEclipseWrapper {
         return mathEclipse.eval(formattedExpression).toString();
     }
 
-    private static String N(String expression, int decimals) {
+    public String calculateNumericValue(String expression) {
+        String formattedExpression = N(expression, DEFAULT_DECIMAL_SIZE);
+        return mathEclipse.eval(formattedExpression).toString();
+    }
+
+    private String N(String expression, int decimals) {
         return "N[" + expression + ", " + decimals + "]";
     }
 
@@ -34,12 +41,12 @@ public class MathEclipseWrapper {
         return mathEclipse.eval(formattedExpression).toString();
     }
 
-    private static String D(String expression, String... variables) {
+    private String D(String expression, String... variables) {
         String variableList = String.join(", ", variables);
         return "D[" + expression + ", " + variableList + "]";
     }
 
-    public static String D(String expression, Map<String, Integer> variables) {
+    private String D(String expression, Map<String, Integer> variables) {
         String derivationPart = variables.entrySet().stream()
                 .map(entry -> "{" + entry.getKey() + ", " + entry.getValue() + "}")
                 .collect(Collectors.joining(", "));
@@ -47,18 +54,35 @@ public class MathEclipseWrapper {
         return "D[" + expression + ", " + derivationPart + "]";
     }
 
+    public String calculateIndefiniteIntegral(String expression, String... variables) {
+        String formattedExpression = I(expression, variables);
+        return mathEclipse.eval(formattedExpression).toString();
+    }
+
+    private String I(String expression, String... variables) {
+        String variableList = String.join(", ", variables);
+        return "Integrate[" + expression + ", " + variableList + "]";
+    }
+
+    public String calculateIndefiniteIntegral(String expression, Map<String, Integer> variables) {
+        String formattedExpression = I(expression, variables);
+        return mathEclipse.eval(formattedExpression).toString();
+    }
+
+    private String I(String expression, Map<String, Integer> variables) {
+        String variablesWithOrder = variables.entrySet().stream()
+                .map(entry -> "{" + entry.getKey() + ", " + entry.getValue() + "}")
+                .collect(Collectors.joining(", "));
+
+        return "Integrate[" + expression + ", " + variablesWithOrder + "]";
+    }
+
     public static void main(String[] args) {
         try {
             ExprEvaluator util = new ExprEvaluator();
 
-            System.out.println("1. Evaluación simbólica:");
-            System.out.println(util.eval("Expand[(x + 1)^3]")); // x^3 + 3x^2 + 3x + 1
-
-            System.out.println("\n2. Derivada:");
-            System.out.println(util.eval("D[x * y^3, x, y]")); // 2x Cos[x^2]
-
             System.out.println("\n3. Integral:");
-            System.out.println(util.eval("Integrate[x*Sin[x], x]")); // Sin[x] - x Cos[x]
+            System.out.println(util.eval("D[Sin[x^2], x]")); // Sin[x] - x Cos[x]
 
             System.out.println("\n4. Simplificación:");
             System.out.println(util.eval("Simplify[(x^2 - 1)/(x - 1)]")); // x + 1
