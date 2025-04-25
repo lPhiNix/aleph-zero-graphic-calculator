@@ -3,16 +3,16 @@ package com.placeholder.placeholder.util.messages;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.placeholder.placeholder.util.enums.AppCode;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.
+import jakarta.validation.constraints.PositiveOrZero;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ApiMessage<T>(
         @NotNull @PositiveOrZero int status,
         @NotNull String code,
         String message,
-        LocalDate timestamp,
+        LocalDateTime timestamp,
         String path,
         T content
 )
@@ -25,6 +25,6 @@ public record ApiMessage<T>(
      * @param content content of the message
      */
     public ApiMessage(AppCode code, String message, String path, T content) {
-        this(code.getStatus().value(), code.value(), message, LocalDate.now(), path, content);
+        this(code.getStatus().value(), code.value(), message, LocalDateTime.now(), path, content);
     }
 }
