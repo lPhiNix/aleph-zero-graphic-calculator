@@ -13,6 +13,7 @@ public record ApiMessage<T>(
         @NotNull String code,
         String message,
         LocalDate timestamp,
+        String path,
         T content
 )
 {
@@ -20,9 +21,10 @@ public record ApiMessage<T>(
      * Class constructor for Api messages
      * @param code enum holding the HTTP status code, and the APP code
      * @param message optional message
+     * @param path  endpoint URL
      * @param content content of the message
      */
-    public ApiMessage(AppCode code, String message, T content) {
-        this(code.getStatus().value(), code.value(), message, LocalDate.now(), content);
+    public ApiMessage(AppCode code, String message, String path, T content) {
+        this(code.getStatus().value(), code.value(), message, LocalDate.now(), path, content);
     }
 }
