@@ -28,10 +28,10 @@ public class ApiResponseFactory {
     }
 
     public ApiMessage<ErrorResponse> createErrorResponse(String path, AppCode code, String details){
-        return createApiMessage(path, code, null, apiMessageContentFactory.getErrorResponse(code, details));
+        return createApiMessage(path, code, null, apiMessageContentFactory.getErrorResponse(code.getSimpleMessage(), details));
     }
 
     public ApiMessage<ErrorResponse> createErrorResponse(String path, AppCode code, String details, List<ErrorDetail> errors){
-        return createApiMessage(path, code, null, apiMessageContentFactory.getErrorResponseWithErrors(code, details, errors));
+        return createApiMessage(path, code, null, apiMessageContentFactory.getErrorResponseWithErrors(code.getSimpleMessage(), details, errors));
     }
 }
