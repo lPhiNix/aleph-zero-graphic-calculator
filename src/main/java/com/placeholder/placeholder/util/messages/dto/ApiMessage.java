@@ -1,4 +1,4 @@
-package com.placeholder.placeholder.util.messages;
+package com.placeholder.placeholder.util.messages.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.placeholder.placeholder.util.enums.AppCode;
@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
  * @param <T> generic value for the message content
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record ApiMessage<T>(
+public record ApiMessage<T extends MessageContent>(
         @NotNull @PositiveOrZero int status,
         @NotNull String code,
         String message,
@@ -29,5 +29,21 @@ public record ApiMessage<T>(
 {
     public ApiMessage(AppCode code, String message, String path, T content) {
         this(code.getStatus().value(), code.value(), message, LocalDateTime.now(), path, content);
+    }
+
+    public ApiMessage(int status, String code, String message, String path, T content) {
+        this(status, code, message, LocalDateTime.now(), path, content);
+    }
+
+    @Override
+    public String toString() {
+        return "ApiMessage{" +
+                "status=" + status +
+                ", code='" + code + '\'' +
+                ", message='" + message + '\'' +
+                ", timestamp=" + timestamp +
+                ", path='" + path + '\'' +
+                ", content=" + content +
+                '}';
     }
 }

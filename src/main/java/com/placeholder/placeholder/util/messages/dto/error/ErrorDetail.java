@@ -1,4 +1,4 @@
-package com.placeholder.placeholder.util.messages.error;
+package com.placeholder.placeholder.util.messages.dto.error;
 
 /**
  * Standard DTO model for error details

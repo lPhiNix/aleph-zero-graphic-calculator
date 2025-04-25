@@ -1,6 +1,7 @@
-package com.placeholder.placeholder.util.messages.error;
+package com.placeholder.placeholder.util.messages.dto.error;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.placeholder.placeholder.util.messages.dto.MessageContent;
 
 import java.util.List;
 
@@ -15,4 +16,14 @@ public record ErrorResponse(
         String detailedMessage,
         String simpleMessage,
         List<ErrorDetail> errors
-) {}
+) implements MessageContent
+{
+    @Override
+    public String toString() {
+        return "ErrorResponse{" +
+                "detailedMessage='" + detailedMessage + '\'' +
+                ", simpleMessage='" + simpleMessage + '\'' +
+                ", errors=" + errors +
+                '}';
+    }
+}
