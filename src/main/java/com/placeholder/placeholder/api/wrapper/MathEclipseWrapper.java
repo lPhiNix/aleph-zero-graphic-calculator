@@ -1,122 +1,88 @@
 package com.placeholder.placeholder.api.wrapper;
 
 import org.matheclipse.core.eval.ExprEvaluator;
+import org.matheclipse.core.expression.F;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Component
 public class MathEclipseWrapper {
-
-    private static final int DEFAULT_DECIMAL_SIZE = 10;
-
     private final ExprEvaluator mathEclipse;
 
-    public MathEclipseWrapper() {
+    private final MathEclipseUtil util;
+    private final SyntaxExpressionValidator validator;
+
+    public MathEclipseWrapper(MathEclipseUtil util, SyntaxExpressionValidator validator) {
         mathEclipse = new ExprEvaluator();
+        this.util = util;
+        this.validator = validator;
+
+        F.initSymbols();
     }
 
-    public String calculateNumericValue(String expression, int decimals) {
-        String formattedExpression = N(expression, decimals);
-        return mathEclipse.eval(formattedExpression).toString();
+    public boolean validate(String expression) {
+        return validator.validate(expression);
     }
 
-    public String calculateNumericValue(String expression) {
-        String formattedExpression = N(expression, DEFAULT_DECIMAL_SIZE);
-        return mathEclipse.eval(formattedExpression).toString();
+    public void evaluate(String expression) {
+
+    }
+
+    public String process(String expression) {
+        if (!validate(expression)) {
+            return null;
+        }
+
+        return mathEclipse.eval(expression).toString();
+    }
+
+    public void calculate(String expression) {
+
+    }
+
+    public void draw(String expression) {
+
     }
 
     private String N(String expression, int decimals) {
         return "N[" + expression + ", " + decimals + "]";
     }
 
-    public String calculateDerivate(String expression, String... variables) {
-        String formattedExpression = D(expression, variables);
-        return mathEclipse.eval(formattedExpression).toString();
-    }
-
-    public String calculateDerivate(String expression, Map<String, Integer> variables) {
-        String formattedExpression = D(expression, variables);
-        return mathEclipse.eval(formattedExpression).toString();
-    }
-
-    private String D(String expression, String... variables) {
+    public String Solve(String expression, String... variables) {
         String variableList = String.join(", ", variables);
-        return "D[" + expression + ", " + variableList + "]";
+        return "Solve[" + expression + ", {" + variableList + "}]";
     }
 
-    private String D(String expression, Map<String, Integer> variables) {
-        String derivationPart = variables.entrySet().stream()
-                .map(entry -> "{" + entry.getKey() + ", " + entry.getValue() + "}")
-                .collect(Collectors.joining(", "));
-
-        return "D[" + expression + ", " + derivationPart + "]";
-    }
-
-    public String calculateIndefiniteIntegral(String expression, String... variables) {
-        String formattedExpression = I(expression, variables);
-        return mathEclipse.eval(formattedExpression).toString();
-    }
-
-    private String I(String expression, String... variables) {
-        String variableList = String.join(", ", variables);
-        return "Integrate[" + expression + ", " + variableList + "]";
-    }
-
-    public String calculateIndefiniteIntegral(String expression, Map<String, Integer> variables) {
-        String formattedExpression = I(expression, variables);
-        return mathEclipse.eval(formattedExpression).toString();
-    }
-
-    private String I(String expression, Map<String, Integer> variables) {
-        String variablesWithOrder = variables.entrySet().stream()
-                .map(entry -> "{" + entry.getKey() + ", " + entry.getValue() + "}")
-                .collect(Collectors.joining(", "));
-
-        return "Integrate[" + expression + ", " + variablesWithOrder + "]";
+    private String Plot(String expression, String variable, String origin, String bound) {
+        return "Plot[" + expression + ", {" + variable + ", " + origin + ", " + bound + "}]";
     }
 
     public static void main(String[] args) {
-        try {
-            ExprEvaluator util = new ExprEvaluator();
+        MathEclipseUtil util = new MathEclipseUtil();
+        SyntaxExpressionValidator validator = new SyntaxExpressionValidator();
+        MathEclipseWrapper mathEclipseWrapper = new MathEclipseWrapper(util, validator);
 
-            System.out.println("\n3. Integral:");
-            System.out.println(util.eval("D[Sin[x^2], x]")); // Sin[x] - x Cos[x]
+        System.out.println(mathEclipseWrapper.Solve("x^2 + Sin[x] == 0", "x", "y"));
 
-            System.out.println("\n4. Simplificación:");
-            System.out.println(util.eval("Simplify[(x^2 - 1)/(x - 1)]")); // x + 1
-
-            System.out.println("\n5. Resolver ecuación:");
-            System.out.println(util.eval("Solve[x^2 - 4 == 0, x]")); // {{x -> -2}, {x -> 2}}
-
-            System.out.println("\n6. Evaluación numérica (Pi):");
-            System.out.println(util.eval("N[sin(1), 50]")); // 50 decimales
-
-            System.out.println("\n7. Inversa de una matriz:");
-            System.out.println(util.eval("Inverse[{{1, 2}, {3, 4}}]")); // {{-2, 1}, {3/2, -1/2}}
-
-            System.out.println("\n8. Límite:");
-            System.out.println(util.eval("Limit[Sin[x]/x, x -> 0]")); // 1
-
-            System.out.println("\n9. Serie de Taylor:");
-            System.out.println(util.eval("Series[Exp[x], {x, 0, 4}]")); // 1 + x + x²/2 + ...
-
-            System.out.println("\n10. 'Plot' simbólico:");
-            System.out.println(util.eval("Table[{x, Sin[x]}, {x, 0, Pi, Pi/4}]")); // Datos para graficar
-
-            System.out.println("\n11. Lógica booleana:");
-            System.out.println(util.eval("And[True, Or[False, True]]")); // True
-
-            System.out.println("\n12. Números complejos:");
-            System.out.println(util.eval("Abs[3 + 4*I]")); // 5
-
-            System.out.println("\n13. Función definida por el usuario:");
-            util.eval("f[x_] := x^2 + 2*x + 1");
-            System.out.println(util.eval("f[3]")); // 16
-
-        } catch (Exception e) {
-            System.out.println("Error al evaluar expresión: " + e.getMessage());
-        }
+        //System.out.println(mathEclipseWrapper.process("Plot[Sin[1], {x, -Pi, Pi}]"));
+        //System.out.println(mathEclipseWrapper.process("Simplify[(x^2 - 1)/(x - 1)]"));
+        //System.out.println(mathEclipseWrapper.process("Expand[(x + 1)^2]"));
+        //System.out.println(mathEclipseWrapper.process("FullSimplify[Sin[x]^2 + Cos[x]^2]"));
+        //System.out.println(mathEclipseWrapper.process("Solve[x^2 + Sin[x] == 0, x]"));
+        //System.out.println(mathEclipseWrapper.process("D[x^2 + y^2, x]"));
+        //System.out.println(mathEclipseWrapper.process("D[x^3 + 2*x^2 + x, {x, 2}]"));
+        //System.out.println(mathEclipseWrapper.process("Integrate[Integrate[x*y, x], y]"));
+        //System.out.println(mathEclipseWrapper.process("Solve[{x^2 + y^2 == 1, x + y == 1}, {x, y}]"));
+        //System.out.println(mathEclipseWrapper.process("DSolve[y''[x] + y[x] == 0, y[x], x]"));
+        //System.out.println(mathEclipseWrapper.process("Inverse[{{1, 2}, {3, 4}}]"));
+        //System.out.println(mathEclipseWrapper.process("SingularValueDecomposition[{{1, 2}, {3, 4}}]"));
+        //System.out.println(mathEclipseWrapper.process("Solve[{{1, 2}, {3, 4}}.{x, y} == {5, 6}, {x, y}]"));
+        //System.out.println(mathEclipseWrapper.process("BesselJ[1, x]"));
+        //System.out.println(mathEclipseWrapper.process("PrimeQ[7]"));
+        //System.out.println(mathEclipseWrapper.process("FourierTransform[Sin[x], x, k]"));
+        //System.out.println(mathEclipseWrapper.process("Minimize[x^2 + 2*x + 1, x]"));
+        //System.out.println(mathEclipseWrapper.process("Plot[Sin[x], {x, -Pi, Pi}]"));
+        //System.out.println(mathEclipseWrapper.process("2 * Meter + 3 * Centimeter"));
+        //System.out.println(mathEclipseWrapper.process("PDF[NormalDistribution[0, 1], 1]"));
+        //System.out.println(mathEclipseWrapper.process("FindFit[{{1, 2}, {2, 3}, {3, 5}}, {a x + b}, {x}, {a, b}]"));
     }
 }
