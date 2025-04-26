@@ -24,4 +24,7 @@ public record UserCreationRequest(
         int roleId,
         String roleName
 ) {
+        public boolean usesNumericIdentifier(){
+            return roleName == null;
+        }
 }
