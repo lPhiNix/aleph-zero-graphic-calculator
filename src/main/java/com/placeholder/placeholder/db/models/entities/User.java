@@ -1,4 +1,4 @@
-package com.placeholder.placeholder.db.models;
+package com.placeholder.placeholder.db.models.entities;
 
 import jakarta.persistence.*;
 
