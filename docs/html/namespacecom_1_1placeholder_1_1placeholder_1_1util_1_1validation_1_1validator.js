@@ -1,5 +1,0 @@
-var namespacecom_1_1placeholder_1_1placeholder_1_1util_1_1validation_1_1validator =
-[
-    [ "OnlyOneFieldValidator", "classcom_1_1placeholder_1_1placeholder_1_1util_1_1validation_1_1validator_1_1_only_one_field_validator.html", "classcom_1_1placeholder_1_1placeholder_1_1util_1_1validation_1_1validator_1_1_only_one_field_validator" ],
-    [ "PasswordValidator", "classcom_1_1placeholder_1_1placeholder_1_1util_1_1validation_1_1validator_1_1_password_validator.html", "classcom_1_1placeholder_1_1placeholder_1_1util_1_1validation_1_1validator_1_1_password_validator" ]
-];

@@ -1,4 +1,0 @@
-var _only_one_field_validator_8java =
-[
-    [ "com.placeholder.placeholder.util.validation.validator.OnlyOneFieldValidator", "classcom_1_1placeholder_1_1placeholder_1_1util_1_1validation_1_1validator_1_1_only_one_field_validator.html", "classcom_1_1placeholder_1_1placeholder_1_1util_1_1validation_1_1validator_1_1_only_one_field_validator" ]
-];

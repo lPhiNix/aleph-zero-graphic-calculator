@@ -1,5 +1,0 @@
-var namespacecom_1_1placeholder_1_1placeholder_1_1util_1_1exceptions =
-[
-    [ "GlobalExceptionHandler", "classcom_1_1placeholder_1_1placeholder_1_1util_1_1exceptions_1_1_global_exception_handler.html", "classcom_1_1placeholder_1_1placeholder_1_1util_1_1exceptions_1_1_global_exception_handler" ],
-    [ "ValidationExceptionHandler", "classcom_1_1placeholder_1_1placeholder_1_1util_1_1exceptions_1_1_validation_exception_handler.html", "classcom_1_1placeholder_1_1placeholder_1_1util_1_1exceptions_1_1_validation_exception_handler" ]
-];
