@@ -1,0 +1,4 @@
+var interfacecom_1_1placeholder_1_1placeholder_1_1db_1_1repositories_1_1_user_preference_repository =
+[
+    [ "findByUser_Username", "interfacecom_1_1placeholder_1_1placeholder_1_1db_1_1repositories_1_1_user_preference_repository.html#aac9baf50afd2db369ab22e079ee08e3d", null ]
+];

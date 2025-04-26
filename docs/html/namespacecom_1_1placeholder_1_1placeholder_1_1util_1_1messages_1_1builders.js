@@ -1,0 +1,6 @@
+var namespacecom_1_1placeholder_1_1placeholder_1_1util_1_1messages_1_1builders =
+[
+    [ "ApiResponseBuilder", "classcom_1_1placeholder_1_1placeholder_1_1util_1_1messages_1_1builders_1_1_api_response_builder.html", "classcom_1_1placeholder_1_1placeholder_1_1util_1_1messages_1_1builders_1_1_api_response_builder" ],
+    [ "ErrorResponseBuilder", "classcom_1_1placeholder_1_1placeholder_1_1util_1_1messages_1_1builders_1_1_error_response_builder.html", "classcom_1_1placeholder_1_1placeholder_1_1util_1_1messages_1_1builders_1_1_error_response_builder" ],
+    [ "PagedResponseBuilder", "classcom_1_1placeholder_1_1placeholder_1_1util_1_1messages_1_1builders_1_1_paged_response_builder.html", "classcom_1_1placeholder_1_1placeholder_1_1util_1_1messages_1_1builders_1_1_paged_response_builder" ]
+];
