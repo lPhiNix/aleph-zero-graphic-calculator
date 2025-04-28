@@ -31,6 +31,6 @@ public class ApiMessageContentFactory {
     }
 
     public static ErrorDetail createErrorDetail(String simpleMessage, String detailedMessage) {
-        return new ErrorDetail(simpleMessage, detailedMessage, errors);
+        return new ErrorDetail(simpleMessage, detailedMessage, null);
     }
 }
