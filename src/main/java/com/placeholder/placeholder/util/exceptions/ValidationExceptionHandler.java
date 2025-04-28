@@ -1,5 +1,6 @@
 package com.placeholder.placeholder.util.exceptions;
 
+import com.placeholder.placeholder.util.enums.AppCode;
 import com.placeholder.placeholder.util.messages.ApiResponseUtils;
 import com.placeholder.placeholder.util.messages.dto.ApiResponse;
 import com.placeholder.placeholder.util.messages.dto.error.ErrorDetail;
@@ -26,6 +27,7 @@ import jakarta.validation.ConstraintViolationException;
  */
 @ControllerAdvice
 public class ValidationExceptionHandler {
+    public static final AppCode APP_CODE = AppCode.VALIDATION_ERROR;
 
     /**
      * Handles {@link MethodArgumentNotValidException} thrown when method arguments fail validation.
@@ -43,6 +45,7 @@ public class ValidationExceptionHandler {
         return ApiResponseUtils.buildErrorResponse(
                 request.getRequestURI(),
                 "Validation failed. Please check your request.",
+                APP_CODE,
                 errorDetails
         );
     }
@@ -63,6 +66,7 @@ public class ValidationExceptionHandler {
         return ApiResponseUtils.buildErrorResponse(
                 request.getRequestURI(),
                 "Constraint violations detected.",
+                APP_CODE,
                 errorDetails
         );
     }
@@ -83,6 +87,7 @@ public class ValidationExceptionHandler {
         return ApiResponseUtils.buildErrorResponse(
                 request.getRequestURI(),
                 "Data binding failed.",
+                APP_CODE,
                 errorDetails
         );
     }
@@ -107,6 +112,7 @@ public class ValidationExceptionHandler {
         return ApiResponseUtils.buildErrorResponse(
                 request.getRequestURI(),
                 "Missing request parameter.",
+                APP_CODE,
                 List.of(errorDetail)
         );
     }

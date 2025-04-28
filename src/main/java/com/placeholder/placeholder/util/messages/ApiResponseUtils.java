@@ -5,7 +5,6 @@ import com.placeholder.placeholder.util.messages.dto.ApiResponse;
 import com.placeholder.placeholder.util.messages.dto.error.ErrorDetail;
 import com.placeholder.placeholder.util.messages.dto.error.ErrorResponse;
 import jakarta.validation.ConstraintViolation;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 
@@ -24,21 +23,22 @@ public class ApiResponseUtils {
      * @param path          the request URI where the error occurred
      * @param message       the general error message
      * @param errorDetails  the list of specific validation errors
-     * @return a {@link ResponseEntity} containing the error response with HTTP 400 (Bad Request) status
+     * @return a {@link ResponseEntity} containing the error response with HTTP/app status
      */
     public static ResponseEntity<ApiResponse<ErrorResponse>> buildErrorResponse(
             String path,
             String message,
+            AppCode code,
             List<ErrorDetail> errorDetails
     ) {
         ApiResponse<ErrorResponse> response = ApiResponseFactory.createErrorResponse(
                 path,
-                AppCode.VALIDATION_ERROR,
+                code,
                 message,
                 errorDetails
         );
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .status(code.getStatus())
                 .body(response);
     }
 
