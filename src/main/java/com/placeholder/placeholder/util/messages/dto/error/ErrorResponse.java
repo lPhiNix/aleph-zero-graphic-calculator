@@ -1,7 +1,7 @@
 package com.placeholder.placeholder.util.messages.dto.error;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.placeholder.placeholder.util.messages.dto.MessageContent;
+import com.placeholder.placeholder.util.messages.dto.content.MessageContent;
 
 import java.util.List;
 

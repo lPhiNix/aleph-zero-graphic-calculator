@@ -1,4 +1,6 @@
-package com.placeholder.placeholder.util.messages.dto;
+package com.placeholder.placeholder.util.messages.dto.content;
+
+import com.placeholder.placeholder.util.messages.dto.ApiResponse;
 
 import java.io.Serializable;
 

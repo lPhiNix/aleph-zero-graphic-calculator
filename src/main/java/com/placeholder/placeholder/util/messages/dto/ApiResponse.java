@@ -2,6 +2,7 @@ package com.placeholder.placeholder.util.messages.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.placeholder.placeholder.util.enums.AppCode;
+import com.placeholder.placeholder.util.messages.dto.content.MessageContent;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 

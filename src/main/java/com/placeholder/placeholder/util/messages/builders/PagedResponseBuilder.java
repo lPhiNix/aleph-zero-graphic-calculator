@@ -1,6 +1,6 @@
 package com.placeholder.placeholder.util.messages.builders;
 
-import com.placeholder.placeholder.util.messages.dto.PagedResponse;
+import com.placeholder.placeholder.util.messages.dto.content.PagedResponse;
 
 /**
  * Builder class for creating {@link PagedResponse} instances.

@@ -3,8 +3,8 @@ package com.placeholder.placeholder.util.messages;
 import com.placeholder.placeholder.util.enums.AppCode;
 import com.placeholder.placeholder.util.messages.builders.ApiResponseBuilder;
 import com.placeholder.placeholder.util.messages.dto.ApiResponse;
-import com.placeholder.placeholder.util.messages.dto.EmptyContentResponse;
-import com.placeholder.placeholder.util.messages.dto.MessageContent;
+import com.placeholder.placeholder.util.messages.dto.content.EmptyContentResponse;
+import com.placeholder.placeholder.util.messages.dto.content.MessageContent;
 import com.placeholder.placeholder.util.messages.dto.error.ErrorDetail;
 import com.placeholder.placeholder.util.messages.dto.error.ErrorResponse;
 

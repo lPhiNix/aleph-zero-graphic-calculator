@@ -4,7 +4,7 @@ import com.placeholder.placeholder.db.models.dto.UserCreationRequest;
 import com.placeholder.placeholder.util.enums.AppCode;
 import com.placeholder.placeholder.util.messages.ApiResponseFactory;
 import com.placeholder.placeholder.util.messages.dto.ApiResponse;
-import com.placeholder.placeholder.util.messages.dto.EmptyContentResponse;
+import com.placeholder.placeholder.util.messages.dto.content.EmptyContentResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
