@@ -26,8 +26,8 @@ public class ApiMessageContentFactory {
         return createErrorResponse(simpleMessage, detailedMessage, errors);
     }
 
-    public static ErrorDetail createErrorDetail(String simpleMessage, String detailedMessage, List<ErrorDetail> errors) {
-        return new ErrorDetail(simpleMessage, detailedMessage, errors);
+    public static ErrorDetail createErrorDetail(String simpleMessage, String detailedMessage, Object rejectedValue) {
+        return new ErrorDetail(simpleMessage, detailedMessage, rejectedValue);
     }
 
     public static ErrorDetail createErrorDetail(String simpleMessage, String detailedMessage) {

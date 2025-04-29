@@ -41,6 +41,14 @@ public class ApiResponseUtils {
         return ResponseEntity.status(code.getStatus()).body(response);
     }
 
+    public static ResponseEntity<ApiResponse<ErrorResponse>> buildErrorResponse(
+            String path,
+            String message,
+            AppCode code
+    ) {
+        return buildErrorResponse(path, message, code, null);
+    }
+
     /**
      * Extracts {@link ErrorDetail} list from a {@link BindingResult} containing field validation errors.
      *

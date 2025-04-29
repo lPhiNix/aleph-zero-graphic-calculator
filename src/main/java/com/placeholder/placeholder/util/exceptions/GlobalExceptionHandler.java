@@ -1,7 +1,7 @@
 package com.placeholder.placeholder.util.exceptions;
 
 import com.placeholder.placeholder.util.enums.AppCode;
-import com.placeholder.placeholder.util.messages.ApiResponseFactory;
+import com.placeholder.placeholder.util.messages.ApiResponseUtils;
 import com.placeholder.placeholder.util.messages.dto.ApiResponse;
 import com.placeholder.placeholder.util.messages.dto.error.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,22 +25,18 @@ public class GlobalExceptionHandler {
 
     /**
      * Handles all uncaught exceptions and builds a standardized error response.
-     *
-     * @param ex      the thrown {@link Exception}
-     * @param request the current {@link HttpServletRequest}
-     * @return a {@link ResponseEntity} containing the error response with appropriate status
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<ErrorResponse>> handleAllExceptions(Exception ex, HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleAllExceptions(
+            Exception ex,
+            HttpServletRequest request
+    ) {
         AppCode code = AppCode.INTERNAL_ERROR;
-
-        ApiResponse<ErrorResponse> errorMessage = ApiResponseFactory.createErrorResponse(
+        return ApiResponseUtils.buildErrorResponse(
                 request.getRequestURI(),
-                code,
-                DEFAULT_ERROR_MESSAGE + ": " + ex.getMessage()
+                DEFAULT_ERROR_MESSAGE + ": " + ex.getMessage(),
+                code
         );
-
-        return ResponseEntity.status(code.getStatus()).body(errorMessage);
     }
 
     /**
@@ -52,12 +48,11 @@ public class GlobalExceptionHandler {
             HttpServletRequest request
     ) {
         AppCode code = AppCode.INTERNAL_ERROR;
-        ApiResponse<ErrorResponse> response = ApiResponseFactory.createErrorResponse(
+        return ApiResponseUtils.buildErrorResponse(
                 request.getRequestURI(),
-                code,
-                DEFAULT_ERROR_MESSAGE + ": " + ex.getMessage()
+                DEFAULT_ERROR_MESSAGE + ": " + ex.getMessage(),
+                code
         );
-        return ResponseEntity.status(code.getStatus()).body(response);
     }
 
     /**
@@ -69,12 +64,11 @@ public class GlobalExceptionHandler {
             HttpServletRequest request
     ) {
         AppCode code = AppCode.BAD_REQUEST;
-        ApiResponse<ErrorResponse> response = ApiResponseFactory.createErrorResponse(
+        return ApiResponseUtils.buildErrorResponse(
                 request.getRequestURI(),
-                code,
-                ex.getMessage()
+                ex.getMessage(),
+                code
         );
-        return ResponseEntity.status(code.getStatus()).body(response);
     }
 
     /**
@@ -86,12 +80,11 @@ public class GlobalExceptionHandler {
             HttpServletRequest request
     ) {
         AppCode code = AppCode.CONFLICT;
-        ApiResponse<ErrorResponse> response = ApiResponseFactory.createErrorResponse(
+        return ApiResponseUtils.buildErrorResponse(
                 request.getRequestURI(),
-                code,
-                ex.getMessage()
+                ex.getMessage(),
+                code
         );
-        return ResponseEntity.status(code.getStatus()).body(response);
     }
 
     /**
@@ -105,15 +98,14 @@ public class GlobalExceptionHandler {
         AppCode code = AppCode.BAD_REQUEST;
 
         String message = String.format("Invalid value for parameter '%s': expected type %s",
-                ex.getPropertyName(), ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown");
+                ex.getPropertyName(),
+                ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown");
 
-        ApiResponse<ErrorResponse> response = ApiResponseFactory.createErrorResponse(
+        return ApiResponseUtils.buildErrorResponse(
                 request.getRequestURI(),
-                code,
-                message
+                message,
+                code
         );
-
-        return ResponseEntity.status(code.getStatus()).body(response);
     }
 
     /**
@@ -128,12 +120,10 @@ public class GlobalExceptionHandler {
 
         String message = "Malformed request body: " + ex.getMostSpecificCause().getMessage();
 
-        ApiResponse<ErrorResponse> response = ApiResponseFactory.createErrorResponse(
+        return ApiResponseUtils.buildErrorResponse(
                 request.getRequestURI(),
-                code,
-                message
+                message,
+                code
         );
-
-        return ResponseEntity.status(code.getStatus()).body(response);
     }
 }

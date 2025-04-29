@@ -1,11 +1,11 @@
 package com.placeholder.placeholder.util.exceptions;
 
 import com.placeholder.placeholder.util.enums.AppCode;
+import com.placeholder.placeholder.util.messages.ApiMessageContentFactory;
 import com.placeholder.placeholder.util.messages.ApiResponseUtils;
 import com.placeholder.placeholder.util.messages.dto.ApiResponse;
 import com.placeholder.placeholder.util.messages.dto.error.ErrorDetail;
 import com.placeholder.placeholder.util.messages.dto.error.ErrorResponse;
-import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
 import org.springframework.http.ResponseEntity;
@@ -105,9 +105,10 @@ public class ValidationExceptionHandler {
             MissingServletRequestParameterException ex,
             HttpServletRequest request
     ) {
-        ErrorDetail errorDetail = ApiResponseUtils.createErrorDetail(
-                ex.getParameterName(),
-                "Required request parameter is missing"
+        ErrorDetail errorDetail = ApiMessageContentFactory.createErrorDetail(
+                "Required request parameter is missing",
+                ex.getMessage(),
+                ex.getParameterName()
         );
 
         return ApiResponseUtils.buildErrorResponse(

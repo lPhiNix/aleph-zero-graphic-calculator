@@ -1,7 +1,7 @@
 package com.placeholder.placeholder.util.exceptions;
 
 import com.placeholder.placeholder.util.enums.AppCode;
-import com.placeholder.placeholder.util.messages.ApiResponseFactory;
+import com.placeholder.placeholder.util.messages.ApiResponseUtils;
 import com.placeholder.placeholder.util.messages.dto.ApiResponse;
 import com.placeholder.placeholder.util.messages.dto.error.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
 public class HTTPExceptionHandler {
+
     /**
      * Handles unsupported HTTP methods (e.g., POST used on a GET-only endpoint).
      */
@@ -25,12 +26,11 @@ public class HTTPExceptionHandler {
             HttpServletRequest request
     ) {
         AppCode code = AppCode.METHOD_NOT_ALLOWED;
-        ApiResponse<ErrorResponse> response = ApiResponseFactory.createErrorResponse(
+        return ApiResponseUtils.buildErrorResponse(
                 request.getRequestURI(),
-                code,
-                "HTTP method not supported: " + ex.getMethod()
+                "HTTP method not supported: " + ex.getMethod(),
+                code
         );
-        return ResponseEntity.status(code.getStatus()).body(response);
     }
 
     /**
@@ -42,12 +42,11 @@ public class HTTPExceptionHandler {
             HttpServletRequest request
     ) {
         AppCode code = AppCode.UNSUPPORTED_MEDIA_TYPE;
-        ApiResponse<ErrorResponse> response = ApiResponseFactory.createErrorResponse(
+        return ApiResponseUtils.buildErrorResponse(
                 request.getRequestURI(),
-                code,
-                "Unsupported media type: " + ex.getContentType()
+                "Unsupported media type: " + ex.getContentType(),
+                code
         );
-        return ResponseEntity.status(code.getStatus()).body(response);
     }
 
     /**
@@ -59,12 +58,11 @@ public class HTTPExceptionHandler {
             HttpServletRequest request
     ) {
         AppCode code = AppCode.NOT_ACCEPTABLE;
-        ApiResponse<ErrorResponse> response = ApiResponseFactory.createErrorResponse(
+        return ApiResponseUtils.buildErrorResponse(
                 request.getRequestURI(),
-                code,
-                "Not acceptable media type"
+                "Not acceptable media type",
+                code
         );
-        return ResponseEntity.status(code.getStatus()).body(response);
     }
 
     /**
@@ -76,12 +74,11 @@ public class HTTPExceptionHandler {
             HttpServletRequest request
     ) {
         AppCode code = AppCode.FORBIDDEN;
-        ApiResponse<ErrorResponse> response = ApiResponseFactory.createErrorResponse(
+        return ApiResponseUtils.buildErrorResponse(
                 request.getRequestURI(),
-                code,
-                "Access denied: insufficient permissions"
+                "Access denied: insufficient permissions",
+                code
         );
-        return ResponseEntity.status(code.getStatus()).body(response);
     }
 
     /**
@@ -93,11 +90,10 @@ public class HTTPExceptionHandler {
             HttpServletRequest request
     ) {
         AppCode code = AppCode.UNAUTHORIZED;
-        ApiResponse<ErrorResponse> response = ApiResponseFactory.createErrorResponse(
+        return ApiResponseUtils.buildErrorResponse(
                 request.getRequestURI(),
-                code,
-                "Authentication failed: " + ex.getMessage()
+                "Authentication failed: " + ex.getMessage(),
+                code
         );
-        return ResponseEntity.status(code.getStatus()).body(response);
     }
 }

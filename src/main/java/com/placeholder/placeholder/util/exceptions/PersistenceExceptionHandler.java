@@ -1,7 +1,7 @@
 package com.placeholder.placeholder.util.exceptions;
 
 import com.placeholder.placeholder.util.enums.AppCode;
-import com.placeholder.placeholder.util.messages.ApiResponseFactory;
+import com.placeholder.placeholder.util.messages.ApiResponseUtils;
 import com.placeholder.placeholder.util.messages.dto.ApiResponse;
 import com.placeholder.placeholder.util.messages.dto.error.ErrorResponse;
 import jakarta.persistence.EntityNotFoundException;
@@ -25,13 +25,11 @@ public class PersistenceExceptionHandler {
             DataIntegrityViolationException ex,
             HttpServletRequest request
     ) {
-        AppCode code = AppCode.CONFLICT;
-        ApiResponse<ErrorResponse> response = ApiResponseFactory.createErrorResponse(
+        return ApiResponseUtils.buildErrorResponse(
                 request.getRequestURI(),
-                code,
-                "Database integrity violation: " + Objects.requireNonNull(ex.getRootCause()).getMessage()
+                "Database integrity violation: " + Objects.requireNonNull(ex.getRootCause()).getMessage(),
+                AppCode.CONFLICT
         );
-        return ResponseEntity.status(code.getStatus()).body(response);
     }
 
     /**
@@ -42,13 +40,11 @@ public class PersistenceExceptionHandler {
             EntityNotFoundException ex,
             HttpServletRequest request
     ) {
-        AppCode code = AppCode.NOT_FOUND;
-        ApiResponse<ErrorResponse> response = ApiResponseFactory.createErrorResponse(
+        return ApiResponseUtils.buildErrorResponse(
                 request.getRequestURI(),
-                code,
-                "Entity not found: " + ex.getMessage()
+                "Entity not found: " + ex.getMessage(),
+                AppCode.NOT_FOUND
         );
-        return ResponseEntity.status(code.getStatus()).body(response);
     }
 
     /**
@@ -59,12 +55,10 @@ public class PersistenceExceptionHandler {
             OptimisticLockingFailureException ex,
             HttpServletRequest request
     ) {
-        AppCode code = AppCode.CONFLICT;
-        ApiResponse<ErrorResponse> response = ApiResponseFactory.createErrorResponse(
+        return ApiResponseUtils.buildErrorResponse(
                 request.getRequestURI(),
-                code,
-                "Optimistic locking failure: concurrent update conflict"
+                "Optimistic locking failure: concurrent update conflict",
+                AppCode.CONFLICT
         );
-        return ResponseEntity.status(code.getStatus()).body(response);
     }
 }
