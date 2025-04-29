@@ -39,8 +39,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(userCreationRequest.password())); //Encodes the password
 
 
-        UserRole role = userCreationRequest.usesNumericIdentifier() ?
-                userRoleRepository.getReferenceById(userCreationRequest.roleId()) :
+        UserRole role =
                 userRoleRepository.getUserRoleByName(userCreationRequest.roleName());
 
         user.setRole(role);

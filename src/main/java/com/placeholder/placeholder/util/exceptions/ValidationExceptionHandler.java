@@ -6,6 +6,8 @@ import com.placeholder.placeholder.util.messages.ApiResponseUtils;
 import com.placeholder.placeholder.util.messages.dto.ApiResponse;
 import com.placeholder.placeholder.util.messages.dto.error.ErrorDetail;
 import com.placeholder.placeholder.util.messages.dto.error.ErrorResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
 import org.springframework.http.ResponseEntity;
@@ -29,6 +31,7 @@ import jakarta.validation.ConstraintViolationException;
 @ControllerAdvice
 public class ValidationExceptionHandler {
     public static final AppCode APP_CODE = AppCode.VALIDATION_ERROR;
+    Logger log = LoggerFactory.getLogger(ValidationExceptionHandler.class);
 
     /**
      * Handles {@link MethodArgumentNotValidException} thrown when method arguments fail validation.
@@ -42,7 +45,8 @@ public class ValidationExceptionHandler {
             MethodArgumentNotValidException ex,
             HttpServletRequest request
     ) {
-        List<ErrorDetail> errorDetails = ApiResponseUtils.getErrorDetails(ex);
+        List<ErrorDetail> errorDetails = ApiResponseUtils.getErrorDetails(ex.getBindingResult());
+        log.info("Longitud de detalles: {}", errorDetails);
         return ApiResponseUtils.buildErrorResponse(
                 request.getRequestURI(),
                 "Validation failed. Please check your request.",
@@ -84,7 +88,7 @@ public class ValidationExceptionHandler {
             BindException ex,
             HttpServletRequest request
     ) {
-        List<ErrorDetail> errorDetails = ApiResponseUtils.getErrorDetails(ex);
+        List<ErrorDetail> errorDetails = ApiResponseUtils.getErrorDetails(ex.getBindingResult());
         return ApiResponseUtils.buildErrorResponse(
                 request.getRequestURI(),
                 "Data binding failed.",

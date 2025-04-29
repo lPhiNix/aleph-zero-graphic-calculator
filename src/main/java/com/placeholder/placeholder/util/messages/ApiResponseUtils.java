@@ -8,6 +8,7 @@ import jakarta.validation.ConstraintViolation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -56,16 +57,33 @@ public class ApiResponseUtils {
      * @return a list of {@link ErrorDetail} instances representing each validation error
      */
     public static List<ErrorDetail> getErrorDetails(BindingResult bindingResult) {
-        return bindingResult
-                .getFieldErrors()
-                .stream()
-                .map(fieldError -> new ErrorDetail(
-                        fieldError.getField(),
-                        fieldError.getDefaultMessage(),
-                        fieldError.getRejectedValue()
-                ))
-                .collect(Collectors.toList());
+        List<ErrorDetail> details = new ArrayList<>();
+
+        // Field-specific errors
+        details.addAll(
+                bindingResult.getFieldErrors().stream()
+                        .map(fieldError -> new ErrorDetail(
+                                fieldError.getField(),
+                                fieldError.getDefaultMessage(),
+                                fieldError.getRejectedValue()
+                        ))
+                        .toList()
+        );
+
+        // Global (class-level) errors
+        details.addAll(
+                bindingResult.getGlobalErrors().stream()
+                        .map(error -> new ErrorDetail(
+                                "global",
+                                error.getDefaultMessage(),
+                                null
+                        ))
+                        .toList()
+        );
+
+        return details;
     }
+
 
     /**
      * Extracts {@link ErrorDetail} list from a set of {@link ConstraintViolation} instances.

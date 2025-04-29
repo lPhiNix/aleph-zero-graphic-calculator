@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
  * Global exception handler that captures any uncaught exceptions
  * and returns a standardized error response.
  */
-@ControllerAdvice
 public class GlobalExceptionHandler {
 
     /**

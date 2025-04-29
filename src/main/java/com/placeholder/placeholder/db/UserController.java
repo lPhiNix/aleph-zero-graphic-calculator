@@ -6,6 +6,7 @@ import com.placeholder.placeholder.util.messages.ApiResponseFactory;
 import com.placeholder.placeholder.util.messages.dto.ApiResponse;
 import com.placeholder.placeholder.util.messages.dto.content.EmptyContentResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<?>> register(@RequestBody UserCreationRequest userCreationRequest, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<ApiResponse<?>> register(@RequestBody @Valid UserCreationRequest userCreationRequest, HttpServletRequest httpServletRequest) {
         logger.info("Registering user: {}", userCreationRequest.username());
         userService.createUser(userCreationRequest);
 
