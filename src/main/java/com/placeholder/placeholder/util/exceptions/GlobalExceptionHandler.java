@@ -5,7 +5,9 @@ import com.placeholder.placeholder.util.messages.ApiResponseFactory;
 import com.placeholder.placeholder.util.messages.dto.ApiResponse;
 import com.placeholder.placeholder.util.messages.dto.error.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -89,6 +91,49 @@ public class GlobalExceptionHandler {
                 code,
                 ex.getMessage()
         );
+        return ResponseEntity.status(code.getStatus()).body(response);
+    }
+
+    /**
+     * Handles type mismatch errors (e.g., when a String is passed but an Integer is expected).
+     */
+    @ExceptionHandler(TypeMismatchException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleTypeMismatchException(
+            TypeMismatchException ex,
+            HttpServletRequest request
+    ) {
+        AppCode code = AppCode.BAD_REQUEST;
+
+        String message = String.format("Invalid value for parameter '%s': expected type %s",
+                ex.getPropertyName(), ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown");
+
+        ApiResponse<ErrorResponse> response = ApiResponseFactory.createErrorResponse(
+                request.getRequestURI(),
+                code,
+                message
+        );
+
+        return ResponseEntity.status(code.getStatus()).body(response);
+    }
+
+    /**
+     * Handles unreadable request body (e.g., malformed JSON).
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleHttpMessageNotReadableException(
+            HttpMessageNotReadableException ex,
+            HttpServletRequest request
+    ) {
+        AppCode code = AppCode.BAD_REQUEST;
+
+        String message = "Malformed request body: " + ex.getMostSpecificCause().getMessage();
+
+        ApiResponse<ErrorResponse> response = ApiResponseFactory.createErrorResponse(
+                request.getRequestURI(),
+                code,
+                message
+        );
+
         return ResponseEntity.status(code.getStatus()).body(response);
     }
 }
