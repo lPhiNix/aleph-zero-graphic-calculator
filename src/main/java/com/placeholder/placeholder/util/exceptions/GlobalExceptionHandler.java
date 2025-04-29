@@ -40,4 +40,55 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(code.getStatus()).body(errorMessage);
     }
+
+    /**
+     * Handles any uncaught runtime exceptions.
+     */
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleRuntimeException(
+            RuntimeException ex,
+            HttpServletRequest request
+    ) {
+        AppCode code = AppCode.INTERNAL_ERROR;
+        ApiResponse<ErrorResponse> response = ApiResponseFactory.createErrorResponse(
+                request.getRequestURI(),
+                code,
+                DEFAULT_ERROR_MESSAGE + ": " + ex.getMessage()
+        );
+        return ResponseEntity.status(code.getStatus()).body(response);
+    }
+
+    /**
+     * Handles invalid arguments passed to a method.
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleIllegalArgumentException(
+            IllegalArgumentException ex,
+            HttpServletRequest request
+    ) {
+        AppCode code = AppCode.BAD_REQUEST;
+        ApiResponse<ErrorResponse> response = ApiResponseFactory.createErrorResponse(
+                request.getRequestURI(),
+                code,
+                ex.getMessage()
+        );
+        return ResponseEntity.status(code.getStatus()).body(response);
+    }
+
+    /**
+     * Handles illegal state of objects preventing an operation.
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleIllegalStateException(
+            IllegalStateException ex,
+            HttpServletRequest request
+    ) {
+        AppCode code = AppCode.CONFLICT;
+        ApiResponse<ErrorResponse> response = ApiResponseFactory.createErrorResponse(
+                request.getRequestURI(),
+                code,
+                ex.getMessage()
+        );
+        return ResponseEntity.status(code.getStatus()).body(response);
+    }
 }

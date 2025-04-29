@@ -37,9 +37,8 @@ public class ApiResponseUtils {
                 message,
                 errorDetails
         );
-        return ResponseEntity
-                .status(code.getStatus())
-                .body(response);
+
+        return ResponseEntity.status(code.getStatus()).body(response);
     }
 
     /**

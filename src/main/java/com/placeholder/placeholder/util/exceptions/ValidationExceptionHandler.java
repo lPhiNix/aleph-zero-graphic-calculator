@@ -5,6 +5,7 @@ import com.placeholder.placeholder.util.messages.ApiResponseUtils;
 import com.placeholder.placeholder.util.messages.dto.ApiResponse;
 import com.placeholder.placeholder.util.messages.dto.error.ErrorDetail;
 import com.placeholder.placeholder.util.messages.dto.error.ErrorResponse;
+import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
 import org.springframework.http.ResponseEntity;
