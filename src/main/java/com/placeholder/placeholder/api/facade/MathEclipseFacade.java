@@ -26,7 +26,9 @@ public class MathEclipseFacade implements MathLibFacade {
 
     @Override
     public String validate(String expression) {
-        return mathExpressionValidator.validate(expression, mathEclipseEvaluator.getEvalEngine());
+        return mathExpressionValidator.validate(
+                expression, mathEclipseEvaluator.getEvalEngine()
+        );
     }
 
     @Override
