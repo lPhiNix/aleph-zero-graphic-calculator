@@ -89,7 +89,7 @@ public class MathEclipseFacade implements MathLibFacade {
 
     @Override
     public String formatResult(String expression) {
-        return parseToLateX(expression);
+        return expression;
     }
 
     private String N(String expression, int decimals) {
@@ -109,70 +109,5 @@ public class MathEclipseFacade implements MathLibFacade {
 
     private IExpr createIExpr(String expression) {
         return new ExprEvaluator().parse(expression);
-    }
-
-    public static void main(String[] args) {
-        EvalUtilities evaluator = new EvalUtilities(
-                new EvalEngine(
-                        "default", 100, null, true
-                ), false, false
-        );
-        MathEclipseFacade facade = new MathEclipseFacade(evaluator, new MathExpressionValidator(), new TeXFormFactory());
-
-        System.out.println("VALIDATE:");
-        System.out.println(facade.validate("x^2 + 2*x + 1"));
-        System.out.println(facade.validate("Integrate[Sin[x], x]"));
-        System.out.println(facade.validate("D[x^3, x]"));
-        System.out.println(facade.validate("Solve[x^2 == 1, x]"));
-
-        System.out.println("\nEVALUATE:");
-        System.out.println(facade.evaluate("Expand[(x + 1)^2]"));
-        System.out.println(facade.evaluate("Simplify[(x^2 - 1)/(x - 1)]"));
-        System.out.println(facade.evaluate("Solve[x^2 - 1 == 0, x]"));
-        System.out.println(facade.evaluate("Integrate[x^2, x]"));
-        System.out.println(facade.evaluate("D[x^3 + 2*x^2 + x, {x, 2}]"));
-        System.out.println(facade.evaluate("Limit[(1+1/x)^x, x -> Infinity]"));
-        System.out.println(facade.evaluate("Inverse[{{1, 2}, {3, 4}}]"));
-        System.out.println(facade.evaluate("Transpose[{{1, 2}, {3, 4}}]"));
-        System.out.println(facade.evaluate("Eigenvalues[{{2, 1}, {1, 2}}]"));
-        System.out.println(facade.evaluate("PrimeQ[7]"));
-        System.out.println(facade.evaluate("GCD[18, 24]"));
-        System.out.println(facade.evaluate("LCM[18, 24]"));
-
-        System.out.println("\nCALCULATE (con decimales):");
-        System.out.println(facade.calculate("a", 5));
-        System.out.println(facade.calculate("E", 10));
-        System.out.println(facade.calculate("Sqrt[2]", 8));
-        System.out.println(facade.calculate("Log[10]", 6));
-
-        System.out.println("\nDRAW:");
-        System.out.println(facade.draw("Sin[x]", "x", "-Pi", "Pi"));
-        System.out.println(facade.draw("x^2", "x", "-5", "5"));
-        System.out.println(facade.draw("Exp[-x^2]", "x", "-2", "2"));
-        System.out.println(facade.draw("Tan[x]", "x", "-Pi/2", "Pi/2"));
-        System.out.println(facade.draw("Abs[x]", "x", "-3", "3"));
-
-        System.out.println("INVALID EXPRESSIONS:");
-
-        System.out.println("VALIDATE (deben dar null):");
-        System.out.println(facade.validate("xx^2 + 1")); // variable inválida
-        System.out.println(facade.validate("Plot[Sin[x], {x, -1, 1}]")); // función no permitida
-        System.out.println(facade.validate("Integrate[Sin[x]")); // error de sintaxis
-
-        System.out.println("\nEVALUATE (deben dar null):");
-        System.out.println(facade.evaluate("velocity + 3")); // variable inválida
-        System.out.println(facade.evaluate("Minimize[x^2 + 1, x]")); // función no permitida
-        System.out.println(facade.evaluate("Solve[x^2 == 1, ]")); // error de sintaxis
-
-        System.out.println("\nCALCULATE (con decimales, deben dar null):");
-        System.out.println(facade.calculate("Plot[Sin[x]]", 5)); // función no permitida
-        System.out.println(facade.calculate("x^^2", 10)); // error de sintaxis
-        System.out.println(facade.calculate("Sqrt[longvar]", 8)); // variable inválida
-
-        System.out.println("\nDRAW (deben dar null):");
-        System.out.println(facade.draw("x^2 + speed", "x", "-5", "5")); // variable inválida
-        System.out.println(facade.draw("Sum[1/x, {x, 1, 10}]", "x", "1", "10")); // función no permitida
-        System.out.println(facade.draw("D[x^2,, x]", "x", "-2", "2")); // error de sintaxis
-
     }
 }
