@@ -1,6 +1,5 @@
 package com.placeholder.placeholder.api.facade;
 
-import org.matheclipse.core.eval.EvalEngine;
 import org.matheclipse.core.eval.EvalUtilities;
 import org.matheclipse.core.eval.ExprEvaluator;
 import org.matheclipse.core.form.tex.TeXFormFactory;
