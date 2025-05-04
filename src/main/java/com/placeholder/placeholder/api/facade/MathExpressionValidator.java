@@ -18,7 +18,9 @@ public class MathExpressionValidator {
     private static final Pattern SYMBOL_PATTERN = Pattern.compile("\\b([a-zA-Z][a-zA-Z0-9]*)\\b");
     private static final Pattern FUNCTION_CALL_PATTERN = Pattern.compile("([a-zA-Z][a-zA-Z0-9]*)\\s*[(\\[]");
 
-    private static final Set<String> VALID_CONSTANTS = Set.of("pi", "phi", "infinity");
+    private static final Set<String> VALID_CONSTANTS = Set.of(
+            "pi", "phi", "infinity"
+    );
 
     private static final Set<String> VALID_FUNCTIONS = Set.of(
             "d", "integrate", "taylorseries", "solve", "limit", "dsolve",
