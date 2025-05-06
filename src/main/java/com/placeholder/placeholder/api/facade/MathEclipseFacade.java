@@ -1,5 +1,6 @@
 package com.placeholder.placeholder.api.facade;
 
+import org.matheclipse.core.eval.EvalEngine;
 import org.matheclipse.core.eval.EvalUtilities;
 import org.matheclipse.core.eval.ExprEvaluator;
 import org.matheclipse.core.form.tex.TeXFormFactory;
@@ -27,14 +28,16 @@ public class MathEclipseFacade implements MathLibFacade {
     private final EvalUtilities mathEclipseEvaluator; // Symja native expression evaluator
     private final MathExpressionValidator mathExpressionValidator; // Custom validator
     private final TeXFormFactory teXParser; // LaTeX parser
+    private final boolean laTeXFormat;
 
     // Buffer to capture any errors printed to System.err during evaluation
     private final ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
 
-    public MathEclipseFacade(EvalUtilities mathEclipseEvaluator, MathExpressionValidator mathExpressionValidator, TeXFormFactory teXParser) {
+    public MathEclipseFacade(EvalUtilities mathEclipseEvaluator, MathExpressionValidator mathExpressionValidator, TeXFormFactory teXParser, boolean laTeXFormat) {
         this.mathEclipseEvaluator = mathEclipseEvaluator;
         this.mathExpressionValidator = mathExpressionValidator;
         this.teXParser = teXParser;
+        this.laTeXFormat = laTeXFormat;
     }
 
     /**
@@ -63,7 +66,7 @@ public class MathEclipseFacade implements MathLibFacade {
             return validated;
         }
 
-        return safeEvaluate(validated, true);
+        return safeEvaluate(validated, laTeXFormat);
     }
 
     /**
@@ -81,7 +84,7 @@ public class MathEclipseFacade implements MathLibFacade {
         }
 
         String numericExpression = N(expression, decimals);
-        return safeEvaluate(numericExpression, true);
+        return safeEvaluate(numericExpression, laTeXFormat);
     }
 
     /**
@@ -199,5 +202,13 @@ public class MathEclipseFacade implements MathLibFacade {
      */
     private IExpr createIExpr(String expression) {
         return new ExprEvaluator().parse(expression);
+    }
+
+    public static void main(String[] args) {
+        EvalEngine engine = new EvalEngine("benchmark", 100, null, true);
+        EvalUtilities evaluator = new EvalUtilities(engine, false, false);
+        MathEclipseFacade facade = new MathEclipseFacade(evaluator, new MathExpressionValidator(), new TeXFormFactory(), false);
+
+        System.out.println(facade.calculate("Erf[1]", 50));
     }
 }
