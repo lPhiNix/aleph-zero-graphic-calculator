@@ -39,7 +39,9 @@ public class MathExpressionValidator {
     private static final Pattern FUNCTION_CALL_PATTERN = Pattern.compile("([a-zA-Z][a-zA-Z0-9]*)\\s*[(\\[]");
 
     // Whitelist of constants that can be used as-is in expressions without being one-character variables.
-    private static final Set<String> VALID_CONSTANTS = Set.of("pi", "phi", "infinity");
+    private static final Set<String> VALID_CONSTANTS = Set.of(
+            "pi", "phi", "infinity"
+    );
 
     // Whitelist of allowed function names the user can include in their input.
     private static final Set<String> VALID_FUNCTIONS = Set.of(
