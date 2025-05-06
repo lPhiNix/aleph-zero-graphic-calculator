@@ -30,10 +30,10 @@ class MathEclipseConfig {
     @Bean
     public EvalEngine evalEngine() {
         // Parameters:
-        // - "default" : Name of the evaluation context (used for thread isolation or debugging)
-        // - 100       : Maximum recursion depth (prevents infinite evaluations or stack overflow)
-        // - null      : nose TODO
-        // - true      : nose TODO
+        // - sessionID = "default" : Name of the evaluation context (used for thread isolation or debugging)
+        // - recursionLimit = 100  : Maximum recursion depth (prevents infinite evaluations or stack overflow)
+        // - out = null            : Output stream for debug/logging (null disables output)
+        // - relaxedSyntax = true  : Allows more permissive parsing of expressions (e.g., "()" or "[]" can be used)
         return new EvalEngine("default", 100, null, true);
     }
 
@@ -46,10 +46,9 @@ class MathEclipseConfig {
     @Bean
     public EvalUtilities evalUtilities(EvalEngine engine) {
         // Parameters:
-        // - engine : the EvalEngine instance created above
-        // - false  : nose TODO
-        // - false  : nose TODO
-        //
+        // - evalEngine = engine     : the EvalEngine instance created above
+        // - mathNLTagPrefix = false : disables tagging with MathNL prefixes (used in natural language support)
+        // - mathMLHeader = false    : disables the inclusion of MathML headers in output (keeps it clean)
         // This configuration keeps the output clean and optimized for production usage.
         return new EvalUtilities(engine, false, false);
     }
