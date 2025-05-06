@@ -39,12 +39,12 @@ public class MathExpressionValidator {
     private static final Pattern FUNCTION_CALL_PATTERN = Pattern.compile("([a-zA-Z][a-zA-Z0-9]*)\\s*[(\\[]");
 
     // Whitelist of constants that can be used as-is in expressions without being one-character variables.
-    private static final Set<String> VALID_CONSTANTS = Set.of(
+    private static final Set<String> VALID_CONSTANT_WHITELIST = Set.of(
             "pi", "phi", "infinity"
     );
 
     // Whitelist of allowed function names the user can include in their input.
-    private static final Set<String> VALID_FUNCTIONS = Set.of(
+    private static final Set<String> VALID_FUNCTION_WHITELIST = Set.of(
             "d", "integrate", "taylor", "solve", "limit", "dsolve",
             "primeq", "eigenvalues", "inverse", "transpose", "gcd", "lcm",
             "simplify", "expand", "sqrt", "exp", "log", "log10", "log2", "abs",
@@ -138,7 +138,7 @@ public class MathExpressionValidator {
      * @return true if it is a valid constant
      */
     private boolean isValidConstant(String symbol) {
-        return VALID_CONSTANTS.contains(symbol.toLowerCase());
+        return VALID_CONSTANT_WHITELIST.contains(symbol.toLowerCase());
     }
 
     /**
@@ -174,7 +174,7 @@ public class MathExpressionValidator {
         Matcher matcher = FUNCTION_CALL_PATTERN.matcher(input);
         while (matcher.find()) {
             String function = matcher.group(1).toLowerCase();
-            if (!VALID_FUNCTIONS.contains(function)) {
+            if (!VALID_FUNCTION_WHITELIST.contains(function)) {
                 return "Invalid function: '" + matcher.group(1) + "' is not allowed.";
             }
         }
