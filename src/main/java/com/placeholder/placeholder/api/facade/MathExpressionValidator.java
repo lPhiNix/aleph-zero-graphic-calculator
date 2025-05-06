@@ -45,7 +45,7 @@ public class MathExpressionValidator {
 
     // Whitelist of allowed function names the user can include in their input.
     private static final Set<String> VALID_FUNCTIONS = Set.of(
-            "d", "integrate", "taylorseries", "solve", "limit", "dsolve",
+            "d", "integrate", "taylor", "solve", "limit", "dsolve",
             "primeq", "eigenvalues", "inverse", "transpose", "gcd", "lcm",
             "simplify", "expand", "sqrt", "exp", "log", "log10", "log2", "abs",
             "sin", "cos", "tan", "csc", "cot", "sec",
