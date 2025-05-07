@@ -1,6 +1,5 @@
 package com.placeholder.placeholder.api.facade;
 
-import org.matheclipse.core.eval.EvalEngine;
 import org.matheclipse.core.eval.EvalUtilities;
 import org.matheclipse.core.eval.ExprEvaluator;
 import org.matheclipse.core.form.tex.TeXFormFactory;
@@ -157,6 +156,11 @@ public class MathEclipseFacade implements MathLibFacade {
         return parseToLateX(expression);
     }
 
+    @Override
+    public void stopRequest() {
+        mathEclipseEvaluator.stopRequest();
+    }
+
     /**
      * Wraps an expression with Symja's N[] function for numeric approximation.
      *
@@ -202,13 +206,5 @@ public class MathEclipseFacade implements MathLibFacade {
      */
     private IExpr createIExpr(String expression) {
         return new ExprEvaluator().parse(expression);
-    }
-
-    public static void main(String[] args) {
-        EvalEngine engine = new EvalEngine("benchmark", 100, null, true);
-        EvalUtilities evaluator = new EvalUtilities(engine, false, false);
-        MathEclipseFacade facade = new MathEclipseFacade(evaluator, new MathExpressionValidator(), new TeXFormFactory(), false);
-
-        System.out.println(facade.calculate("Erf[1]", 50));
     }
 }

@@ -52,4 +52,12 @@ public interface MathLibFacade {
      * @return mathematical formated expression.
      */
     String formatResult(String expression);
+
+    /**
+     * Stops the ongoing evaluation of a mathematical expression.
+     * <p>
+     * This method is intended to interrupt long or potentially infinite evaluations,
+     * ensuring that the computation process can be controlled and stopped if necessary.
+     */
+    void stopRequest();
 }
