@@ -1,6 +1,6 @@
 package com.placeholder.placeholder.util.messages.builders;
 
-import com.placeholder.placeholder.util.messages.dto.error.ErrorDetail;
+import com.placeholder.placeholder.util.messages.dto.error.details.ValidationErrorDetail;
 import com.placeholder.placeholder.util.messages.dto.error.ErrorResponse;
 
 import java.util.List;
@@ -12,7 +12,7 @@ import java.util.List;
 public class ErrorResponseBuilder {
     private String detailedMessage;
     private String simpleMessage;
-    private List<ErrorDetail> errors;
+    private List<ValidationErrorDetail> errors;
 
     /**
      * Creates a new instance of {@code ErrorResponseBuilder}.
@@ -48,10 +48,10 @@ public class ErrorResponseBuilder {
     /**
      * Sets a list of specific error details, such as field validation errors.
      *
-     * @param errors a list of {@link ErrorDetail} objects
+     * @param errors a list of {@link ValidationErrorDetail} objects
      * @return this builder instance
      */
-    public ErrorResponseBuilder errors(List<ErrorDetail> errors) {
+    public ErrorResponseBuilder errors(List<ValidationErrorDetail> errors) {
         this.errors = errors;
         return this;
     }

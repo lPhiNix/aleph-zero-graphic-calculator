@@ -1,21 +1,32 @@
 package com.placeholder.placeholder.util.exceptions;
 
 import com.placeholder.placeholder.util.enums.AppCode;
-import com.placeholder.placeholder.util.messages.ApiResponseUtils;
+import com.placeholder.placeholder.util.messages.ApiResponseFactory;
 import com.placeholder.placeholder.util.messages.dto.ApiResponse;
+import com.placeholder.placeholder.util.messages.dto.error.ErrorCategory;
+import com.placeholder.placeholder.util.messages.dto.error.details.ValidationErrorDetail;
 import com.placeholder.placeholder.util.messages.dto.error.ErrorResponse;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.util.List;
 import java.util.Objects;
 
 @ControllerAdvice
+@Order(2)
 public class PersistenceExceptionHandler {
+
+    private final ApiResponseFactory responseFactory;
+
+    public PersistenceExceptionHandler(ApiResponseFactory responseFactory) {
+        this.responseFactory = responseFactory;
+    }
 
     /**
      * Handles database constraint violations, such as unique key violations.
@@ -25,10 +36,15 @@ public class PersistenceExceptionHandler {
             DataIntegrityViolationException ex,
             HttpServletRequest request
     ) {
-        return ApiResponseUtils.buildErrorResponse(
+        String message = "Database integrity violation: " + Objects.requireNonNull(ex.getRootCause()).getMessage();
+        ValidationErrorDetail detail = new ValidationErrorDetail(ErrorCategory.BUSINESS, "Database Constraint", message, ex.getRootCause());
+
+        return responseFactory.error(
                 request.getRequestURI(),
-                "Database integrity violation: " + Objects.requireNonNull(ex.getRootCause()).getMessage(),
-                AppCode.CONFLICT
+                AppCode.CONFLICT,
+                message,
+                ex.getMessage(),
+                List.of(detail)
         );
     }
 
@@ -40,10 +56,15 @@ public class PersistenceExceptionHandler {
             EntityNotFoundException ex,
             HttpServletRequest request
     ) {
-        return ApiResponseUtils.buildErrorResponse(
+        String message = "Entity not found: " + ex.getMessage();
+        ValidationErrorDetail detail = new ValidationErrorDetail(ErrorCategory.NOT_FOUND, "Entity", message, null);
+
+        return responseFactory.error(
                 request.getRequestURI(),
-                "Entity not found: " + ex.getMessage(),
-                AppCode.NOT_FOUND
+                AppCode.NOT_FOUND,
+                message,
+                ex.getMessage(),
+                List.of(detail)
         );
     }
 
@@ -55,10 +76,15 @@ public class PersistenceExceptionHandler {
             OptimisticLockingFailureException ex,
             HttpServletRequest request
     ) {
-        return ApiResponseUtils.buildErrorResponse(
+        String message = "Optimistic locking failure: concurrent update conflict";
+        ValidationErrorDetail detail = new ValidationErrorDetail(ErrorCategory.CONFLICT, "Optimistic Locking", message, null);
+
+        return responseFactory.error(
                 request.getRequestURI(),
-                "Optimistic locking failure: concurrent update conflict",
-                AppCode.CONFLICT
+                AppCode.CONFLICT,
+                message,
+                ex.getMessage(),
+                List.of(detail)
         );
     }
 }
