@@ -19,22 +19,22 @@ import java.io.PrintStream;
  * library's native validator (syntactic) and its own validator (grammatical and semantic).
  *
  * @see MathLibFacade
- * @see MathExpressionValidator
+ * @see MathEclipseExpressionValidator
  */
 @Component
 public class MathEclipseFacade implements MathLibFacade {
 
     private final EvalUtilities mathEclipseEvaluator; // Symja native expression evaluator
-    private final MathExpressionValidator mathExpressionValidator; // Custom validator
+    private final MathEclipseExpressionValidator mathEclipseExpressionValidator; // Custom validator
     private final TeXFormFactory teXParser; // LaTeX parser
     private final boolean laTeXFormat;
 
     // Buffer to capture any errors printed to System.err during evaluation
     private final ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
 
-    public MathEclipseFacade(EvalUtilities mathEclipseEvaluator, MathExpressionValidator mathExpressionValidator, TeXFormFactory teXParser, boolean laTeXFormat) {
+    public MathEclipseFacade(EvalUtilities mathEclipseEvaluator, MathEclipseExpressionValidator mathEclipseExpressionValidator, TeXFormFactory teXParser, boolean laTeXFormat) {
         this.mathEclipseEvaluator = mathEclipseEvaluator;
-        this.mathExpressionValidator = mathExpressionValidator;
+        this.mathEclipseExpressionValidator = mathEclipseExpressionValidator;
         this.teXParser = teXParser;
         this.laTeXFormat = laTeXFormat;
     }
@@ -47,7 +47,7 @@ public class MathEclipseFacade implements MathLibFacade {
      */
     @Override
     public String validate(String expression) {
-        return mathExpressionValidator.validate(
+        return mathEclipseExpressionValidator.validate(
                 expression, mathEclipseEvaluator.getEvalEngine()
         );
     }
@@ -112,7 +112,7 @@ public class MathEclipseFacade implements MathLibFacade {
      * @return True if validation has returned an error or False if not.
      */
     private boolean returnIsError(String validationResult) {
-        return validationResult.startsWith(MathExpressionValidator.ERROR_SYMBOL);
+        return validationResult.startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL);
     }
 
     /**
@@ -132,10 +132,10 @@ public class MathEclipseFacade implements MathLibFacade {
             // If no errors, return the result (formatted if requested)
             return errors.isEmpty()
                     ? isFormatted ? formatResult(result) : result
-                    : mathExpressionValidator.formatError(errors);
+                    : mathEclipseExpressionValidator.formatError(errors);
         } catch (Exception e) {
             // Return a formatted error message if evaluation throws an exception
-            return mathExpressionValidator.formatError("Evaluation failed with exception: " + e.getMessage());
+            return mathEclipseExpressionValidator.formatError("Evaluation failed with exception: " + e.getMessage());
         } finally {
             // Restore the original System.err to avoid affecting other code
             System.setErr(System.err);

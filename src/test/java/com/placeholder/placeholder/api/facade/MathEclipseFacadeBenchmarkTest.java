@@ -19,7 +19,7 @@ class MathEclipseFacadeBenchmarkTest {
     void setUp() {
         EvalEngine engine = new EvalEngine("benchmark", 100, null, true);
         EvalUtilities evaluator = new EvalUtilities(engine, false, false);
-        facade = new MathEclipseFacade(evaluator, new MathExpressionValidator(), new TeXFormFactory(), false);
+        facade = new MathEclipseFacade(evaluator, new MathEclipseExpressionValidator(), new TeXFormFactory(), false);
     }
 
     // Expand & Simplify

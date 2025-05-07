@@ -17,7 +17,7 @@ class MathEclipseFacadeTest {
     void setUp() {
         EvalEngine engine = new EvalEngine("test", 100, null, true);
         EvalUtilities evaluator = new EvalUtilities(engine, false, false);
-        mathEclipseFacade = new MathEclipseFacade(evaluator, new MathExpressionValidator(), new TeXFormFactory(), false);
+        mathEclipseFacade = new MathEclipseFacade(evaluator, new MathEclipseExpressionValidator(), new TeXFormFactory(), false);
     }
 
     @Test
@@ -65,32 +65,32 @@ class MathEclipseFacadeTest {
     @Test
     @DisplayName("Validate: expresiones inválidas")
     void testValidate_Invalid() {
-        assertTrue(mathEclipseFacade.validate("xx^2 + 1").startsWith(MathExpressionValidator.ERROR_SYMBOL));
-        assertTrue(mathEclipseFacade.validate("Plot[Sin[x], {x, -1, 1}]").startsWith(MathExpressionValidator.ERROR_SYMBOL));
-        assertTrue(mathEclipseFacade.validate("Integrate[Sin[x]").startsWith(MathExpressionValidator.ERROR_SYMBOL));
+        assertTrue(mathEclipseFacade.validate("xx^2 + 1").startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
+        assertTrue(mathEclipseFacade.validate("Plot[Sin[x], {x, -1, 1}]").startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
+        assertTrue(mathEclipseFacade.validate("Integrate[Sin[x]").startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
     }
 
     @Test
     @DisplayName("Evaluate: expresiones inválidas")
     void testEvaluate_Invalid() {
-        assertTrue(mathEclipseFacade.evaluate("velocity + 3").startsWith(MathExpressionValidator.ERROR_SYMBOL));
-        assertTrue(mathEclipseFacade.evaluate("Minimize[x^2 + 1, x]").startsWith(MathExpressionValidator.ERROR_SYMBOL));
-        assertTrue(mathEclipseFacade.evaluate("Solve[x^2 == 1, ]").startsWith(MathExpressionValidator.ERROR_SYMBOL));
+        assertTrue(mathEclipseFacade.evaluate("velocity + 3").startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
+        assertTrue(mathEclipseFacade.evaluate("Minimize[x^2 + 1, x]").startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
+        assertTrue(mathEclipseFacade.evaluate("Solve[x^2 == 1, ]").startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
     }
 
     @Test
     @DisplayName("Calculate: expresiones inválidas")
     void testCalculate_Invalid() {
-        assertTrue(mathEclipseFacade.calculate("Plot[Sin[x]]", 5).startsWith(MathExpressionValidator.ERROR_SYMBOL));
-        assertTrue(mathEclipseFacade.calculate("x^^2", 10).startsWith(MathExpressionValidator.ERROR_SYMBOL));
-        assertTrue(mathEclipseFacade.calculate("Sqrt[longvar]", 8).startsWith(MathExpressionValidator.ERROR_SYMBOL));
+        assertTrue(mathEclipseFacade.calculate("Plot[Sin[x]]", 5).startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
+        assertTrue(mathEclipseFacade.calculate("x^^2", 10).startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
+        assertTrue(mathEclipseFacade.calculate("Sqrt[longvar]", 8).startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
     }
 
     @Test
     @DisplayName("Draw: expresiones inválidas")
     void testDraw_Invalid() {
-        assertTrue(mathEclipseFacade.draw("x^2 + speed", "x", "-5", "5").startsWith(MathExpressionValidator.ERROR_SYMBOL));
-        assertTrue(mathEclipseFacade.draw("Sum[1/x, {x, 1, 10}]", "x", "1", "10").startsWith(MathExpressionValidator.ERROR_SYMBOL));
-        assertTrue(mathEclipseFacade.draw("D[x^2,, x]", "x", "-2", "2").startsWith(MathExpressionValidator.ERROR_SYMBOL));
+        assertTrue(mathEclipseFacade.draw("x^2 + speed", "x", "-5", "5").startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
+        assertTrue(mathEclipseFacade.draw("Sum[1/x, {x, 1, 10}]", "x", "1", "10").startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
+        assertTrue(mathEclipseFacade.draw("D[x^2,, x]", "x", "-2", "2").startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
     }
 }

@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
  * @see MathLibFacade
  */
 @Component
-public class MathExpressionValidator {
+public class MathEclipseExpressionValidator {
 
     // Special prefix used to indicate an error in expression validation.
     public static final String ERROR_SYMBOL = "ERROR";
