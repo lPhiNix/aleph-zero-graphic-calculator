@@ -1,7 +1,7 @@
 package com.placeholder.placeholder.services;
 
 import com.placeholder.placeholder.auth.CustomUserDetails;
-import com.placeholder.placeholder.db.models.User;
+import com.placeholder.placeholder.db.models.entities.User;
 import com.placeholder.placeholder.db.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;

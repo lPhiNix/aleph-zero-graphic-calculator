@@ -1,10 +1,10 @@
 package com.placeholder.placeholder.util.messages.builders;
 
-import com.placeholder.placeholder.util.messages.dto.ApiMessage;
+import com.placeholder.placeholder.util.messages.dto.ApiResponse;
 import com.placeholder.placeholder.util.messages.dto.MessageContent;
 
 /**
- * A builder class for creating {@link ApiMessage} instances with custom status, code, message, path, and content.
+ * A builder class for creating {@link ApiResponse} instances with custom status, code, message, path, and content.
  *
  * @param <T> the type of content, which must implement {@link MessageContent}
  */
@@ -81,11 +81,11 @@ public class ApiResponseBuilder<T extends MessageContent> {
     }
 
     /**
-     * Builds the {@link ApiMessage} with the configured values.
+     * Builds the {@link ApiResponse} with the configured values.
      *
-     * @return a new {@link ApiMessage} instance
+     * @return a new {@link ApiResponse} instance
      */
-    public ApiMessage<T> build() {
-        return new ApiMessage<>(status, code, message, path, content);
+    public ApiResponse<T> build() {
+        return new ApiResponse<>(status, code, message, path, content);
     }
 }

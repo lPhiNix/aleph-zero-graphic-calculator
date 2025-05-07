@@ -1,6 +1,6 @@
 package com.placeholder.placeholder.auth;
 
-import com.placeholder.placeholder.db.models.User;
+import com.placeholder.placeholder.db.models.entities.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

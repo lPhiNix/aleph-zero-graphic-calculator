@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
  * @param <T> generic value for the message content
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record ApiMessage<T extends MessageContent>(
+public record ApiResponse<T extends MessageContent>(
         @NotNull @PositiveOrZero int status,
         @NotNull String code,
         String message,
@@ -27,11 +27,11 @@ public record ApiMessage<T extends MessageContent>(
         T content
 )
 {
-    public ApiMessage(AppCode code, String message, String path, T content) {
+    public ApiResponse(AppCode code, String message, String path, T content) {
         this(code.getStatus().value(), code.value(), message, LocalDateTime.now(), path, content);
     }
 
-    public ApiMessage(int status, String code, String message, String path, T content) {
+    public ApiResponse(int status, String code, String message, String path, T content) {
         this(status, code, message, LocalDateTime.now(), path, content);
     }
 
