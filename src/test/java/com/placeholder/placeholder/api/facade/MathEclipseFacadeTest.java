@@ -93,4 +93,30 @@ class MathEclipseFacadeTest {
         assertTrue(mathEclipseFacade.draw("Sum[1/x, {x, 1, 10}]", "x", "1", "10").startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
         assertTrue(mathEclipseFacade.draw("D[x^2,, x]", "x", "-2", "2").startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
     }
+
+    @Test
+    @DisplayName("Stop Request: interrupt ongoing evaluation")
+    void testStopRequest() {
+        Thread evaluationThread = new Thread(() -> {
+            try {
+                String impossibleExpression = "Integrate[log(sin(x^2 + cos(x))) / (1 + x^6), x]";
+                String result = mathEclipseFacade.evaluate(impossibleExpression);
+                fail("Expected stopRequest to interrupt the evaluation, but got: " + result);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+        evaluationThread.start();
+        try {
+            // Wait a bit to let the evaluation start
+            Thread.sleep(100);
+            // Stop the ongoing evaluation
+            mathEclipseFacade.stopRequest();
+            // Wait for the thread to complete
+            evaluationThread.join();
+        } catch (InterruptedException e) {
+            fail("Test interrupted unexpectedly.");
+        }
+    }
 }
