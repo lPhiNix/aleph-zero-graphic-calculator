@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 
 class MathEclipseFacadeBenchmarkTest {
 
-    private static final int ITERATIONS = 1000;
+    private static final int BASE_ITERATIONS = 1000;
     private static final boolean PRINT_RESULTS = true;
     private MathEclipseFacade facade;
 
@@ -176,12 +176,12 @@ class MathEclipseFacadeBenchmarkTest {
     @Test void benchmarkIntegralEllipticLike() { benchmark(0.001, () -> facade.evaluate("Integrate[(x^2 * sqrt(1 - x^2)) / (1 + x^4), x]")); }
 
     private <T> void benchmark(Supplier<T> task) {
-        benchmarkInternal(ITERATIONS, task);
+        benchmarkInternal(BASE_ITERATIONS, task);
     }
 
     private <T> void benchmark(double iterationsMultiplier, Supplier<T> task) {
-        long newIterations = (long) ((double) ITERATIONS * iterationsMultiplier);
-        if (newIterations <= 0) newIterations = ITERATIONS;
+        long newIterations = (long) ((double) BASE_ITERATIONS * iterationsMultiplier);
+        if (newIterations <= 0) newIterations = BASE_ITERATIONS;
         benchmarkInternal(newIterations, task);
     }
 
