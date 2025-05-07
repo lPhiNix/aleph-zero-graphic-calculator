@@ -20,7 +20,8 @@ class MathEclipseFacadeBenchmarkTest {
     void setUp() {
         EvalEngine engine = new EvalEngine("benchmark", 100, null, true);
         EvalUtilities evaluator = new EvalUtilities(engine, false, false);
-        mathEclipseFacade = new MathEclipseFacade(evaluator, new MathEclipseExpressionValidator(), new TeXFormFactory(), false);
+        mathEclipseFacade = new MathEclipseFacade(evaluator, new MathEclipseExpressionValidator(), new TeXFormFactory());
+        mathEclipseFacade.isLaTeXFormat(false);
     }
 
     // BENCHMARK (ms and seg per ONE iteration)

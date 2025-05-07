@@ -21,16 +21,6 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 class MathEclipseConfig {
-
-    @Bean
-    public MathEclipseFacade mathEclipse(
-            EvalUtilities evalUtilities, 
-            MathEclipseExpressionValidator validator, 
-            TeXFormFactory teXFormFactory
-    ) {
-        return new MathEclipseFacade(evalUtilities, validator, teXFormFactory, true); 
-    }
-    
     /**
      * Creates the core {@link EvalEngine} used by Symja for symbolic evaluation.
      *
