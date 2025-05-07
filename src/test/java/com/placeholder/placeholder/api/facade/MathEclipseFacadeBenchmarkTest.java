@@ -22,6 +22,8 @@ class MathEclipseFacadeBenchmarkTest {
         facade = new MathEclipseFacade(evaluator, new MathEclipseExpressionValidator(), new TeXFormFactory(), false);
     }
 
+    // BENCHMARK (ms and seg per ONE iteration)
+
     // Expand & Simplify
 
     /** 1,062834 ms, ~0,001 seg */
