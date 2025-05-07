@@ -1,68 +1,35 @@
 package com.placeholder.placeholder.util.messages;
 
-import com.placeholder.placeholder.util.enums.AppCode;
-import com.placeholder.placeholder.util.messages.dto.ApiResponse;
-import com.placeholder.placeholder.util.messages.dto.error.ErrorDetail;
-import com.placeholder.placeholder.util.messages.dto.error.ErrorResponse;
+import com.placeholder.placeholder.util.messages.dto.error.ErrorCategory;
+import com.placeholder.placeholder.util.messages.dto.error.details.ValidationErrorDetail;
 import jakarta.validation.ConstraintViolation;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Utility class for building standardized API responses related to validation errors.
+ * Utility class for getting and parsing error responses from common errors.
  */
 public class ApiResponseUtils {
 
     /**
-     * Builds a standardized error {@link ApiResponse} with validation error details.
-     *
-     * @param path          the request URI where the error occurred
-     * @param message       the general error message
-     * @param errorDetails  the list of specific validation errors
-     * @return a {@link ResponseEntity} containing the error response with HTTP/app status
-     */
-    public static ResponseEntity<ApiResponse<ErrorResponse>> buildErrorResponse(
-            String path,
-            String message,
-            AppCode code,
-            List<ErrorDetail> errorDetails
-    ) {
-        ApiResponse<ErrorResponse> response = ApiResponseFactory.createErrorResponse(
-                path,
-                code,
-                message,
-                errorDetails
-        );
-
-        return ResponseEntity.status(code.getStatus()).body(response);
-    }
-
-    public static ResponseEntity<ApiResponse<ErrorResponse>> buildErrorResponse(
-            String path,
-            String message,
-            AppCode code
-    ) {
-        return buildErrorResponse(path, message, code, null);
-    }
-
-    /**
-     * Extracts {@link ErrorDetail} list from a {@link BindingResult} containing field validation errors.
+     * Extracts {@link ValidationErrorDetail} list from a {@link BindingResult} containing field validation errors.
      *
      * @param bindingResult the binding result containing validation errors
-     * @return a list of {@link ErrorDetail} instances representing each validation error
+     * @return a list of {@link ValidationErrorDetail} instances representing each validation error
      */
-    public static List<ErrorDetail> getErrorDetails(BindingResult bindingResult) {
-        List<ErrorDetail> details = new ArrayList<>();
+    public static List<ValidationErrorDetail> getErrorDetails(BindingResult bindingResult, ErrorCategory category) {
+        List<ValidationErrorDetail> details = new ArrayList<>();
 
         // Field-specific errors
         details.addAll(
                 bindingResult.getFieldErrors().stream()
-                        .map(fieldError -> new ErrorDetail(
+                        .map(fieldError -> new ValidationErrorDetail(
+                                category,
                                 fieldError.getField(),
                                 fieldError.getDefaultMessage(),
                                 fieldError.getRejectedValue()
@@ -70,14 +37,15 @@ public class ApiResponseUtils {
                         .toList()
         );
 
-        // Global (class-level) errors
         details.addAll(
                 bindingResult.getGlobalErrors().stream()
-                        .map(error -> new ErrorDetail(
+                        .map(error -> new ValidationErrorDetail(
+                                ErrorCategory.UNKNOWN,
                                 "global",
                                 error.getDefaultMessage(),
                                 null
                         ))
+                        .sorted(Comparator.comparing(ValidationErrorDetail::category))
                         .toList()
         );
 
@@ -86,29 +54,20 @@ public class ApiResponseUtils {
 
 
     /**
-     * Extracts {@link ErrorDetail} list from a set of {@link ConstraintViolation} instances.
+     * Extracts {@link ValidationErrorDetail} list from a set of {@link ConstraintViolation} instances.
      *
      * @param violations the set of constraint violations
-     * @return a list of {@link ErrorDetail} instances representing each constraint violation
+     * @return a list of {@link ValidationErrorDetail} instances representing each constraint violation
      */
-    public static List<ErrorDetail> getErrorDetails(Set<ConstraintViolation<?>> violations) {
+    public static List<ValidationErrorDetail> getErrorDetails(Set<ConstraintViolation<?>> violations, ErrorCategory category) {
         return violations.stream()
-                .map(violation -> new ErrorDetail(
+                .map(violation -> new ValidationErrorDetail(
+                        category,
                         violation.getPropertyPath().toString(),
                         violation.getMessage(),
                         violation.getInvalidValue()
                 ))
+                .sorted(Comparator.comparing(ValidationErrorDetail::category))
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * Creates a single {@link ErrorDetail} for a missing or invalid request parameter.
-     *
-     * @param parameterName the name of the parameter
-     * @param message       the associated error message
-     * @return a new {@link ErrorDetail} instance
-     */
-    public static ErrorDetail createErrorDetail(String parameterName, String message) {
-        return new ErrorDetail(parameterName, message, null);
     }
 }

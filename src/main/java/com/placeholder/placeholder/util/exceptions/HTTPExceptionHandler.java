@@ -1,10 +1,14 @@
 package com.placeholder.placeholder.util.exceptions;
 
 import com.placeholder.placeholder.util.enums.AppCode;
-import com.placeholder.placeholder.util.messages.ApiResponseUtils;
+import com.placeholder.placeholder.util.messages.ApiResponseFactory;
 import com.placeholder.placeholder.util.messages.dto.ApiResponse;
+import com.placeholder.placeholder.util.messages.dto.error.ErrorCategory;
+import com.placeholder.placeholder.util.messages.dto.error.details.ErrorDetail;
+import com.placeholder.placeholder.util.messages.dto.error.details.ValidationErrorDetail;
 import com.placeholder.placeholder.util.messages.dto.error.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
@@ -14,8 +18,17 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.util.List;
+
 @ControllerAdvice
+@Order(3)
 public class HTTPExceptionHandler {
+
+    private final ApiResponseFactory responseFactory;
+
+    public HTTPExceptionHandler(ApiResponseFactory responseFactory) {
+        this.responseFactory = responseFactory;
+    }
 
     /**
      * Handles unsupported HTTP methods (e.g., POST used on a GET-only endpoint).
@@ -25,11 +38,15 @@ public class HTTPExceptionHandler {
             HttpRequestMethodNotSupportedException ex,
             HttpServletRequest request
     ) {
-        AppCode code = AppCode.METHOD_NOT_ALLOWED;
-        return ApiResponseUtils.buildErrorResponse(
+        String message = "HTTP method not supported: " + ex.getMethod();
+        ErrorDetail detail = new ErrorDetail(ErrorCategory.INTERNAL, ex.getCause().getMessage(), message);
+
+        return responseFactory.error(
                 request.getRequestURI(),
-                "HTTP method not supported: " + ex.getMethod(),
-                code
+                AppCode.METHOD_NOT_ALLOWED,
+                message,
+                ex.getMessage(),
+                List.of(detail)
         );
     }
 
@@ -41,11 +58,15 @@ public class HTTPExceptionHandler {
             HttpMediaTypeNotSupportedException ex,
             HttpServletRequest request
     ) {
-        AppCode code = AppCode.UNSUPPORTED_MEDIA_TYPE;
-        return ApiResponseUtils.buildErrorResponse(
+        String message = "Unsupported media type: " + ex.getContentType();
+        ErrorDetail detail = new ErrorDetail(ErrorCategory.INTERNAL, ex.getCause().getMessage(), message);
+
+        return responseFactory.error(
                 request.getRequestURI(),
-                "Unsupported media type: " + ex.getContentType(),
-                code
+                AppCode.UNSUPPORTED_MEDIA_TYPE,
+                message,
+                ex.getMessage(),
+                List.of(detail)
         );
     }
 
@@ -57,27 +78,36 @@ public class HTTPExceptionHandler {
             HttpMediaTypeNotAcceptableException ex,
             HttpServletRequest request
     ) {
-        AppCode code = AppCode.NOT_ACCEPTABLE;
-        return ApiResponseUtils.buildErrorResponse(
+        String message = "Not acceptable media type";
+        ErrorDetail detail = new ErrorDetail(ErrorCategory.INTERNAL, ex.getCause().getMessage(), message);
+
+        return responseFactory.error(
                 request.getRequestURI(),
-                "Not acceptable media type",
-                code
+                AppCode.NOT_ACCEPTABLE,
+                message,
+                ex.getMessage(),
+                List.of(detail)
         );
     }
 
     /**
      * Handles access denied errors (e.g., insufficient roles/authorities).
+     * This will be moved into a dedicated Auth Exception Handler.
      */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<ErrorResponse>> handleAccessDenied(
             AccessDeniedException ex,
             HttpServletRequest request
     ) {
-        AppCode code = AppCode.FORBIDDEN;
-        return ApiResponseUtils.buildErrorResponse(
+        String message = "Access denied: insufficient permissions";
+        ErrorDetail detail = new ErrorDetail(ErrorCategory.AUTHORIZATION, ex.getCause().getMessage() ,message);
+
+        return responseFactory.error(
                 request.getRequestURI(),
-                "Access denied: insufficient permissions",
-                code
+                AppCode.FORBIDDEN,
+                message,
+                ex.getMessage(),
+                List.of(detail)
         );
     }
 
@@ -89,11 +119,16 @@ public class HTTPExceptionHandler {
             AuthenticationException ex,
             HttpServletRequest request
     ) {
-        AppCode code = AppCode.UNAUTHORIZED;
-        return ApiResponseUtils.buildErrorResponse(
+        String message = "Authentication failed: " + ex.getMessage();
+        ErrorDetail detail = new ErrorDetail(ErrorCategory.AUTHENTICATION, ex.getCause().getMessage(), message);
+
+        return responseFactory.error(
                 request.getRequestURI(),
-                "Authentication failed: " + ex.getMessage(),
-                code
+                AppCode.UNAUTHORIZED,
+                message,
+                ex.getMessage(),
+                List.of(detail)
         );
     }
 }
+
