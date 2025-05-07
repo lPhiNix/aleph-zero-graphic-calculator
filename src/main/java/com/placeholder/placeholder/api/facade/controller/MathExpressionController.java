@@ -17,6 +17,21 @@ public class MathExpressionController {
     
     @GetMapping("/evaluate")
     public String getEvaluatedResult(@RequestParam String expression) {
-        
+        return service.evaluate(expression);
+    }
+
+    @GetMapping("/calculate")
+    public String getCalculatedResult(@RequestParam String expression, @RequestParam int decimals) {
+        return service.calculate(expression, decimals);
+    }
+
+    @GetMapping("/draw")
+    public String getDrawResult(
+            @RequestParam String expression,
+            @RequestParam String variable,
+            @RequestParam String origin,
+            @RequestParam String bound
+    ) {
+        return service.draw(expression, variable, origin, bound);
     }
 }
