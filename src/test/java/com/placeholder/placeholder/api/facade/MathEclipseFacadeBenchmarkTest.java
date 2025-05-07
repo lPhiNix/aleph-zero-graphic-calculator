@@ -143,7 +143,7 @@ class MathEclipseFacadeBenchmarkTest {
     /** 0,970677 ms, ~0,00097 seg */
     @Test void benchmarkDrawTrigCombo() { benchmark(10, () -> facade.draw("Sin[x]*Cos[x]", "x", "-Pi", "Pi")); }
 
-    // DIFFICULT TO PROCESS
+    // DIFFICULT TO PROCESS (> ~1 seg per ONE iteration)
 
     /** 23754 ms, ~23 seg */
     @Test void benchmarkIntegralRationalRootIrreducible() { benchmark(0.001, () -> facade.evaluate("Integrate[(1 - x^4)/((1 + x^2 + x^4)*(1 + x^4)^(1/4)), x]")); }
@@ -154,7 +154,7 @@ class MathEclipseFacadeBenchmarkTest {
     /** 5287 ms, ~5,2 seg */
     @Test void benchmarkIntegralLogComplexTrinomial() { benchmark(0.001, () -> facade.evaluate("Integrate[(log(x^2 + 3*x + 2)) / sqrt(1 + x^6 + x^4), x]")); }
 
-    /** DOESN'T WORK */
+    /** INFINITE (DOESN'T WORK) */
     @Test void benchmarkIntegralRecursiveTrigLog() { benchmark(0.001, () -> facade.evaluate("Integrate[log(sin(x^2 + cos(x))) / (1 + x^6), x]")); }
 
     /** 10706 ms, ~10 seg */
