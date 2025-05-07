@@ -22,20 +22,20 @@ public class UserController {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     private final UserService userService;
+    private final ApiResponseFactory apiResponseFactory;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, ApiResponseFactory apiResponseFactory) {
         this.userService = userService;
+        this.apiResponseFactory = apiResponseFactory;
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<?>> register(@RequestBody @Valid UserCreationRequest userCreationRequest, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<ApiResponse<EmptyContentResponse>> register(@RequestBody @Valid UserCreationRequest userCreationRequest, HttpServletRequest httpServletRequest) {
         logger.info("Registering user: {}", userCreationRequest.username());
         userService.createUser(userCreationRequest);
 
-        ApiResponse<EmptyContentResponse> response = ApiResponseFactory.
-                createEmptyContentResponse(httpServletRequest.getRequestURI(), AppCode.CREATED, "User Successfully Registered");
 
-        return new ResponseEntity<>(response, AppCode.CREATED.getStatus());
+        return apiResponseFactory.ok(httpServletRequest.getRequestURI(), "User successfuly created");
     }
 }
