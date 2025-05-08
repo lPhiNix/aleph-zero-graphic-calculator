@@ -1,4 +1,4 @@
-package com.placeholder.placeholder.api.facade.controller;
+package com.placeholder.placeholder.api.controller;
 
 import com.placeholder.placeholder.api.services.MathExpressionService;
 import org.springframework.web.bind.annotation.GetMapping;
