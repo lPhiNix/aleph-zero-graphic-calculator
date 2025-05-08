@@ -1,4 +1,4 @@
-package com.placeholder.placeholder.util.messages.dto;
+package com.placeholder.placeholder.util.messages.dto.content;
 
 /**
  * DTO model for a simple response

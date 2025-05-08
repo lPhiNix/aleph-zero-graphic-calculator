@@ -1,9 +1,16 @@
 package com.placeholder.placeholder.util.exceptions;
 
+import com.placeholder.placeholder.util.messages.ApiResponseFactory;
 import com.placeholder.placeholder.util.messages.ApiResponseUtils;
 import com.placeholder.placeholder.util.messages.dto.ApiResponse;
-import com.placeholder.placeholder.util.messages.dto.error.ErrorDetail;
+import com.placeholder.placeholder.util.messages.dto.error.ErrorCategory;
+import com.placeholder.placeholder.util.messages.dto.error.details.ValidationErrorDetail;
 import com.placeholder.placeholder.util.messages.dto.error.ErrorResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
 import org.springframework.http.ResponseEntity;
@@ -11,12 +18,13 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.List;
 
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.validation.BindException;
 
 import jakarta.validation.ConstraintViolationException;
+
+import java.util.List;
 
 /**
  * Global exception handler for validation-related exceptions.
@@ -25,7 +33,16 @@ import jakarta.validation.ConstraintViolationException;
  * that occur during request handling, providing standardized error responses.
  */
 @ControllerAdvice
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class ValidationExceptionHandler {
+    private final ApiResponseFactory apiResponseFactory;
+
+    @Autowired
+    public ValidationExceptionHandler(ApiResponseFactory apiResponseFactory) {
+        this.apiResponseFactory = apiResponseFactory;
+    }
+
+    Logger log = LoggerFactory.getLogger(ValidationExceptionHandler.class);
 
     /**
      * Handles {@link MethodArgumentNotValidException} thrown when method arguments fail validation.
@@ -39,12 +56,12 @@ public class ValidationExceptionHandler {
             MethodArgumentNotValidException ex,
             HttpServletRequest request
     ) {
-        List<ErrorDetail> errorDetails = ApiResponseUtils.getErrorDetails(ex);
-        return ApiResponseUtils.buildErrorResponse(
+        List<ValidationErrorDetail> validationErrorDetails = ApiResponseUtils.getErrorDetails(ex.getBindingResult(), ErrorCategory.VALIDATION);
+        return apiResponseFactory.validationError(
                 request.getRequestURI(),
-                "Validation failed. Please check your request.",
-                errorDetails
-        );
+                "Validation failed for one or more arguments, check your request.",
+                validationErrorDetails
+                );
     }
 
     /**
@@ -59,11 +76,11 @@ public class ValidationExceptionHandler {
             ConstraintViolationException ex,
             HttpServletRequest request
     ) {
-        List<ErrorDetail> errorDetails = ApiResponseUtils.getErrorDetails(ex.getConstraintViolations());
-        return ApiResponseUtils.buildErrorResponse(
+        List<ValidationErrorDetail> validationErrorDetails = ApiResponseUtils.getErrorDetails(ex.getConstraintViolations(), ErrorCategory.VALIDATION);
+        return apiResponseFactory.validationError(
                 request.getRequestURI(),
                 "Constraint violations detected.",
-                errorDetails
+                validationErrorDetails
         );
     }
 
@@ -79,11 +96,11 @@ public class ValidationExceptionHandler {
             BindException ex,
             HttpServletRequest request
     ) {
-        List<ErrorDetail> errorDetails = ApiResponseUtils.getErrorDetails(ex);
-        return ApiResponseUtils.buildErrorResponse(
+        List<ValidationErrorDetail> validationErrorDetails = ApiResponseUtils.getErrorDetails(ex.getBindingResult(), ErrorCategory.VALIDATION);
+        return apiResponseFactory.validationError(
                 request.getRequestURI(),
                 "Data binding failed.",
-                errorDetails
+                validationErrorDetails
         );
     }
 
@@ -99,15 +116,11 @@ public class ValidationExceptionHandler {
             MissingServletRequestParameterException ex,
             HttpServletRequest request
     ) {
-        ErrorDetail errorDetail = ApiResponseUtils.createErrorDetail(
-                ex.getParameterName(),
-                "Required request parameter is missing"
-        );
-
-        return ApiResponseUtils.buildErrorResponse(
+        List<ValidationErrorDetail> detail = List.of(new ValidationErrorDetail(ErrorCategory.VALIDATION, ex.getParameterName(), ex.getMessage(), null));
+        return  apiResponseFactory.validationError(
                 request.getRequestURI(),
-                "Missing request parameter.",
-                List.of(errorDetail)
+                "Required request parameter is missing",
+                detail
         );
     }
 }
