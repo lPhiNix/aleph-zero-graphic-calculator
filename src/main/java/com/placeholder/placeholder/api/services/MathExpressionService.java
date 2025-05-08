@@ -1,14 +1,14 @@
 package com.placeholder.placeholder.api.services;
 
-import com.placeholder.placeholder.api.facade.MathEclipseFacade;
+import com.placeholder.placeholder.api.facade.MathLibFacade;
 import org.springframework.stereotype.Service;
 
 @Service
 public class MathExpressionService {
 
-    private final MathEclipseFacade mathEclipse;
+    private final MathLibFacade mathEclipse;
 
-    public MathExpressionService(MathEclipseFacade mathEclipse) {
+    public MathExpressionService(MathLibFacade mathEclipse) {
         this.mathEclipse = mathEclipse;
     }
 

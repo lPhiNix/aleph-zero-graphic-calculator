@@ -1,7 +1,7 @@
 package com.placeholder.placeholder.util.messages.builders;
 
 import com.placeholder.placeholder.util.messages.dto.ApiResponse;
-import com.placeholder.placeholder.util.messages.dto.MessageContent;
+import com.placeholder.placeholder.util.messages.dto.content.MessageContent;
 
 /**
  * A builder class for creating {@link ApiResponse} instances with custom status, code, message, path, and content.

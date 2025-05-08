@@ -1,4 +1,4 @@
-package com.placeholder.placeholder.util.messages.dto;
+package com.placeholder.placeholder.util.messages.dto.content;
 
 /**
  * DTO model for creating a response with paged results

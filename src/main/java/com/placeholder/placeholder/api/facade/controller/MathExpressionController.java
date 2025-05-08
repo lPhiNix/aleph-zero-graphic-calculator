@@ -1,7 +1,10 @@
 package com.placeholder.placeholder.api.facade.controller;
 
 import com.placeholder.placeholder.api.services.MathExpressionService;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("api/v1/math_expression")
@@ -13,12 +16,22 @@ public class MathExpressionController {
     }
     
     @GetMapping("/evaluate")
-    public String getEvaluatedResult(@RequestBody String expression) {
+    public String getEvaluatedResult(@RequestParam String expression) {
         return service.evaluate(expression);
     }
 
     @GetMapping("/calculate")
-    public String getCalculatedResult(@RequestBody String expression, int decimals) {
+    public String getCalculatedResult(@RequestParam String expression, @RequestParam int decimals) {
         return service.calculate(expression, decimals);
+    }
+
+    @GetMapping("/draw")
+    public String getDrawResult(
+            @RequestParam String expression,
+            @RequestParam String variable,
+            @RequestParam String origin,
+            @RequestParam String bound
+    ) {
+        return service.draw(expression, variable, origin, bound);
     }
 }

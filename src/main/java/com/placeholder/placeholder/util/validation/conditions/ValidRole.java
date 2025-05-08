@@ -1,20 +1,20 @@
 package com.placeholder.placeholder.util.validation.conditions;
 
-import com.placeholder.placeholder.util.validation.validator.OnlyOneFieldValidator;
+import com.placeholder.placeholder.util.validation.validator.RoleValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
+
 import java.lang.annotation.*;
 
 @Documented
-@Constraint(validatedBy = OnlyOneFieldValidator.class)
-@Target({ElementType.TYPE})
+@Constraint(validatedBy = RoleValidator.class)
+@Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface OnlyOneField {
-    String message() default "Only one of the specified fields must be provided";
+public @interface ValidRole {
+
+    String message() default "Role does not exist";
 
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
-
-    String[] fields();
 }
