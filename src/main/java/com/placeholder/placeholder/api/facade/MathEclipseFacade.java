@@ -27,16 +27,16 @@ public class MathEclipseFacade implements MathLibFacade {
     private final EvalUtilities mathEclipseEvaluator; // Symja native expression evaluator
     private final MathEclipseExpressionValidator mathEclipseExpressionValidator; // Custom validator
     private final TeXFormFactory teXParser; // LaTeX parser
-    private final boolean laTeXFormat;
+    private boolean laTeXFormat;
 
     // Buffer to capture any errors printed to System.err during evaluation
     private final ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
 
-    public MathEclipseFacade(EvalUtilities mathEclipseEvaluator, MathEclipseExpressionValidator mathEclipseExpressionValidator, TeXFormFactory teXParser, boolean laTeXFormat) {
+    public MathEclipseFacade(EvalUtilities mathEclipseEvaluator, MathEclipseExpressionValidator mathEclipseExpressionValidator, TeXFormFactory teXParser) {
         this.mathEclipseEvaluator = mathEclipseEvaluator;
         this.mathEclipseExpressionValidator = mathEclipseExpressionValidator;
         this.teXParser = teXParser;
-        this.laTeXFormat = laTeXFormat;
+        this.laTeXFormat = true;
     }
 
     /**
@@ -206,5 +206,9 @@ public class MathEclipseFacade implements MathLibFacade {
      */
     private IExpr createIExpr(String expression) {
         return new ExprEvaluator().parse(expression);
+    }
+
+    public void isLaTeXFormat(boolean laTeXFormat) {
+        this.laTeXFormat = laTeXFormat;
     }
 }
