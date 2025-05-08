@@ -1,9 +1,15 @@
 package com.placeholder.placeholder.api.controller;
 
+import com.placeholder.placeholder.api.dto.ExpressionRequest;
 import com.placeholder.placeholder.api.services.MathExpressionService;
-import org.springframework.web.bind.annotation.GetMapping;
+import com.placeholder.placeholder.db.models.dto.UserCreationRequest;
+import com.placeholder.placeholder.util.enums.AppCode;
+import com.placeholder.placeholder.util.messages.dto.ApiResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -14,24 +20,13 @@ public class MathExpressionController {
     public MathExpressionController(MathExpressionService service) {
         this.service = service;
     }
-    
-    @GetMapping("/evaluate")
-    public String getEvaluatedResult(@RequestParam String expression) {
-        return service.evaluate(expression);
-    }
 
-    @GetMapping("/calculate")
-    public String getCalculatedResult(@RequestParam String expression, @RequestParam int decimals) {
-        return service.calculate(expression, decimals);
-    }
+    @PostMapping("/evaluate")
+    public ResponseEntity<ApiResponse<?>> getEvaluatedExpression(@RequestBody ExpressionRequest expressionRequest, HttpServletRequest httpServletRequest) {
+        String result = service.evaluate(expressionRequest.expression());
 
-    @GetMapping("/draw")
-    public String getDrawResult(
-            @RequestParam String expression,
-            @RequestParam String variable,
-            @RequestParam String origin,
-            @RequestParam String bound
-    ) {
-        return service.draw(expression, variable, origin, bound);
+        ApiResponse<>
+
+        return new ResponseEntity<>(AppCode.OK.getStatus());
     }
 }
