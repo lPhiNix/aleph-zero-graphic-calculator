@@ -24,44 +24,50 @@ class MathEclipseConfig {
 
     /**
      * Creates the core {@link EvalEngine} used by Symja for symbolic evaluation.
+     * <p>
+     * Parameters:
+     * <ul>
+     *      <li>{@code sessionID = "default"} : Name of the evaluation context (used for thread isolation or debugging)</li>
+     *      <li>{@code recursionLimit = 100}  : Maximum recursion depth (prevents infinite evaluations or stack overflow)</li>
+     *      <li>{@code out = null}            : Output stream for debug/logging (null disables output)</li>
+     *      <li>{@code relaxedSyntax = true}  : Allows more permissive parsing of expressions (e.g., "()" or "[]" can be used)</li>
+     * </ul>
      *
      * @return a configured instance of {@code EvalEngine}
      */
     @Bean
     public EvalEngine evalEngine() {
-        // Parameters:
-        // - sessionID = "default" : Name of the evaluation context (used for thread isolation or debugging)
-        // - recursionLimit = 100  : Maximum recursion depth (prevents infinite evaluations or stack overflow)
-        // - out = null            : Output stream for debug/logging (null disables output)
-        // - relaxedSyntax = true  : Allows more permissive parsing of expressions (e.g., "()" or "[]" can be used)
         return new EvalEngine("default", 100, null, true);
     }
 
     /**
      * Creates an {@link EvalUtilities} instance using the provided {@link EvalEngine}.
+     * <p>
+     * Parameters:
+     * <ul>
+     *     <li>{@code evalEngine = engine}     : the EvalEngine instance created above</li>
+     *     <li>{@code mathNLTagPrefix = false} : disables tagging with MathNL prefixes (used in natural language support)</li>
+     *     <li>{@code mathMLHeader = false}    : disables the inclusion of MathML headers in output (keeps it clean)</li>
+     * </ul>
      *
      * @param engine the engine to associate with this utility instance
      * @return a configured {@code EvalUtilities} object
      */
     @Bean
     public EvalUtilities evalUtilities(EvalEngine engine) {
-        // Parameters:
-        // - evalEngine = engine     : the EvalEngine instance created above
-        // - mathNLTagPrefix = false : disables tagging with MathNL prefixes (used in natural language support)
-        // - mathMLHeader = false    : disables the inclusion of MathML headers in output (keeps it clean)
-        // This configuration keeps the output clean and optimized for production usage.
         return new EvalUtilities(engine, false, false);
     }
 
     /**
      * Creates the LaTeX form converter used to render Symja expressions to LaTeX.
+     * <p>
+     * The {@code TeXFormFactory} provides methods to convert symbolic expressions to LaTeX
+     * It has no internal state and can be reused safely
      *
      * @return a new {@code TeXFormFactory} instance
      */
     @Bean
     public TeXFormFactory teXFormFactory() {
-        // The TeXFormFactory provides methods to convert symbolic expressions to LaTeX
-        // It has no internal state and can be reused safely
         return new TeXFormFactory();
     }
 }
