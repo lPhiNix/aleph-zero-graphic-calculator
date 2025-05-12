@@ -1,0 +1,49 @@
+package com.placeholder.placeholder.api.user.service;
+
+import com.placeholder.placeholder.api.user.dto.UserCreationRequest;
+import com.placeholder.placeholder.db.models.User;
+import com.placeholder.placeholder.db.models.UserRole;
+import com.placeholder.placeholder.db.repositories.UserPreferenceRepository;
+import com.placeholder.placeholder.db.repositories.UserRepository;
+import com.placeholder.placeholder.db.repositories.UserRoleRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+@Service
+public class UserService {
+    private final UserRepository userRepository;
+    private final UserRoleRepository userRoleRepository;
+    private final UserPreferenceRepository userPreferenceRepository;
+
+    private final PasswordEncoder passwordEncoder;
+
+    @Autowired
+    public UserService(UserRepository userRepository, UserRoleRepository userRoleRepository, UserPreferenceRepository userPreferenceRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.userRoleRepository = userRoleRepository;
+        this.userPreferenceRepository = userPreferenceRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    public User findUserByUsername(String username) {
+        return userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(username));
+    }
+
+    public User createUser(UserCreationRequest userCreationRequest) {
+        User user = new User();
+        user.setEmail(userCreationRequest.email());
+        user.setUsername(userCreationRequest.username());
+        user.setPassword(passwordEncoder.encode(userCreationRequest.password())); //Encodes the password
+
+
+        UserRole role =
+                userRoleRepository.getUserRoleByName(userCreationRequest.roleName());
+
+        user.setRole(role);
+
+        return userRepository.save(user);
+    }
+}

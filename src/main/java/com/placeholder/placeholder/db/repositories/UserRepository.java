@@ -1,7 +1,6 @@
 package com.placeholder.placeholder.db.repositories;
 
-import com.placeholder.placeholder.db.models.entities.User;
-import com.placeholder.placeholder.db.models.entities.UserRole;
+import com.placeholder.placeholder.db.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
