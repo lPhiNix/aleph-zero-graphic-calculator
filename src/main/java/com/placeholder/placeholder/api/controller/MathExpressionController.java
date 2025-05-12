@@ -33,8 +33,4 @@ public class MathExpressionController {
 
         return apiResponseFactory.ok(httpServletRequest.getRequestURI(), result, response);
     }
-
-    public ResponseEntity<ApiResponse<EmptyContentResponse>> calculate(String path) {
-
-    }
 }
