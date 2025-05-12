@@ -2,7 +2,6 @@ package com.placeholder.placeholder.api.controller;
 
 import com.placeholder.placeholder.api.dto.ExpressionRequest;
 import com.placeholder.placeholder.api.services.MathExpressionService;
-import com.placeholder.placeholder.db.models.dto.UserCreationRequest;
 import com.placeholder.placeholder.util.enums.AppCode;
 import com.placeholder.placeholder.util.messages.dto.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,8 +23,6 @@ public class MathExpressionController {
     @PostMapping("/evaluate")
     public ResponseEntity<ApiResponse<?>> getEvaluatedExpression(@RequestBody ExpressionRequest expressionRequest, HttpServletRequest httpServletRequest) {
         String result = service.evaluate(expressionRequest.expression());
-
-        ApiResponse<>
 
         return new ResponseEntity<>(AppCode.OK.getStatus());
     }
