@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS user_preferences (
     CONSTRAINT user_preferences_user_fk FOREIGN KEY(user_id) REFERENCES user(id)
 );
 
--- Table for each math expression
+-- Table for each math lateXResultEvaluation
 CREATE TABLE IF NOT EXISTS math_expression(
     id INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
     user_id INTEGER NOT NULL,
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS math_expression(
     CONSTRAINT expression_user_fk FOREIGN KEY (user_id) REFERENCES user (id)
 );
 
--- Preferences for one math expression representation canvas.
+-- Preferences for one math lateXResultEvaluation representation canvas.
 CREATE TABLE IF NOT EXISTS expression_preferences(
     id INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
     use_global_preferences BOOLEAN,
