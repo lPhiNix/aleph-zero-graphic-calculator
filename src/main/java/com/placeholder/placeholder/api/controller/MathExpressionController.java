@@ -1,6 +1,7 @@
 package com.placeholder.placeholder.api.controller;
 
 import com.placeholder.placeholder.api.dto.ExpressionRequest;
+import com.placeholder.placeholder.api.dto.ExpressionResultResponse;
 import com.placeholder.placeholder.api.services.MathExpressionService;
 import com.placeholder.placeholder.util.messages.ApiResponseFactory;
 import com.placeholder.placeholder.util.messages.dto.ApiResponse;
@@ -25,9 +26,15 @@ public class MathExpressionController {
     }
 
     @PostMapping("/evaluate")
-    public ResponseEntity<ApiResponse<EmptyContentResponse>> evaluate(@RequestBody ExpressionRequest expressionRequest, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<ApiResponse<ExpressionResultResponse>> evaluate(@RequestBody ExpressionRequest expressionRequest, HttpServletRequest httpServletRequest) {
         String result = service.evaluate(expressionRequest.expression());
 
-        return apiResponseFactory.ok(httpServletRequest.getRequestURI(), result);
+        ExpressionResultResponse response = new ExpressionResultResponse(result);
+
+        return apiResponseFactory.ok(httpServletRequest.getRequestURI(), result, response);
+    }
+
+    public ResponseEntity<ApiResponse<EmptyContentResponse>> calculate(String path) {
+
     }
 }

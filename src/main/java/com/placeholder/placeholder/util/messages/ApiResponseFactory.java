@@ -60,6 +60,10 @@ public class ApiResponseFactory {
         return build(path, AppCode.OK, DEFAULT_OK_HEADER_MESSAGE, new EmptyContentResponse());
     }
 
+    public <T extends MessageContent> ResponseEntity<ApiResponse<T>> ok(String path, String headerMessage, T content) {
+        return build(path, AppCode.OK, headerMessage, content);
+    }
+
     // == ERRORS: GENERIC ==
     public ResponseEntity<ApiResponse<ErrorResponse>> error(String path, AppCode code, String title, List<ApiErrorDetail> details) {
         ErrorResponse error = buildError(title, null, details);

@@ -19,8 +19,4 @@ public class MathExpressionService {
     public String calculate(String expression, int decimals) {
         return mathEclipse.calculate(expression, decimals);
     }
-
-    public String draw(String expression, String variable, String origin, String bound) {
-        return mathEclipse.draw(expression, variable, origin, bound);
-    }
 }
