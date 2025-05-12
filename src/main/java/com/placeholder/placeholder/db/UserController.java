@@ -1,11 +1,9 @@
 package com.placeholder.placeholder.db;
 
 import com.placeholder.placeholder.db.models.dto.UserCreationRequest;
-import com.placeholder.placeholder.util.enums.AppCode;
 import com.placeholder.placeholder.util.messages.ApiResponseFactory;
 import com.placeholder.placeholder.util.messages.dto.ApiResponse;
-import com.placeholder.placeholder.util.messages.dto.content.EmptyContentResponse;
-import jakarta.servlet.http.HttpServletRequest;
+import com.placeholder.placeholder.util.messages.dto.content.SimpleResponse;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,11 +29,11 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<EmptyContentResponse>> register(@RequestBody @Valid UserCreationRequest userCreationRequest, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<ApiResponse<SimpleResponse>> register(@RequestBody @Valid UserCreationRequest userCreationRequest) {
         logger.info("Registering user: {}", userCreationRequest.username());
         userService.createUser(userCreationRequest);
 
-
-        return apiResponseFactory.ok(httpServletRequest.getRequestURI(), "User successfuly created");
+        SimpleResponse response = new SimpleResponse("User successfuly created");
+        return apiResponseFactory.ok(response);
     }
 }

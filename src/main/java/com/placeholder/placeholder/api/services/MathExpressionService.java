@@ -1,5 +1,6 @@
 package com.placeholder.placeholder.api.services;
 
+import com.placeholder.placeholder.api.dto.ExpressionResultResponse;
 import com.placeholder.placeholder.api.facade.MathLibFacade;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,10 @@ public class MathExpressionService {
 
     public MathExpressionService(MathLibFacade mathEclipse) {
         this.mathEclipse = mathEclipse;
+    }
+
+    public ExpressionResultResponse getEvaluation(String expression) {
+        return null;
     }
 
     public String evaluate(String expression) {
