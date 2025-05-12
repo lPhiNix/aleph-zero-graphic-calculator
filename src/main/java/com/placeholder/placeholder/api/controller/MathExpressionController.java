@@ -5,7 +5,6 @@ import com.placeholder.placeholder.api.dto.ExpressionResultResponse;
 import com.placeholder.placeholder.api.services.MathExpressionService;
 import com.placeholder.placeholder.util.messages.ApiResponseFactory;
 import com.placeholder.placeholder.util.messages.dto.ApiResponse;
-import com.placeholder.placeholder.util.messages.dto.content.EmptyContentResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
