@@ -33,14 +33,12 @@ public class PersistenceExceptionHandler {
      */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiResponse<ErrorResponse>> handleDataIntegrityViolation(
-            DataIntegrityViolationException ex,
-            HttpServletRequest request
+            DataIntegrityViolationException ex
     ) {
         String message = "Database integrity violation: " + Objects.requireNonNull(ex.getRootCause()).getMessage();
         ValidationErrorDetail detail = new ValidationErrorDetail(ErrorCategory.BUSINESS, "Database Constraint", message, ex.getRootCause());
 
         return responseFactory.error(
-                request.getRequestURI(),
                 AppCode.CONFLICT,
                 message,
                 ex.getMessage(),
@@ -53,14 +51,12 @@ public class PersistenceExceptionHandler {
      */
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ApiResponse<ErrorResponse>> handleEntityNotFound(
-            EntityNotFoundException ex,
-            HttpServletRequest request
+            EntityNotFoundException ex
     ) {
         String message = "Entity not found: " + ex.getMessage();
         ValidationErrorDetail detail = new ValidationErrorDetail(ErrorCategory.NOT_FOUND, "Entity", message, null);
 
         return responseFactory.error(
-                request.getRequestURI(),
                 AppCode.NOT_FOUND,
                 message,
                 ex.getMessage(),
@@ -73,14 +69,12 @@ public class PersistenceExceptionHandler {
      */
     @ExceptionHandler(OptimisticLockingFailureException.class)
     public ResponseEntity<ApiResponse<ErrorResponse>> handleOptimisticLockingFailure(
-            OptimisticLockingFailureException ex,
-            HttpServletRequest request
+            OptimisticLockingFailureException ex
     ) {
         String message = "Optimistic locking failure: concurrent update conflict";
         ValidationErrorDetail detail = new ValidationErrorDetail(ErrorCategory.CONFLICT, "Optimistic Locking", message, null);
 
         return responseFactory.error(
-                request.getRequestURI(),
                 AppCode.CONFLICT,
                 message,
                 ex.getMessage(),

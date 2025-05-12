@@ -5,9 +5,7 @@ import com.placeholder.placeholder.util.messages.ApiResponseFactory;
 import com.placeholder.placeholder.util.messages.dto.ApiResponse;
 import com.placeholder.placeholder.util.messages.dto.error.ErrorCategory;
 import com.placeholder.placeholder.util.messages.dto.error.details.ErrorDetail;
-import com.placeholder.placeholder.util.messages.dto.error.details.ValidationErrorDetail;
 import com.placeholder.placeholder.util.messages.dto.error.ErrorResponse;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -35,14 +33,12 @@ public class HTTPExceptionHandler {
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ApiResponse<ErrorResponse>> handleMethodNotSupported(
-            HttpRequestMethodNotSupportedException ex,
-            HttpServletRequest request
+            HttpRequestMethodNotSupportedException ex
     ) {
         String message = "HTTP method not supported: " + ex.getMethod();
         ErrorDetail detail = new ErrorDetail(ErrorCategory.INTERNAL, ex.getCause().getMessage(), message);
 
         return responseFactory.error(
-                request.getRequestURI(),
                 AppCode.METHOD_NOT_ALLOWED,
                 message,
                 ex.getMessage(),
@@ -55,14 +51,12 @@ public class HTTPExceptionHandler {
      */
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     public ResponseEntity<ApiResponse<ErrorResponse>> handleUnsupportedMediaType(
-            HttpMediaTypeNotSupportedException ex,
-            HttpServletRequest request
+            HttpMediaTypeNotSupportedException ex
     ) {
         String message = "Unsupported media type: " + ex.getContentType();
         ErrorDetail detail = new ErrorDetail(ErrorCategory.INTERNAL, ex.getCause().getMessage(), message);
 
         return responseFactory.error(
-                request.getRequestURI(),
                 AppCode.UNSUPPORTED_MEDIA_TYPE,
                 message,
                 ex.getMessage(),
@@ -75,14 +69,12 @@ public class HTTPExceptionHandler {
      */
     @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
     public ResponseEntity<ApiResponse<ErrorResponse>> handleMediaTypeNotAcceptable(
-            HttpMediaTypeNotAcceptableException ex,
-            HttpServletRequest request
+            HttpMediaTypeNotAcceptableException ex
     ) {
         String message = "Not acceptable media type";
         ErrorDetail detail = new ErrorDetail(ErrorCategory.INTERNAL, ex.getCause().getMessage(), message);
 
         return responseFactory.error(
-                request.getRequestURI(),
                 AppCode.NOT_ACCEPTABLE,
                 message,
                 ex.getMessage(),
@@ -96,14 +88,12 @@ public class HTTPExceptionHandler {
      */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<ErrorResponse>> handleAccessDenied(
-            AccessDeniedException ex,
-            HttpServletRequest request
+            AccessDeniedException ex
     ) {
         String message = "Access denied: insufficient permissions";
         ErrorDetail detail = new ErrorDetail(ErrorCategory.AUTHORIZATION, ex.getCause().getMessage() ,message);
 
         return responseFactory.error(
-                request.getRequestURI(),
                 AppCode.FORBIDDEN,
                 message,
                 ex.getMessage(),
@@ -116,14 +106,12 @@ public class HTTPExceptionHandler {
      */
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ApiResponse<ErrorResponse>> handleAuthenticationException(
-            AuthenticationException ex,
-            HttpServletRequest request
+            AuthenticationException ex
     ) {
         String message = "Authentication failed: " + ex.getMessage();
         ErrorDetail detail = new ErrorDetail(ErrorCategory.AUTHENTICATION, ex.getCause().getMessage(), message);
 
         return responseFactory.error(
-                request.getRequestURI(),
                 AppCode.UNAUTHORIZED,
                 message,
                 ex.getMessage(),
