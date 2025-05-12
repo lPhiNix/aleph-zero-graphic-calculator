@@ -17,8 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.validation.BindException;
 
@@ -48,17 +46,14 @@ public class ValidationExceptionHandler {
      * Handles {@link MethodArgumentNotValidException} thrown when method arguments fail validation.
      *
      * @param ex      the exception instance
-     * @param request the current HTTP request
      * @return a standardized {@link ApiResponse} containing validation error details
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<ErrorResponse>> handleMethodArgumentNotValidException(
-            MethodArgumentNotValidException ex,
-            HttpServletRequest request
+            MethodArgumentNotValidException ex
     ) {
         List<ValidationErrorDetail> validationErrorDetails = ApiResponseUtils.getErrorDetails(ex.getBindingResult(), ErrorCategory.VALIDATION);
         return apiResponseFactory.validationError(
-                request.getRequestURI(),
                 "Validation failed for one or more arguments, check your request.",
                 validationErrorDetails
                 );
@@ -68,17 +63,14 @@ public class ValidationExceptionHandler {
      * Handles {@link ConstraintViolationException} thrown when validation constraints are violated.
      *
      * @param ex      the exception instance
-     * @param request the current HTTP request
      * @return a standardized {@link ApiResponse} containing constraint violation details
      */
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ApiResponse<ErrorResponse>> handleConstraintViolationException(
-            ConstraintViolationException ex,
-            HttpServletRequest request
+            ConstraintViolationException ex
     ) {
         List<ValidationErrorDetail> validationErrorDetails = ApiResponseUtils.getErrorDetails(ex.getConstraintViolations(), ErrorCategory.VALIDATION);
         return apiResponseFactory.validationError(
-                request.getRequestURI(),
                 "Constraint violations detected.",
                 validationErrorDetails
         );
@@ -88,17 +80,14 @@ public class ValidationExceptionHandler {
      * Handles {@link BindException} thrown when binding request parameters to an object fails.
      *
      * @param ex      the exception instance
-     * @param request the current HTTP request
      * @return a standardized {@link ApiResponse} containing data binding error details
      */
     @ExceptionHandler(BindException.class)
     public ResponseEntity<ApiResponse<ErrorResponse>> handleBindException(
-            BindException ex,
-            HttpServletRequest request
+            BindException ex
     ) {
         List<ValidationErrorDetail> validationErrorDetails = ApiResponseUtils.getErrorDetails(ex.getBindingResult(), ErrorCategory.VALIDATION);
         return apiResponseFactory.validationError(
-                request.getRequestURI(),
                 "Data binding failed.",
                 validationErrorDetails
         );
@@ -108,17 +97,14 @@ public class ValidationExceptionHandler {
      * Handles {@link MissingServletRequestParameterException} thrown when a required request parameter is missing.
      *
      * @param ex      the exception instance
-     * @param request the current HTTP request
      * @return a standardized {@link ApiResponse} containing information about the missing parameter
      */
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ApiResponse<ErrorResponse>> handleMissingServletRequestParameterException(
-            MissingServletRequestParameterException ex,
-            HttpServletRequest request
+            MissingServletRequestParameterException ex
     ) {
         List<ValidationErrorDetail> detail = List.of(new ValidationErrorDetail(ErrorCategory.VALIDATION, ex.getParameterName(), ex.getMessage(), null));
         return  apiResponseFactory.validationError(
-                request.getRequestURI(),
                 "Required request parameter is missing",
                 detail
         );

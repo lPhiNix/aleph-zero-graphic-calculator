@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ApiResponse<T extends MessageContent>(
-        @NotNull @PositiveOrZero int status,
         @NotNull String code,
         String message,
         LocalDateTime timestamp,
@@ -29,17 +28,16 @@ public record ApiResponse<T extends MessageContent>(
 )
 {
     public ApiResponse(AppCode code, String message, String path, T content) {
-        this(code.getStatus().value(), code.value(), message, LocalDateTime.now(), path, content);
+        this(code.value(), message, LocalDateTime.now(), path, content);
     }
 
-    public ApiResponse(int status, String code, String message, String path, T content) {
-        this(status, code, message, LocalDateTime.now(), path, content);
+    public ApiResponse(String code, String message, String path, T content) {
+        this(code, message, LocalDateTime.now(), path, content);
     }
 
     @Override
     public String toString() {
         return "ApiMessage{" +
-                "status=" + status +
                 ", code='" + code + '\'' +
                 ", message='" + message + '\'' +
                 ", timestamp=" + timestamp +

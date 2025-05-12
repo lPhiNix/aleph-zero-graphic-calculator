@@ -33,11 +33,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<ErrorResponse>> handleAllExceptions(
-            Exception ex,
-            HttpServletRequest request
+            Exception ex
     ) {
         return responseFactory.error(
-                request.getRequestURI(),
                 AppCode.INTERNAL_ERROR,
                 DEFAULT_ERROR_MESSAGE,
                 ex.getMessage(),
@@ -47,11 +45,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponse<ErrorResponse>> handleRuntimeException(
-            RuntimeException ex,
-            HttpServletRequest request
+            RuntimeException ex
     ) {
         return responseFactory.error(
-                request.getRequestURI(),
                 AppCode.INTERNAL_ERROR,
                 "Runtime error",
                 ex.getMessage(),
@@ -61,11 +57,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiResponse<ErrorResponse>> handleIllegalArgumentException(
-            IllegalArgumentException ex,
-            HttpServletRequest request
+            IllegalArgumentException ex
     ) {
         return responseFactory.error(
-                request.getRequestURI(),
                 AppCode.BAD_REQUEST,
                 "Invalid argument",
                 ex.getMessage(),
@@ -75,11 +69,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ApiResponse<ErrorResponse>> handleIllegalStateException(
-            IllegalStateException ex,
-            HttpServletRequest request
+            IllegalStateException ex
     ) {
         return responseFactory.error(
-                request.getRequestURI(),
                 AppCode.CONFLICT,
                 "Illegal state",
                 ex.getMessage(),
@@ -104,7 +96,6 @@ public class GlobalExceptionHandler {
         );
 
         return responseFactory.error(
-                request.getRequestURI(),
                 AppCode.BAD_REQUEST,
                 "Type mismatch",
                 message,
@@ -114,8 +105,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiResponse<ErrorResponse>> handleHttpMessageNotReadableException(
-            HttpMessageNotReadableException ex,
-            HttpServletRequest request
+            HttpMessageNotReadableException ex
     ) {
         ex.getMostSpecificCause();
         String cause = ex.getMostSpecificCause().getMessage();
@@ -123,7 +113,6 @@ public class GlobalExceptionHandler {
         ErrorDetail detail = new ErrorDetail(ErrorCategory.VALIDATION, cause, DEFAULT_ERROR_MESSAGE);
 
         return responseFactory.error(
-                request.getRequestURI(),
                 AppCode.BAD_REQUEST,
                 "Malformed request body",
                 cause,
