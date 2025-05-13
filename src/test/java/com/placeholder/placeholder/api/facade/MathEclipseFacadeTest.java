@@ -20,7 +20,6 @@ class MathEclipseFacadeTest {
         EvalEngine engine = new EvalEngine("test", 100, null, true);
         EvalUtilities evaluator = new EvalUtilities(engine, false, false);
         mathEclipseFacade = new MathEclipseFacade(evaluator, new MathEclipseExpressionValidator(), new TeXFormFactory());
-        mathEclipseFacade.isLaTeXFormat(false);
     }
 
     @Test
