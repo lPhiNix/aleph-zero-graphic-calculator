@@ -139,11 +139,7 @@ public class MathEclipseFacade implements MathLibFacade {
     }
 
     private String handleErrors(String originalExpression, String result, String errors) {
-        if (errors == null || errors.isBlank()) {
-            return result;
-        }
-
-        if (!originalExpression.equals(result)) {
+        if (errors == null || errors.isBlank() || !originalExpression.equals(result)) {
             return result;
         }
 
