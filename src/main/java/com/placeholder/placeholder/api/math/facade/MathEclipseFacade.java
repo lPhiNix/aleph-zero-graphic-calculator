@@ -59,8 +59,6 @@ public class MathEclipseFacade implements MathLibFacade {
     @Override
     public String evaluate(String expression) {
         String validated = validate(expression);
-        System.out.println(expression);
-        System.out.println(validated);
         if (returnIsError(validated)) {
             return validated;
         }
