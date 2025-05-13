@@ -27,7 +27,6 @@ public class MathEclipseFacade implements MathLibFacade {
     private final EvalUtilities mathEclipseEvaluator; // Symja native expression evaluator
     private final MathEclipseExpressionValidator mathEclipseExpressionValidator; // Custom validator
     private final TeXFormFactory teXParser; // LaTeX parser
-    private boolean laTeXFormat;
 
     // Buffer to capture any errors printed to System.err during evaluation
     private final ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
@@ -36,7 +35,6 @@ public class MathEclipseFacade implements MathLibFacade {
         this.mathEclipseEvaluator = mathEclipseEvaluator;
         this.mathEclipseExpressionValidator = mathEclipseExpressionValidator;
         this.teXParser = teXParser;
-        this.laTeXFormat = true;
     }
 
     /**
@@ -67,7 +65,7 @@ public class MathEclipseFacade implements MathLibFacade {
             return validated;
         }
 
-        return safeEvaluate(validated, laTeXFormat);
+        return safeEvaluate(validated);
     }
 
     /**
@@ -85,7 +83,7 @@ public class MathEclipseFacade implements MathLibFacade {
         }
 
         String numericExpression = N(expression, decimals);
-        return safeEvaluate(numericExpression, laTeXFormat);
+        return safeEvaluate(numericExpression);
     }
 
     /**
@@ -105,7 +103,7 @@ public class MathEclipseFacade implements MathLibFacade {
         }
 
         String plotExpression = Plot(expression, variable, origin, bound);
-        return safeEvaluate(plotExpression, false); // Do not format plot output
+        return safeEvaluate(plotExpression); // Do not format plot output
     }
 
     /**
@@ -121,17 +119,16 @@ public class MathEclipseFacade implements MathLibFacade {
      * Safely evaluates an expression and captures any warnings/errors.
      *
      * @param expression the expression to evaluate
-     * @param isFormatted whether to format the result using LaTeX
      * @return the result or formatted error message
      */
-    private String safeEvaluate(String expression, boolean isFormatted) {
+    private String safeEvaluate(String expression) {
         System.setErr(new PrintStream(errorStream)); // Redirect System.err to capture evaluation warnings or errors
         try {
             String result = rawEvaluate(expression); // Evaluate the expression directly
             String errors = errorStream.toString().trim(); // Read any error messages written during evaluation
 
             // If no errors, return the result (formatted if requested)
-            return handleErrors(expression, result, errors, isFormatted);
+            return handleErrors(expression, result, errors);
         } catch (Exception e) {
             // Return a formatted error message if evaluation throws an exception
             return mathEclipseExpressionValidator.formatError("Evaluation failed with exception: " + e.getMessage());
@@ -141,13 +138,13 @@ public class MathEclipseFacade implements MathLibFacade {
         }
     }
 
-    private String handleErrors(String originalExpression, String result, String errors, boolean isFormatted) {
+    private String handleErrors(String originalExpression, String result, String errors) {
         if (errors == null || errors.isBlank()) {
-            return isFormatted ? formatResult(result) : result;
+            return result;
         }
 
         if (!originalExpression.equals(result)) {
-            return isFormatted ? formatResult(result) : result;
+            return result;
         }
 
         return mathEclipseExpressionValidator.formatError(errors);
@@ -217,9 +214,5 @@ public class MathEclipseFacade implements MathLibFacade {
      */
     private IExpr createIExpr(String expression) {
         return new ExprEvaluator().parse(expression);
-    }
-
-    public void isLaTeXFormat(boolean laTeXFormat) {
-        this.laTeXFormat = laTeXFormat;
     }
 }
