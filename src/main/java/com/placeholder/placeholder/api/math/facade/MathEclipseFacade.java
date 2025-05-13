@@ -61,6 +61,8 @@ public class MathEclipseFacade implements MathLibFacade {
     @Override
     public String evaluate(String expression) {
         String validated = validate(expression);
+        System.out.println(expression);
+        System.out.println(validated);
         if (returnIsError(validated)) {
             return validated;
         }
@@ -123,16 +125,13 @@ public class MathEclipseFacade implements MathLibFacade {
      * @return the result or formatted error message
      */
     private String safeEvaluate(String expression, boolean isFormatted) {
-        //System.setErr(new PrintStream(errorStream)); // Redirect System.err to capture evaluation warnings or errors
-
+        System.setErr(new PrintStream(errorStream)); // Redirect System.err to capture evaluation warnings or errors
         try {
             String result = rawEvaluate(expression); // Evaluate the expression directly
             String errors = errorStream.toString().trim(); // Read any error messages written during evaluation
 
             // If no errors, return the result (formatted if requested)
-            return errors.isEmpty()
-                    ? isFormatted ? formatResult(result) : result
-                    : mathEclipseExpressionValidator.formatError(errors);
+            return handleErrors(expression, result, errors, isFormatted);
         } catch (Exception e) {
             // Return a formatted error message if evaluation throws an exception
             return mathEclipseExpressionValidator.formatError("Evaluation failed with exception: " + e.getMessage());
@@ -140,6 +139,18 @@ public class MathEclipseFacade implements MathLibFacade {
             // Restore the original System.err to avoid affecting other code
             System.setErr(System.err);
         }
+    }
+
+    private String handleErrors(String originalExpression, String result, String errors, boolean isFormatted) {
+        if (errors == null || errors.isBlank()) {
+            return isFormatted ? formatResult(result) : result;
+        }
+
+        if (!originalExpression.equals(result)) {
+            return isFormatted ? formatResult(result) : result;
+        }
+
+        return mathEclipseExpressionValidator.formatError(errors);
     }
 
     /**

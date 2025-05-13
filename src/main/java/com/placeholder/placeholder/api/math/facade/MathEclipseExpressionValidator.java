@@ -40,7 +40,7 @@ public class MathEclipseExpressionValidator {
 
     // Whitelist of constants that can be used as-is in expressions without being one-character variables.
     private static final Set<String> VALID_CONSTANT_WHITELIST = Set.of(
-            "pi", "phi", "infinity"
+            "pi", "phi", "infinity", "complexinfinity"
     );
 
     // Whitelist of allowed function names the user can include in their input.
@@ -70,6 +70,7 @@ public class MathEclipseExpressionValidator {
     public String validate(String expression, EvalEngine engine) {
         // Remove all whitespaces to simplify token parsing.
         expression = removeSpaces(expression);
+        expression = formatBranches(expression);
 
         String error;
 
@@ -208,6 +209,13 @@ public class MathEclipseExpressionValidator {
      */
     private String removeSpaces(String expression) {
         return expression.replaceAll("\\s+", "");
+    }
+
+    private String formatBranches(String expression) {
+        if (expression == null || expression.isBlank()) {
+            return expression;
+        }
+        return expression.replace("[", "(").replace("]", ")");
     }
 
     /**

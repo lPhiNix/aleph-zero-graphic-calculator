@@ -28,7 +28,7 @@ class MathEclipseConfig {
      * <ul>
      *      <li>{@code sessionID = "default"} : Name of the evaluation context (used for thread isolation or debugging)</li>
      *      <li>{@code recursionLimit = 100}  : Maximum recursion depth (prevents infinite evaluations or stack overflow)</li>
-     *      <li>{@code out = null}            : Output stream for debug/logging (null disables output)</li>
+     *      <li>{@code out = null}            : Output stream (null disables output)</li>
      *      <li>{@code relaxedSyntax = true}  : Allows more permissive parsing of expressions (e.g., "()" or "[]" can be used)</li>
      * </ul>
      *
