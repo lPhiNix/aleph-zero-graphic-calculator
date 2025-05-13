@@ -45,8 +45,8 @@ public class MathEclipseExpressionValidator {
 
     // Whitelist of allowed function names the user can include in their input.
     private static final Set<String> VALID_FUNCTION_WHITELIST = Set.of(
-            "gamma", "zeta", "erf",
-            "d", "diff", "integrate", "taylor", "solve", "limit", "dsolve",
+            "gamma", "zeta", "erf", "cleanall",
+            "d", "diff", "integrate", "taylor", "solve", "limit", "dsolve", "logicalexpand",
             "dot", "cross", "norm", "normalize", "vectorangle", "projection",
             "primeq", "eigenvalues", "inverse", "transpose", "gcd", "lcm",
             "simplify", "expand", "sqrt", "exp", "log", "log10", "log2", "abs",
@@ -85,7 +85,7 @@ public class MathEclipseExpressionValidator {
         }
 
         // Use MathEclipse parser to ensure the expression is syntactically valid.
-        if (!validateSyntax(expression, engine)) {
+        if ((expression = validateSyntax(expression, engine)) == null) {
             return formatError("Invalid syntax in expression.");
         }
 
@@ -191,13 +191,13 @@ public class MathEclipseExpressionValidator {
      * @param engine     the evaluation engine from MathEclipse
      * @return true if the expression parses correctly, false if a syntax error occurs
      */
-    private boolean validateSyntax(String expression, EvalEngine engine) {
+    private String validateSyntax(String expression, EvalEngine engine) {
         try {
             IExpr expr = syntaxEvaluator.parse(expression);
             ExprParser.test(expression, engine);
-            return expr != null;
+            return expr.toString();
         } catch (Exception e) {
-            return false;
+            return null;
         }
     }
 

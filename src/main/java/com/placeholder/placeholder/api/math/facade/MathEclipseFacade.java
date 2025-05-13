@@ -133,15 +133,23 @@ public class MathEclipseFacade implements MathLibFacade {
         } finally {
             // Restore the original System.err to avoid affecting other code
             System.setErr(System.err);
+            errorStream.reset();
         }
     }
 
     private String handleErrors(String originalExpression, String result, String errors) {
+        originalExpression = cleanExpression(originalExpression);
+
         if (errors == null || errors.isBlank() || !originalExpression.equals(result)) {
             return result;
         }
 
         return mathEclipseExpressionValidator.formatError(errors);
+    }
+
+    private String cleanExpression(String expression) {
+        String logicalExpandExpression = LogicalExpand(expression);
+        return rawEvaluate(logicalExpandExpression);
     }
 
     /**
@@ -152,7 +160,6 @@ public class MathEclipseFacade implements MathLibFacade {
     private String rawEvaluate(String expression) {
         return mathEclipseEvaluator.evaluate(expression).toString();
     }
-
     @Override
     public String formatResult(String expression) {
         return parseToLateX(expression);
@@ -185,6 +192,10 @@ public class MathEclipseFacade implements MathLibFacade {
      */
     private String Plot(String expression, String variable, String origin, String bound) {
         return "Plot[" + expression + ", {" + variable + ", " + origin + ", " + bound + "}]";
+    }
+
+    private String LogicalExpand(String expression) {
+        return "LogicalExpand[" + expression + "]";
     }
 
     /**
