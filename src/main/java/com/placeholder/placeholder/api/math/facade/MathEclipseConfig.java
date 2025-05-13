@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
  * <p>It exposes the following beans to the application context:
  * <ul>
  *     <li>{@link EvalEngine} - the core symbolic evaluation engine</li>
- *     <li>{@link EvalUtilities} - a utility class that wraps lateXResultEvaluation parsing and evaluation</li>
+ *     <li>{@link EvalUtilities} - a utility class that wraps expression parsing and evaluation</li>
  *     <li>{@link TeXFormFactory} - a formatter for converting expressions to LaTeX</li>
  * </ul>
  *

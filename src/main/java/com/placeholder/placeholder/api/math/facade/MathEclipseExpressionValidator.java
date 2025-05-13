@@ -29,10 +29,10 @@ import java.util.regex.Pattern;
 @Component
 public class MathEclipseExpressionValidator {
 
-    // Special prefix used to indicate an error in lateXResultEvaluation validation.
+    // Special prefix used to indicate an error in expression validation.
     public static final String ERROR_SYMBOL = "ERROR";
 
-    // Pattern to detect symbols (e.g. variables and constants) in the lateXResultEvaluation.
+    // Pattern to detect symbols (e.g. variables and constants) in the expression.
     private static final Pattern SYMBOL_PATTERN = Pattern.compile("\\b([a-zA-Z][a-zA-Z0-9]*)\\b");
 
     // Pattern to detect function calls by looking for a name followed by ( or [.
@@ -47,6 +47,7 @@ public class MathEclipseExpressionValidator {
     private static final Set<String> VALID_FUNCTION_WHITELIST = Set.of(
             "gamma", "zeta", "erf",
             "d", "diff", "integrate", "taylor", "solve", "limit", "dsolve",
+            "dot", "cross", "norm", "normalize", "vectorangle", "projection",
             "primeq", "eigenvalues", "inverse", "transpose", "gcd", "lcm",
             "simplify", "expand", "sqrt", "exp", "log", "log10", "log2", "abs",
             "sin", "cos", "tan", "csc", "cot", "sec",
@@ -59,12 +60,12 @@ public class MathEclipseExpressionValidator {
     private final ExprEvaluator syntaxEvaluator = new ExprEvaluator();
 
     /**
-     * Validates a full mathematical lateXResultEvaluation using custom grammar, allowed functions/variables,
+     * Validates a full mathematical expression using custom grammar, allowed functions/variables,
      * and MathEclipse's parser to ensure both syntactic and semantic correctness.
      *
-     * @param expression the input lateXResultEvaluation to validate
+     * @param expression the input expression to validate
      * @param engine     the evaluation engine used for parsing validation
-     * @return the input lateXResultEvaluation if valid; otherwise, a string beginning with "ERROR" followed by the cause
+     * @return the input expression if valid; otherwise, a string beginning with "ERROR" followed by the cause
      */
     public String validate(String expression, EvalEngine engine) {
         // Remove all whitespaces to simplify token parsing.
@@ -82,20 +83,20 @@ public class MathEclipseExpressionValidator {
             return formatError(error);
         }
 
-        // Use MathEclipse parser to ensure the lateXResultEvaluation is syntactically valid.
+        // Use MathEclipse parser to ensure the expression is syntactically valid.
         if (!validateSyntax(expression, engine)) {
-            return formatError("Invalid syntax in lateXResultEvaluation.");
+            return formatError("Invalid syntax in expression.");
         }
 
-        // If all checks pass, return the lateXResultEvaluation as valid.
+        // If all checks pass, return the expression as valid.
         return expression;
     }
 
     /**
-     * Validates the individual symbols found in the lateXResultEvaluation,
+     * Validates the individual symbols found in the expression,
      * including variables and constants, ensuring they conform to allowed rules.
      *
-     * @param input the lateXResultEvaluation with no whitespace
+     * @param input the expression with no whitespace
      * @return null if valid, or an error message describing the invalid symbol
      */
     private String validateSymbols(String input) {
@@ -146,7 +147,7 @@ public class MathEclipseExpressionValidator {
      * Determines if a symbol is a function by checking if it appears
      * followed by an open parenthesis or bracket (used for function calls).
      *
-     * @param input  the full lateXResultEvaluation
+     * @param input  the full expression
      * @param symbol the symbol to search for
      * @return true if the symbol is used as a function call
      */
@@ -166,9 +167,9 @@ public class MathEclipseExpressionValidator {
     }
 
     /**
-     * Validates that all function calls in the lateXResultEvaluation are whitelisted.
+     * Validates that all function calls in the expression are whitelisted.
      *
-     * @param input the lateXResultEvaluation to scan
+     * @param input the expression to scan
      * @return null if all function calls are valid, otherwise an error message
      */
     private String validateFunctionCalls(String input) {
@@ -183,11 +184,11 @@ public class MathEclipseExpressionValidator {
     }
 
     /**
-     * Uses MathEclipse to parse the lateXResultEvaluation and ensure it is syntactically correct.
+     * Uses MathEclipse to parse the expression and ensure it is syntactically correct.
      *
-     * @param expression the cleaned lateXResultEvaluation
+     * @param expression the cleaned expression
      * @param engine     the evaluation engine from MathEclipse
-     * @return true if the lateXResultEvaluation parses correctly, false if a syntax error occurs
+     * @return true if the expression parses correctly, false if a syntax error occurs
      */
     private boolean validateSyntax(String expression, EvalEngine engine) {
         try {
@@ -200,10 +201,10 @@ public class MathEclipseExpressionValidator {
     }
 
     /**
-     * Utility method to remove all whitespace characters from an lateXResultEvaluation.
+     * Utility method to remove all whitespace characters from an expression.
      *
-     * @param expression the original lateXResultEvaluation
-     * @return the lateXResultEvaluation without spaces
+     * @param expression the original expression
+     * @return the expression without spaces
      */
     private String removeSpaces(String expression) {
         return expression.replaceAll("\\s+", "");
