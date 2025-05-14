@@ -4,7 +4,7 @@ import com.placeholder.placeholder.api.user.service.UserService;
 import com.placeholder.placeholder.api.user.dto.UserCreationRequest;
 import com.placeholder.placeholder.api.util.common.messages.ApiResponseFactory;
 import com.placeholder.placeholder.api.util.common.messages.dto.ApiResponse;
-import com.placeholder.placeholder.api.util.common.messages.dto.content.SimpleResponse;
+import com.placeholder.placeholder.api.util.common.messages.dto.content.responses.SimpleResponse;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
