@@ -20,13 +20,12 @@ import java.time.LocalDateTime;
 public record ApiResponse<T extends MessageContent>(
         @NotNull String code,
         String message,
-        LocalDateTime timestamp,
         String path,
         T content
 )
 {
     public ApiResponse(AppCode code, String message, String path, T content) {
-        this(code.value(), message, LocalDateTime.now(), path, content);
+        this(code.value(), message, path, content);
     }
 
     @Override
@@ -34,7 +33,6 @@ public record ApiResponse<T extends MessageContent>(
         return "ApiMessage{" +
                 ", code='" + code + '\'' +
                 ", message='" + message + '\'' +
-                ", timestamp=" + timestamp +
                 ", path='" + path + '\'' +
                 ", content=" + content +
                 '}';

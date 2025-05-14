@@ -31,6 +31,12 @@ public enum AppCode {
     CREATED(HttpStatus.CREATED, "Resource created successfully"),
 
     /**
+     * Request accepted.
+     * Maps to HTTP 202 Accepted.
+     */
+    ACCEPTED(HttpStatus.ACCEPTED, "Resource accepted"),
+
+    /**
      * Request succeeded but no content to return.
      * <p>
      * Maps to HTTP 204 No Content.
