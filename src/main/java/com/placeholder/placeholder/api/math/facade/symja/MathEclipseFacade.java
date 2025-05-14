@@ -64,12 +64,8 @@ public class MathEclipseFacade implements MathLibFacade {
      */
     @Override
     public String evaluate(String expression) {
-        String validated = validate(expression);
-        if (returnIsError(validated)) {
-            return validated;
-        }
-
-        return safeEvaluate(validated);
+        String validatedExpression = validate(expression);
+        return safeEvaluate(validatedExpression);
     }
 
     /**
@@ -81,12 +77,8 @@ public class MathEclipseFacade implements MathLibFacade {
      */
     @Override
     public String calculate(String expression, int decimals) {
-        String validated = validate(expression);
-        if (returnIsError(validated)) {
-            return validated;
-        }
-
-        String numericExpression = expressionFactory.N(expression, decimals);
+        String validatedExpression = validate(expression);
+        String numericExpression = expressionFactory.N(validatedExpression, decimals);
         return safeEvaluate(numericExpression);
     }
 
@@ -101,22 +93,9 @@ public class MathEclipseFacade implements MathLibFacade {
      */
     @Override
     public String draw(String expression, String variable, String origin, String bound) {
-        String validated = validate(expression);
-        if (returnIsError(validated)) {
-            return validated;
-        }
-
-        String plotExpression = expressionFactory.Plot(expression, variable, origin, bound);
+        String validatedExpression = validate(expression);
+        String plotExpression = expressionFactory.Plot(validatedExpression, variable, origin, bound);
         return safeEvaluate(plotExpression); // Do not format plot output
-    }
-
-    /**
-     * check if the validation has returned an error
-     * @param validationResult validation result
-     * @return True if validation has returned an error or False if not.
-     */
-    private boolean returnIsError(String validationResult) {
-        return validationResult.startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL);
     }
 
     /**
@@ -147,7 +126,7 @@ public class MathEclipseFacade implements MathLibFacade {
     private String handleErrors(String originalExpression, String result, String errors) {
         String cleanedExpression = cleanExpression(originalExpression);
 
-        /*
+        /* TODO
         System.out.println("Original Expression: " + originalExpression);
         System.out.println("Cleaned Expression: " + cleanedExpression);
         System.out.println("Result: " + result);
