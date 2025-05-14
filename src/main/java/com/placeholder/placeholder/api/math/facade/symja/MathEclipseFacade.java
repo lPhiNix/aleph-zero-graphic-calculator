@@ -147,10 +147,12 @@ public class MathEclipseFacade implements MathLibFacade {
     private String handleErrors(String originalExpression, String result, String errors) {
         String cleanedExpression = cleanExpression(originalExpression);
 
+        /*
         System.out.println("Original Expression: " + originalExpression);
         System.out.println("Cleaned Expression: " + cleanedExpression);
         System.out.println("Result: " + result);
         System.out.println("Error: " + errors);
+         */
 
         if (errors == null || errors.isBlank()) {
             return result;

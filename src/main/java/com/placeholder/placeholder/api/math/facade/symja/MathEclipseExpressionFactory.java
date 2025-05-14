@@ -29,7 +29,9 @@ public class MathEclipseExpressionFactory {
     }
 
     public String removeFreezeFromExpression(String expression) {
-        System.out.println("FREEZE: " + expression);
+        //System.out.println("FREEZE: " + expression); // TODO
+
+
         // Convertir a minúsculas para hacerlo insensible al caso
         String lowerExpression = expression.toLowerCase();
 
