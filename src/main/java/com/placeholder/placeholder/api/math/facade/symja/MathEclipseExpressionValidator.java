@@ -1,9 +1,8 @@
-package com.placeholder.placeholder.api.math.facade;
+package com.placeholder.placeholder.api.math.facade.symja;
 
-import org.matheclipse.core.eval.EvalEngine;
+import com.placeholder.placeholder.api.math.facade.MathLibFacade;
 import org.matheclipse.core.eval.ExprEvaluator;
 import org.matheclipse.core.interfaces.IExpr;
-import org.matheclipse.core.parser.ExprParser;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -40,12 +39,12 @@ public class MathEclipseExpressionValidator {
 
     // Whitelist of constants that can be used as-is in expressions without being one-character variables.
     private static final Set<String> VALID_CONSTANT_WHITELIST = Set.of(
-            "pi", "phi", "infinity", "complexinfinity"
+            "pi", "phi", "infinity", "complexinfinity", "∈"
     );
 
     // Whitelist of allowed function names the user can include in their input.
     private static final Set<String> VALID_FUNCTION_WHITELIST = Set.of(
-            "gamma", "zeta", "erf", "cleanall",
+            "gamma", "zeta", "erf", "fresnelc", "c",
             "d", "diff", "integrate", "taylor", "solve", "limit", "dsolve", "logicalexpand",
             "dot", "cross", "norm", "normalize", "vectorangle", "projection",
             "primeq", "eigenvalues", "inverse", "transpose", "gcd", "lcm",
@@ -67,7 +66,7 @@ public class MathEclipseExpressionValidator {
      * @param engine     the evaluation engine used for parsing validation
      * @return the input expression if valid; otherwise, a string beginning with "ERROR" followed by the cause
      */
-    public String validate(String expression, EvalEngine engine) {
+    public String validate(String expression) {
         // Remove all whitespaces to simplify token parsing.
         expression = removeSpaces(expression);
         expression = formatBranches(expression);
@@ -85,7 +84,7 @@ public class MathEclipseExpressionValidator {
         }
 
         // Use MathEclipse parser to ensure the expression is syntactically valid.
-        if ((expression = validateSyntax(expression, engine)) == null) {
+        if ((expression = validateSyntax(expression)) == null) {
             return formatError("Invalid syntax in expression.");
         }
 
@@ -191,10 +190,9 @@ public class MathEclipseExpressionValidator {
      * @param engine     the evaluation engine from MathEclipse
      * @return true if the expression parses correctly, false if a syntax error occurs
      */
-    private String validateSyntax(String expression, EvalEngine engine) {
+    private String validateSyntax(String expression) {
         try {
             IExpr expr = syntaxEvaluator.parse(expression);
-            ExprParser.test(expression, engine);
             return expr.toString();
         } catch (Exception e) {
             return null;

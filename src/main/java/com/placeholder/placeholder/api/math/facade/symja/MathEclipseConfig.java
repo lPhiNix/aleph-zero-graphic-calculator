@@ -1,4 +1,4 @@
-package com.placeholder.placeholder.api.math.facade;
+package com.placeholder.placeholder.api.math.facade.symja;
 
 import org.matheclipse.core.eval.EvalEngine;
 import org.matheclipse.core.eval.EvalUtilities;
@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Configuration;
  * <p>All components are designed for reuse across services and facades in the system.</p>
  */
 @Configuration
-class MathEclipseConfig {
+public class MathEclipseConfig {
     /**
      * Creates the core {@link EvalEngine} used by Symja for symbolic evaluation.
      * <p>
@@ -36,7 +36,26 @@ class MathEclipseConfig {
      */
     @Bean
     public EvalEngine evalEngine() {
-        return new EvalEngine("default", 100, null, true);
+        return buildEvalEngine();
+    }
+
+    public static EvalEngine buildEvalEngine() {
+        return buildEvalEngine("default");
+    }
+
+    public static EvalEngine buildEvalEngine(String sessionID) {
+        return buildEvalEngine(sessionID, 100, 100);
+    }
+
+    public static EvalEngine buildEvalEngine(String sessionID, int recursionLimit, int iterationLimit) {
+        return new EvalEngine(
+                sessionID,
+                recursionLimit,
+                iterationLimit,
+                null,
+                null,
+                true
+        );
     }
 
     /**
@@ -54,7 +73,23 @@ class MathEclipseConfig {
      */
     @Bean
     public EvalUtilities evalUtilities(EvalEngine engine) {
+        return buildEvalUtilities(engine);
+    }
+
+    public static EvalUtilities buildEvalUtilities() {
+        return new EvalUtilities(buildEvalEngine(), false, false);
+    }
+
+    public static EvalUtilities buildEvalUtilities(EvalEngine engine) {
         return new EvalUtilities(engine, false, false);
+    }
+
+    public static EvalUtilities buildEvalUtilities(String sessionID) {
+        return new EvalUtilities(buildEvalEngine(sessionID), false, false);
+    }
+
+    public static EvalUtilities buildEvalUtilities(String sessionID, int recursionLimit, int iterationLimit) {
+        return new EvalUtilities(buildEvalEngine(sessionID, recursionLimit, iterationLimit), false, false);
     }
 
     /**
@@ -67,6 +102,10 @@ class MathEclipseConfig {
      */
     @Bean
     public TeXFormFactory teXFormFactory() {
+        return buildTeXFormFactory();
+    }
+
+    public static TeXFormFactory buildTeXFormFactory() {
         return new TeXFormFactory();
     }
 }

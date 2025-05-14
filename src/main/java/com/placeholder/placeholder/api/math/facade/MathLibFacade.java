@@ -1,5 +1,7 @@
 package com.placeholder.placeholder.api.math.facade;
 
+import com.placeholder.placeholder.api.math.facade.symja.MathEclipseFacade;
+
 /**
  * {@code MathLibFacade} is an interface that defines the behavior and
  * methods that the implementation of the mathematical expressions computing

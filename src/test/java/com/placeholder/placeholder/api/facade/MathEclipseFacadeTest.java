@@ -1,11 +1,12 @@
 package com.placeholder.placeholder.api.facade;
 
-import com.placeholder.placeholder.api.math.facade.MathEclipseExpressionValidator;
-import com.placeholder.placeholder.api.math.facade.MathEclipseFacade;
+import com.placeholder.placeholder.api.math.facade.symja.MathEclipseConfig;
+import com.placeholder.placeholder.api.math.facade.symja.MathEclipseExpressionFactory;
+import com.placeholder.placeholder.api.math.facade.symja.MathEclipseExpressionValidator;
+import com.placeholder.placeholder.api.math.facade.symja.MathEclipseFacade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.matheclipse.core.eval.EvalEngine;
 import org.matheclipse.core.eval.EvalUtilities;
 import org.matheclipse.core.form.tex.TeXFormFactory;
 
@@ -17,9 +18,15 @@ class MathEclipseFacadeTest {
 
     @BeforeEach
     void setUp() {
-        EvalEngine engine = new EvalEngine("test", 100, null, true);
-        EvalUtilities evaluator = new EvalUtilities(engine, false, false);
-        mathEclipseFacade = new MathEclipseFacade(evaluator, new MathEclipseExpressionValidator(), new TeXFormFactory());
+        EvalUtilities evaluator = MathEclipseConfig.buildEvalUtilities("test");
+        TeXFormFactory laTeXParser = MathEclipseConfig.buildTeXFormFactory();
+
+        mathEclipseFacade = new MathEclipseFacade(
+                evaluator,
+                new MathEclipseExpressionValidator(),
+                new MathEclipseExpressionFactory(),
+                laTeXParser
+        );
     }
 
     @Test

@@ -1,5 +1,6 @@
-package com.placeholder.placeholder.api.math.facade;
+package com.placeholder.placeholder.api.math.facade.symja;
 
+import com.placeholder.placeholder.api.math.facade.MathLibFacade;
 import org.matheclipse.core.eval.EvalUtilities;
 import org.matheclipse.core.eval.ExprEvaluator;
 import org.matheclipse.core.form.tex.TeXFormFactory;
@@ -24,16 +25,23 @@ import java.io.PrintStream;
 @Component
 public class MathEclipseFacade implements MathLibFacade {
 
-    private final EvalUtilities mathEclipseEvaluator; // Symja native expression evaluator
+    private EvalUtilities mathEclipseEvaluator; // Symja native expression evaluator
     private final MathEclipseExpressionValidator mathEclipseExpressionValidator; // Custom validator
+    private final MathEclipseExpressionFactory expressionFactory;
     private final TeXFormFactory teXParser; // LaTeX parser
 
     // Buffer to capture any errors printed to System.err during evaluation
     private final ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
 
-    public MathEclipseFacade(EvalUtilities mathEclipseEvaluator, MathEclipseExpressionValidator mathEclipseExpressionValidator, TeXFormFactory teXParser) {
+    public MathEclipseFacade(
+            EvalUtilities mathEclipseEvaluator, 
+            MathEclipseExpressionValidator mathEclipseExpressionValidator, 
+            MathEclipseExpressionFactory expressionFactory,
+            TeXFormFactory teXParser
+    ) {
         this.mathEclipseEvaluator = mathEclipseEvaluator;
         this.mathEclipseExpressionValidator = mathEclipseExpressionValidator;
+        this.expressionFactory = expressionFactory;
         this.teXParser = teXParser;
     }
 
@@ -45,9 +53,7 @@ public class MathEclipseFacade implements MathLibFacade {
      */
     @Override
     public String validate(String expression) {
-        return mathEclipseExpressionValidator.validate(
-                expression, mathEclipseEvaluator.getEvalEngine()
-        );
+        return mathEclipseExpressionValidator.validate(expression);
     }
 
     /**
@@ -80,7 +86,7 @@ public class MathEclipseFacade implements MathLibFacade {
             return validated;
         }
 
-        String numericExpression = N(expression, decimals);
+        String numericExpression = expressionFactory.N(expression, decimals);
         return safeEvaluate(numericExpression);
     }
 
@@ -100,7 +106,7 @@ public class MathEclipseFacade implements MathLibFacade {
             return validated;
         }
 
-        String plotExpression = Plot(expression, variable, origin, bound);
+        String plotExpression = expressionFactory.Plot(expression, variable, origin, bound);
         return safeEvaluate(plotExpression); // Do not format plot output
     }
 
@@ -134,13 +140,23 @@ public class MathEclipseFacade implements MathLibFacade {
             // Restore the original System.err to avoid affecting other code
             System.setErr(System.err);
             errorStream.reset();
+            resetEvaluator();
         }
     }
 
     private String handleErrors(String originalExpression, String result, String errors) {
-        originalExpression = cleanExpression(originalExpression);
+        String cleanedExpression = cleanExpression(originalExpression);
 
-        if (errors == null || errors.isBlank() || !originalExpression.equals(result)) {
+        System.out.println("Original Expression: " + originalExpression);
+        System.out.println("Cleaned Expression: " + cleanedExpression);
+        System.out.println("Result: " + result);
+        System.out.println("Error: " + errors);
+
+        if (errors == null || errors.isBlank()) {
+            return result;
+        }
+
+        if (!cleanedExpression.equals(result)) {
             return result;
         }
 
@@ -148,8 +164,7 @@ public class MathEclipseFacade implements MathLibFacade {
     }
 
     private String cleanExpression(String expression) {
-        String logicalExpandExpression = LogicalExpand(expression);
-        return rawEvaluate(logicalExpandExpression);
+        return expressionFactory.removeFreezeFromExpression(rawFreezeEvaluate(expression));
     }
 
     /**
@@ -160,6 +175,13 @@ public class MathEclipseFacade implements MathLibFacade {
     private String rawEvaluate(String expression) {
         return mathEclipseEvaluator.evaluate(expression).toString();
     }
+    
+    private String rawFreezeEvaluate(String expression) {
+        return MathEclipseConfig.buildEvalUtilities(
+                "freeze", 0, 0
+        ).evaluate(expression).toString();
+    }
+    
     @Override
     public String formatResult(String expression) {
         return parseToLateX(expression);
@@ -170,32 +192,8 @@ public class MathEclipseFacade implements MathLibFacade {
         mathEclipseEvaluator.stopRequest();
     }
 
-    /**
-     * Wraps an expression with Symja's N[] function for numeric approximation.
-     *
-     * @param expression input expression
-     * @param decimals number of decimals
-     * @return wrapped expression
-     */
-    private String N(String expression, int decimals) {
-        return "N[" + expression + ", " + decimals + "]";
-    }
-
-    /**
-     * Builds a Symja-compatible Plot[] expression.
-     *
-     * @param expression the function to plot
-     * @param variable variable of the function
-     * @param origin start of the domain
-     * @param bound end of the domain
-     * @return constructed plot expression
-     */
-    private String Plot(String expression, String variable, String origin, String bound) {
-        return "Plot[" + expression + ", {" + variable + ", " + origin + ", " + bound + "}]";
-    }
-
-    private String LogicalExpand(String expression) {
-        return "LogicalExpand[" + expression + "]";
+    private void resetEvaluator() {
+        mathEclipseEvaluator = MathEclipseConfig.buildEvalUtilities();
     }
 
     /**
