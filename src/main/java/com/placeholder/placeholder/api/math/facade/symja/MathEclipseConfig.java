@@ -1,5 +1,6 @@
 package com.placeholder.placeholder.api.math.facade.symja;
 
+import com.placeholder.placeholder.api.math.facade.MathLibFacade;
 import org.matheclipse.core.eval.EvalEngine;
 import org.matheclipse.core.eval.EvalUtilities;
 import org.matheclipse.core.form.tex.TeXFormFactory;
@@ -21,6 +22,15 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class MathEclipseConfig {
+
+    public static MathEclipseFacade buildMathEclipseFacade() {
+        return new MathEclipseFacade(
+                buildEvalUtilities(),
+                new MathEclipseExpressionValidator(),
+                buildTeXFormFactory()
+        );
+    }
+
     /**
      * Creates the core {@link EvalEngine} used by Symja for symbolic evaluation.
      * <p>

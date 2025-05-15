@@ -1,9 +1,11 @@
 package com.placeholder.placeholder.api.math.facade.symja;
 
+
 import com.placeholder.placeholder.api.math.facade.MathLibFacade;
 import com.placeholder.placeholder.api.math.facade.symja.exceptions.MathEclipseGrammaticalException;
 import com.placeholder.placeholder.api.math.facade.symja.exceptions.MathEclipseSemanticException;
 import com.placeholder.placeholder.api.math.facade.symja.exceptions.MathEclipseSyntaxException;
+import org.matheclipse.core.eval.EvalEngine;
 import org.matheclipse.core.eval.ExprEvaluator;
 import org.matheclipse.core.interfaces.IExpr;
 import org.springframework.stereotype.Component;
@@ -66,7 +68,6 @@ public class MathEclipseExpressionValidator {
      * and MathEclipse's parser to ensure both syntactic and semantic correctness.
      *
      * @param expression the input expression to validate
-     * @param engine     the evaluation engine used for parsing validation
      * @return the input expression if valid; otherwise, a string beginning with "ERROR" followed by the cause
      */
     public String validate(String expression) {
@@ -172,7 +173,6 @@ public class MathEclipseExpressionValidator {
      * Uses MathEclipse to parse the expression and ensure it is syntactically correct.
      *
      * @param expression the cleaned expression
-     * @param engine     the evaluation engine from MathEclipse
      * @return true if the expression parses correctly, false if a syntax error occurs
      */
     private String validateSyntax(String expression) {
@@ -199,15 +199,5 @@ public class MathEclipseExpressionValidator {
             return expression;
         }
         return expression.replace("[", "(").replace("]", ")");
-    }
-
-    /**
-     * Formats an error message by prepending the standard error symbol.
-     *
-     * @param message the detailed error message
-     * @return a full error string to be returned
-     */
-    public String formatError(String message) {
-        return ERROR_SYMBOL + " " + message;
     }
 }

@@ -1,7 +1,6 @@
 package com.placeholder.placeholder.api.facade;
 
 import com.placeholder.placeholder.api.math.facade.symja.MathEclipseConfig;
-import com.placeholder.placeholder.api.math.facade.symja.MathEclipseExpressionFactory;
 import com.placeholder.placeholder.api.math.facade.symja.MathEclipseExpressionValidator;
 import com.placeholder.placeholder.api.math.facade.symja.MathEclipseFacade;
 import org.junit.jupiter.api.BeforeEach;

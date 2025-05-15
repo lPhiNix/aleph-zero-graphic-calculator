@@ -4,4 +4,8 @@ public class MathEclipseGrammaticalException extends MathEclipseException {
     public MathEclipseGrammaticalException(String message) {
         super(message);
     }
+
+    public MathEclipseGrammaticalException(String message, Throwable  cause) {
+        super(message, cause);
+    }
 }

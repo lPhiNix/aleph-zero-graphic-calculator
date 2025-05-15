@@ -9,7 +9,7 @@ package com.placeholder.placeholder.api.math.facade;
  * expression computation libraries in a simple way, ensuring extensibility and code
  * decoupling.
  */
-public interface MathLibFacade {
+public interface MathLibFacade<E extends MathExpressionEvaluation> {
     /**
      * Checks whether a mathematical expression is syntactically, grammatically and semantically valid.
      * @param expression mathematical expression to validate.
@@ -22,7 +22,7 @@ public interface MathLibFacade {
      * @param expression mathematical expression to evaluate.
      * @return error message if expression is not valid or an evaluated result if is valid.
      */
-    String evaluate(String expression);
+    E evaluate(String expression);
 
     /**
      * Processes a mathematical expression to return its exact numerical value with a given number of decimal places
@@ -30,7 +30,7 @@ public interface MathLibFacade {
      * @param decimals number of decimal places you want the result to have.
      * @return error message if expression is not valid or an evaluated result if is valid.
      */
-    String calculate(String expression, int decimals);
+    E calculate(String expression, int decimals);
 
     /**
      * Processes a mathematical function or equation to return a list of points
@@ -42,7 +42,7 @@ public interface MathLibFacade {
      * @param bound limit of the range through which the points are to be calculated.
      * @return return a list of points in it evaluated within a specified range.
      */
-    String draw(String expression, String variable, String origin, String bound);
+    E draw(String expression, String variable, String origin, String bound);
 
     /**
      * Used to format the mathematical expression resulting from the defined operations.

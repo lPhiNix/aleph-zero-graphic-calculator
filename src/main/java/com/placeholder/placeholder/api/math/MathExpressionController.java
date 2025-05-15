@@ -25,9 +25,7 @@ public class MathExpressionController {
 
     @PostMapping("/evaluate")
     public ResponseEntity<ApiResponse<ExpressionResultResponse>> evaluate(@RequestBody ExpressionRequest expressionRequest) {
-        String result = service.evaluate(expressionRequest.expression());
-        ExpressionResultResponse response = new ExpressionResultResponse(result);
-
+        ExpressionResultResponse response = service.evaluate(expressionRequest.expression());
         return apiResponseFactory.ok(response);
     }
 }

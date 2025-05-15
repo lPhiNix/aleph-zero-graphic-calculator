@@ -1,8 +1,11 @@
 package com.placeholder.placeholder.api.math.services;
 
 import com.placeholder.placeholder.api.math.dto.ExpressionResultResponse;
+import com.placeholder.placeholder.api.math.facade.MathExpressionEvaluation;
 import com.placeholder.placeholder.api.math.facade.MathLibFacade;
 import org.springframework.stereotype.Service;
+
+import java.util.Collections;
 
 @Service
 public class MathExpressionService {
@@ -17,11 +20,15 @@ public class MathExpressionService {
         return null;
     }
 
-    public String evaluate(String expression) {
-        return mathEclipse.evaluate(expression);
+    public ExpressionResultResponse evaluate(String expression) {
+        MathExpressionEvaluation evaluation = mathEclipse.evaluate(expression);
+        return new ExpressionResultResponse(
+                evaluation.getExpressionEvaluated(),
+                evaluation.getEvaluationProblems().orElse(null)
+        );
     }
 
     public String calculate(String expression, int decimals) {
-        return mathEclipse.calculate(expression, decimals);
+        return mathEclipse.calculate(expression, decimals).getExpressionEvaluated();
     }
 }

@@ -1,13 +1,11 @@
 package com.placeholder.placeholder.api.facade;
 
 import com.placeholder.placeholder.api.math.facade.symja.MathEclipseConfig;
-import com.placeholder.placeholder.api.math.facade.symja.MathEclipseExpressionFactory;
 import com.placeholder.placeholder.api.math.facade.symja.MathEclipseExpressionValidator;
 import com.placeholder.placeholder.api.math.facade.symja.MathEclipseFacade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.matheclipse.core.eval.EvalEngine;
 import org.matheclipse.core.eval.EvalUtilities;
 import org.matheclipse.core.form.tex.TeXFormFactory;
 

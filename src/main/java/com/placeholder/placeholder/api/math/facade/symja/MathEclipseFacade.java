@@ -1,6 +1,7 @@
 package com.placeholder.placeholder.api.math.facade.symja;
 
 import com.placeholder.placeholder.api.math.facade.MathLibFacade;
+import com.placeholder.placeholder.api.math.facade.symja.exceptions.MathEclipseEvaluationException;
 import org.matheclipse.core.eval.EvalUtilities;
 import org.matheclipse.core.eval.ExprEvaluator;
 import org.matheclipse.core.form.tex.TeXFormFactory;
@@ -23,11 +24,10 @@ import java.io.PrintStream;
  * @see MathEclipseExpressionValidator
  */
 @Component
-public class MathEclipseFacade implements MathLibFacade {
+public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
 
     private EvalUtilities mathEclipseEvaluator; // Symja native expression evaluator
     private final MathEclipseExpressionValidator mathEclipseExpressionValidator; // Custom validator
-    private final MathEclipseExpressionFactory expressionFactory;
     private final TeXFormFactory teXParser; // LaTeX parser
 
     // Buffer to capture any errors printed to System.err during evaluation
@@ -35,13 +35,11 @@ public class MathEclipseFacade implements MathLibFacade {
 
     public MathEclipseFacade(
             EvalUtilities mathEclipseEvaluator, 
-            MathEclipseExpressionValidator mathEclipseExpressionValidator, 
-            MathEclipseExpressionFactory expressionFactory,
+            MathEclipseExpressionValidator mathEclipseExpressionValidator,
             TeXFormFactory teXParser
     ) {
         this.mathEclipseEvaluator = mathEclipseEvaluator;
         this.mathEclipseExpressionValidator = mathEclipseExpressionValidator;
-        this.expressionFactory = expressionFactory;
         this.teXParser = teXParser;
     }
 
@@ -63,7 +61,7 @@ public class MathEclipseFacade implements MathLibFacade {
      * @return the result of the evaluation or a formatted error message
      */
     @Override
-    public String evaluate(String expression) {
+    public MathEclipseEvaluation evaluate(String expression) {
         String validatedExpression = validate(expression);
         return safeEvaluate(validatedExpression);
     }
@@ -76,9 +74,9 @@ public class MathEclipseFacade implements MathLibFacade {
      * @return the evaluated numeric result or a formatted error message
      */
     @Override
-    public String calculate(String expression, int decimals) {
+    public MathEclipseEvaluation calculate(String expression, int decimals) {
         String validatedExpression = validate(expression);
-        String numericExpression = expressionFactory.N(validatedExpression, decimals);
+        String numericExpression = N(validatedExpression, decimals);
         return safeEvaluate(numericExpression);
     }
 
@@ -92,9 +90,9 @@ public class MathEclipseFacade implements MathLibFacade {
      * @return the result of the plot expression evaluation, or an error message
      */
     @Override
-    public String draw(String expression, String variable, String origin, String bound) {
+    public MathEclipseEvaluation draw(String expression, String variable, String origin, String bound) {
         String validatedExpression = validate(expression);
-        String plotExpression = expressionFactory.Plot(validatedExpression, variable, origin, bound);
+        String plotExpression = Plot(validatedExpression, variable, origin, bound);
         return safeEvaluate(plotExpression); // Do not format plot output
     }
 
@@ -104,48 +102,26 @@ public class MathEclipseFacade implements MathLibFacade {
      * @param expression the expression to evaluate
      * @return the result or formatted error message
      */
-    private String safeEvaluate(String expression) {
+    private MathEclipseEvaluation safeEvaluate(String expression) {
         System.setErr(new PrintStream(errorStream)); // Redirect System.err to capture evaluation warnings or errors
         try {
             String result = rawEvaluate(expression); // Evaluate the expression directly
             String errors = errorStream.toString().trim(); // Read any error messages written during evaluation
 
-            // If no errors, return the result (formatted if requested)
-            return handleErrors(expression, result, errors);
+            System.out.println(errors);
+
+            MathEclipseEvaluation evaluation = new MathEclipseEvaluation(result);
+            evaluation.addErrorsFromErrorStream(errors);
+
+            return evaluation;
         } catch (Exception e) {
-            // Return a formatted error message if evaluation throws an exception
-            return mathEclipseExpressionValidator.formatError("Evaluation failed with exception: " + e.getMessage());
+            throw new MathEclipseEvaluationException(e.getMessage(), e);
         } finally {
             // Restore the original System.err to avoid affecting other code
             System.setErr(System.err);
             errorStream.reset();
             resetEvaluator();
         }
-    }
-
-    private String handleErrors(String originalExpression, String result, String errors) {
-        String cleanedExpression = cleanExpression(originalExpression);
-
-        /* TODO
-        System.out.println("Original Expression: " + originalExpression);
-        System.out.println("Cleaned Expression: " + cleanedExpression);
-        System.out.println("Result: " + result);
-        System.out.println("Error: " + errors);
-         */
-
-        if (errors == null || errors.isBlank()) {
-            return result;
-        }
-
-        if (!cleanedExpression.equals(result)) {
-            return result;
-        }
-
-        return mathEclipseExpressionValidator.formatError(errors);
-    }
-
-    private String cleanExpression(String expression) {
-        return expressionFactory.removeFreezeFromExpression(rawFreezeEvaluate(expression));
     }
 
     /**
@@ -155,12 +131,6 @@ public class MathEclipseFacade implements MathLibFacade {
      */
     private String rawEvaluate(String expression) {
         return mathEclipseEvaluator.evaluate(expression).toString();
-    }
-    
-    private String rawFreezeEvaluate(String expression) {
-        return MathEclipseConfig.buildEvalUtilities(
-                "freeze", 0, 0
-        ).evaluate(expression).toString();
     }
     
     @Override
@@ -175,6 +145,30 @@ public class MathEclipseFacade implements MathLibFacade {
 
     private void resetEvaluator() {
         mathEclipseEvaluator = MathEclipseConfig.buildEvalUtilities();
+    }
+
+    /**
+     * Wraps an expression with Symja's N[] function for numeric approximation.
+     *
+     * @param expression input expression
+     * @param decimals number of decimals
+     * @return wrapped expression
+     */
+    public String N(String expression, int decimals) {
+        return "N[" + expression + ", " + decimals + "]";
+    }
+
+    /**
+     * Builds a Symja-compatible Plot[] expression.
+     *
+     * @param expression the function to plot
+     * @param variable variable of the function
+     * @param origin start of the domain
+     * @param bound end of the domain
+     * @return constructed plot expression
+     */
+    public String Plot(String expression, String variable, String origin, String bound) {
+        return "Plot[" + expression + ", {" + variable + ", " + origin + ", " + bound + "}]";
     }
 
     /**

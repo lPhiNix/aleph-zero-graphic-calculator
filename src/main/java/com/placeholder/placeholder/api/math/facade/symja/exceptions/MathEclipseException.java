@@ -4,4 +4,8 @@ public abstract class MathEclipseException extends RuntimeException {
     public MathEclipseException(String message) {
         super(message);
     }
+
+    public MathEclipseException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
