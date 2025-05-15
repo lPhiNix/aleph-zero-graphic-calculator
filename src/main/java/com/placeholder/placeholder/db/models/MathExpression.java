@@ -1,12 +1,18 @@
 package com.placeholder.placeholder.db.models;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.util.Map;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "math_expression", schema = "mysqldb")
 public class MathExpression {
@@ -31,53 +37,4 @@ public class MathExpression {
 
     @Column(name = "updated_at")
     private Instant updatedAt;
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public String getExpression() {
-        return expression;
-    }
-
-    public void setExpression(String expression) {
-        this.expression = expression;
-    }
-
-    public Map<String, Object> getPointsSnapshot() {
-        return pointsSnapshot;
-    }
-
-    public void setPointsSnapshot(Map<String, Object> pointsSnapshot) {
-        this.pointsSnapshot = pointsSnapshot;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Instant updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
 }
