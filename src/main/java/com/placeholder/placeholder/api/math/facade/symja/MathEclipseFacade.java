@@ -93,7 +93,7 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
     public MathEclipseEvaluation draw(String expression, String variable, String origin, String bound) {
         String validatedExpression = validate(expression);
         String plotExpression = Plot(validatedExpression, variable, origin, bound);
-        return safeEvaluate(plotExpression); // Do not format plot output
+        return safeEvaluate(plotExpression);
     }
 
     /**
@@ -120,7 +120,6 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
             // Restore the original System.err to avoid affecting other code
             System.setErr(System.err);
             errorStream.reset();
-            resetEvaluator();
         }
     }
 
@@ -143,7 +142,7 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
         mathEclipseEvaluator.stopRequest();
     }
 
-    private void resetEvaluator() {
+    public void resetEvaluator() {
         mathEclipseEvaluator = MathEclipseConfig.buildEvalUtilities();
     }
 
