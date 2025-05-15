@@ -148,6 +148,19 @@ public class ApiResponseFactory {
     }
 
     /**
+     * Constructs a successful (HTTP 202 Accepted) API response indicating that the request
+     * has been accepted for processing, but the processing is not yet complete.
+     *
+     * <p>Use this method when the request has been accepted, but the processing is still ongoing.</p>
+
+     * @return A {@link ResponseEntity} representing a successful response (HTTP 202 Accepted)
+     *         without content.
+     */
+    public ResponseEntity<ApiResponse<EmptyContentResponse>> accepted() {
+        return build(AppCode.ACCEPTED, AppCode.ACCEPTED.getSimpleMessage(), new EmptyContentResponse());
+    }
+
+    /**
      * Constructs a successful (HTTP 204 No Content) API response indicating that the request
      * has been successfully processed, but there is no content to return.
      *
