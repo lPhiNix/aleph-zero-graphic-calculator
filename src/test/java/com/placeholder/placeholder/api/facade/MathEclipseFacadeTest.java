@@ -1,13 +1,13 @@
 package com.placeholder.placeholder.api.facade;
 
 import com.placeholder.placeholder.api.math.facade.symja.MathEclipseConfig;
-import com.placeholder.placeholder.api.math.facade.symja.MathEclipseExpressionValidator;
 import com.placeholder.placeholder.api.math.facade.symja.MathEclipseFacade;
+import com.placeholder.placeholder.api.math.facade.symja.exceptions.MathEclipseGrammaticalException;
+import com.placeholder.placeholder.api.math.facade.symja.exceptions.MathEclipseSemanticException;
+import com.placeholder.placeholder.api.math.facade.symja.exceptions.MathEclipseSyntaxException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,15 +32,15 @@ class MathEclipseFacadeTest {
                 testValidate("x^2 + 2*x + 1")
         );
         assertEquals(
-                "Integrate[Sin[x],x]",
+                "Integrate(Sin(x),x)",
                 testValidate("Integrate[Sin[x], x]")
         );
         assertEquals(
-                "D[x^3,x]",
+                "D(x^3,x)",
                 testValidate("D[x^3, x]")
         );
         assertEquals(
-                "Solve[x^2==1,x]",
+                "Solve(x^2==1,x)",
                 testValidate("Solve[x^2 == 1, x]")
         );
     }
@@ -89,9 +89,6 @@ class MathEclipseFacadeTest {
                 "{3,1}"
         ));
         assertTrue(testEvaluate(
-                "PrimeQ[7]", "true"
-        ));
-        assertTrue(testEvaluate(
                 "GCD[18, 24]", "6"
         ));
         assertTrue(testEvaluate(
@@ -100,7 +97,11 @@ class MathEclipseFacadeTest {
     }
 
     private boolean testEvaluate(String expression, String expectedResult) {
-        return mathEclipseFacade.evaluate(expression).getExpressionEvaluated().contains(expectedResult);
+        return rawTestEvaluate(expression).contains(expectedResult);
+    }
+
+    private String rawTestEvaluate(String expression) {
+        return mathEclipseFacade.evaluate(expression).getExpressionEvaluated();
     }
 
     @Test
@@ -118,7 +119,11 @@ class MathEclipseFacadeTest {
     }
 
     private boolean testCalculate(String expression, String expectedResult) {
-        return mathEclipseFacade.calculate(expression, CALCULATION_DECIMALS).getExpressionEvaluated().contains(expectedResult);
+        return rawTestCalculate(expression).contains(expectedResult);
+    }
+
+    private String rawTestCalculate(String expression) {
+        return mathEclipseFacade.calculate(expression, CALCULATION_DECIMALS).getExpressionEvaluated();
     }
 
     @Test
@@ -136,50 +141,81 @@ class MathEclipseFacadeTest {
     }
 
     private boolean testDraw(String expression, String origin, String bound) {
-        return mathEclipseFacade.draw(expression, DRAW_VARIABLE, origin, bound).getExpressionEvaluated().contains()
+        return rawTestDraw(expression, origin, bound).contains(GRAPHICS_SYMBOL);
+    }
+
+    private String rawTestDraw(String expression, String origin, String bound) {
+        return mathEclipseFacade.draw(expression, DRAW_VARIABLE, origin, bound).getExpressionEvaluated();
     }
 
     @Test
     @DisplayName("Validate: expresiones inválidas")
     void testValidateInvalid() {
-        assertTrue(mathEclipseFacade.validate("xx^2 + 1").startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
-        assertTrue(mathEclipseFacade.validate("Plot[Sin[x], {x, -1, 1}]").startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
-        assertTrue(mathEclipseFacade.validate("Integrate[Sin[x]").startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
+        assertThrows(
+                MathEclipseGrammaticalException.class,
+                () -> testValidate("xx^2 + 1")
+        );
+        assertThrows(
+                MathEclipseSemanticException.class,
+                () -> testValidate("Plot[Sin[x], {x, -1, 1}]")
+        );
+        assertThrows(
+                MathEclipseSyntaxException.class,
+                () -> testValidate("Integrate[Sin[x]")
+        );
     }
-
-
 
     @Test
     @DisplayName("Evaluate: expresiones inválidas")
     void testEvaluateInvalid() {
-        assertTrue(mathEclipseFacade.evaluate("velocity + 3").startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
-        assertTrue(mathEclipseFacade.evaluate("Minimize[x^2 + 1, x]").startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
-        assertTrue(mathEclipseFacade.evaluate("Solve[x^2 == 1, ]").startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
+        assertThrows(
+                MathEclipseGrammaticalException.class,
+                () -> rawTestEvaluate("velocity + 3")
+        );
+        assertThrows(
+                MathEclipseSemanticException.class,
+                () -> rawTestEvaluate("Minimize[x^2 + 1, x]")
+        );
+        assertThrows(
+                MathEclipseSyntaxException.class,
+                () -> rawTestEvaluate("Solve[x^2 = 1, ")
+        );
     }
 
     @Test
     @DisplayName("Calculate: expresiones inválidas")
     void testCalculateInvalid() {
-        assertTrue(mathEclipseFacade.calculate("Plot[Sin[x]]", 5).startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
-        assertTrue(mathEclipseFacade.calculate("x^^2", 10).startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
-        assertTrue(mathEclipseFacade.calculate("Sqrt[longvar]", 8).startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
+        assertThrows(
+                MathEclipseSemanticException.class,
+                () -> rawTestCalculate("Plot[Sin[x]]")
+        );
+        assertThrows(
+                MathEclipseSyntaxException.class,
+                () -> rawTestCalculate("x^^2")
+        );
+        assertThrows(
+                MathEclipseGrammaticalException.class,
+                () -> rawTestCalculate("Sqrt[longvar]")
+        );
     }
 
     @Test
     @DisplayName("Draw: expresiones inválidas")
     void testDrawInvalid() {
-        assertTrue(mathEclipseFacade.draw("x^2 + speed", "x", "-5", "5").startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
-        assertTrue(mathEclipseFacade.draw("Sum[1/x, {x, 1, 10}]", "x", "1", "10").startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
-        assertTrue(mathEclipseFacade.draw("D[x^2,, x]", "x", "-2", "2").startsWith(MathEclipseExpressionValidator.ERROR_SYMBOL));
-    }
+        assertThrows(
+                MathEclipseGrammaticalException.class,//TODO
+                () -> rawTestDraw("x^2 + speed", "-5", "5")
+        );
 
-    private <T extends Throwable> boolean testThrows(Class<T> exceptionClass, Consumer<String> operation) {
-        try {
-            operation.accept();
-            return false;
-        } catch (Throwable e) {
-            return exceptionClass.isInstance(e);
-        }
+        assertThrows(
+                MathEclipseSemanticException.class,
+                () -> rawTestDraw("Sum[1/x, {x, 1, 10}]", "1", "10")
+        );
+
+        assertThrows(
+                MathEclipseSyntaxException.class,
+                () -> rawTestDraw("D[x^2,, x]", "-2", "2")
+        );
     }
 
     @Test
@@ -188,7 +224,7 @@ class MathEclipseFacadeTest {
         Thread evaluationThread = new Thread(() -> {
             try {
                 String impossibleExpression = "Integrate[log(sin(x^2 + cos(x))) / (1 + x^6), x]";
-                String result = mathEclipseFacade.evaluate(impossibleExpression);
+                String result = mathEclipseFacade.evaluate(impossibleExpression).getExpressionEvaluated();
                 fail("Expected stopRequest to interrupt the evaluation, but got: " + result);
             } catch (Exception e) {
                 e.printStackTrace();

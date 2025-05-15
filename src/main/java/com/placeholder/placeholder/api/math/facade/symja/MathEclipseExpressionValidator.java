@@ -31,9 +31,6 @@ import java.util.regex.Pattern;
 @Component
 public class MathEclipseExpressionValidator {
 
-    // Special prefix used to indicate an error in expression validation.
-    public static final String ERROR_SYMBOL = "ERROR";
-
     // Pattern to detect symbols (e.g. variables and constants) in the expression.
     private static final Pattern SYMBOL_PATTERN = Pattern.compile("\\b([a-zA-Z][a-zA-Z0-9]*)\\b");
 
@@ -50,7 +47,7 @@ public class MathEclipseExpressionValidator {
             "gamma", "zeta", "erf", "fresnelc", "c",
             "d", "diff", "integrate", "taylor", "solve", "limit", "dsolve", "logicalexpand",
             "dot", "cross", "norm", "normalize", "vectorangle", "projection",
-            "primeq", "eigenvalues", "inverse", "transpose", "gcd", "lcm",
+            "eigenvalues", "inverse", "transpose", "gcd", "lcm",
             "simplify", "expand", "sqrt", "exp", "log", "log10", "log2", "abs",
             "sin", "cos", "tan", "csc", "cot", "sec",
             "arcsin", "arccos", "arctan", "arccsc", "arccot", "arcsec",

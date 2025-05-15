@@ -27,7 +27,6 @@ class MathEclipseFacadeBenchmarkTest {
         mathEclipseFacade = new MathEclipseFacade(
                 evaluator,
                 new MathEclipseExpressionValidator(),
-                new MathEclipseExpressionFactory(),
                 laTeXParser
         );
     }
@@ -141,10 +140,6 @@ class MathEclipseFacadeBenchmarkTest {
     @Test void benchmarkMatrixEigen() { benchmark(50, () -> mathEclipseFacade.evaluate("Eigenvalues[{{2, 1}, {1, 2}}]")); }
 
     // Boolean Functions
-
-    /** 0,048789 ms, ~0,00005 seg */
-    @DisplayName("evaluate: PrimeQ[97]")
-    @Test void benchmarkPrimeQ() { benchmark(10, () -> mathEclipseFacade.evaluate("PrimeQ[97]")); }
 
     /** 0,065142 ms, ~0,00007 seg */
     @DisplayName("evaluate: GCD[252, 105]")
