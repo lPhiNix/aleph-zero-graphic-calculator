@@ -1,11 +1,9 @@
 package com.placeholder.placeholder.api.math.facade.symja;
 
-
 import com.placeholder.placeholder.api.math.facade.MathLibFacade;
 import com.placeholder.placeholder.api.math.facade.symja.exceptions.MathEclipseGrammaticalException;
 import com.placeholder.placeholder.api.math.facade.symja.exceptions.MathEclipseSemanticException;
 import com.placeholder.placeholder.api.math.facade.symja.exceptions.MathEclipseSyntaxException;
-import org.matheclipse.core.eval.EvalEngine;
 import org.matheclipse.core.eval.ExprEvaluator;
 import org.matheclipse.core.interfaces.IExpr;
 import org.springframework.stereotype.Component;

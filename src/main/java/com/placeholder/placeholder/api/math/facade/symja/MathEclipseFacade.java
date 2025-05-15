@@ -108,7 +108,7 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
             String result = rawEvaluate(expression); // Evaluate the expression directly
             String errors = errorStream.toString().trim(); // Read any error messages written during evaluation
 
-            System.out.println(errors);
+            System.out.println(errors); // TODO
 
             MathEclipseEvaluation evaluation = new MathEclipseEvaluation(result);
             evaluation.addErrorsFromErrorStream(errors);
