@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 
 /**
  * Standard DTO model for sending API responses with metadata
- * @param status HTTP status code (200, 404, 403...)
  * @param code APP status code (OK/SUCCESS, RESOURCE_NOT_FOUND, BAD_REQUEST…)
  * @param message optional message
  * @param timestamp timestamp containing the exact date and time of the creation
@@ -21,17 +20,12 @@ import java.time.LocalDateTime;
 public record ApiResponse<T extends MessageContent>(
         @NotNull String code,
         String message,
-        LocalDateTime timestamp,
         String path,
         T content
 )
 {
     public ApiResponse(AppCode code, String message, String path, T content) {
-        this(code.value(), message, LocalDateTime.now(), path, content);
-    }
-
-    public ApiResponse(String code, String message, String path, T content) {
-        this(code, message, LocalDateTime.now(), path, content);
+        this(code.value(), message, path, content);
     }
 
     @Override
@@ -39,7 +33,6 @@ public record ApiResponse<T extends MessageContent>(
         return "ApiMessage{" +
                 ", code='" + code + '\'' +
                 ", message='" + message + '\'' +
-                ", timestamp=" + timestamp +
                 ", path='" + path + '\'' +
                 ", content=" + content +
                 '}';

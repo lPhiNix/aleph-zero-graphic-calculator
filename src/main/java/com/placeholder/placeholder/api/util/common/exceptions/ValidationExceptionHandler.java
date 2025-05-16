@@ -46,10 +46,10 @@ public class ValidationExceptionHandler {
      * Handles {@link MethodArgumentNotValidException} thrown when method arguments fail validation.
      *
      * @param ex      the exception instance
-     * @return a standardized {@link ApiResponse} containing validation error details
+     * @return a standardized {@link ErrorResponse} containing validation error details
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<ErrorResponse>> handleMethodArgumentNotValidException(
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
             MethodArgumentNotValidException ex
     ) {
         List<ValidationErrorDetail> validationErrorDetails = ApiResponseUtils.getErrorDetails(ex.getBindingResult(), ErrorCategory.VALIDATION);
@@ -63,10 +63,10 @@ public class ValidationExceptionHandler {
      * Handles {@link ConstraintViolationException} thrown when validation constraints are violated.
      *
      * @param ex      the exception instance
-     * @return a standardized {@link ApiResponse} containing constraint violation details
+     * @return a standardized {@link ErrorResponse} containing constraint violation details
      */
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ApiResponse<ErrorResponse>> handleConstraintViolationException(
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(
             ConstraintViolationException ex
     ) {
         List<ValidationErrorDetail> validationErrorDetails = ApiResponseUtils.getErrorDetails(ex.getConstraintViolations(), ErrorCategory.VALIDATION);
@@ -80,10 +80,10 @@ public class ValidationExceptionHandler {
      * Handles {@link BindException} thrown when binding request parameters to an object fails.
      *
      * @param ex      the exception instance
-     * @return a standardized {@link ApiResponse} containing data binding error details
+     * @return a standardized {@link ErrorResponse} containing data binding error details
      */
     @ExceptionHandler(BindException.class)
-    public ResponseEntity<ApiResponse<ErrorResponse>> handleBindException(
+    public ResponseEntity<ErrorResponse> handleBindException(
             BindException ex
     ) {
         List<ValidationErrorDetail> validationErrorDetails = ApiResponseUtils.getErrorDetails(ex.getBindingResult(), ErrorCategory.VALIDATION);
@@ -97,10 +97,10 @@ public class ValidationExceptionHandler {
      * Handles {@link MissingServletRequestParameterException} thrown when a required request parameter is missing.
      *
      * @param ex      the exception instance
-     * @return a standardized {@link ApiResponse} containing information about the missing parameter
+     * @return a standardized {@link ErrorResponse} containing information about the missing parameter
      */
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<ApiResponse<ErrorResponse>> handleMissingServletRequestParameterException(
+    public ResponseEntity<ErrorResponse> handleMissingServletRequestParameterException(
             MissingServletRequestParameterException ex
     ) {
         List<ValidationErrorDetail> detail = List.of(new ValidationErrorDetail(ErrorCategory.VALIDATION, ex.getParameterName(), ex.getMessage(), null));

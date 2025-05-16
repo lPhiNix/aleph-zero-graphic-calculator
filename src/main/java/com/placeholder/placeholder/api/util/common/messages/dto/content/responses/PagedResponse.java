@@ -1,4 +1,6 @@
-package com.placeholder.placeholder.api.util.common.messages.dto.content;
+package com.placeholder.placeholder.api.util.common.messages.dto.content.responses;
+
+import com.placeholder.placeholder.api.util.common.messages.dto.content.MessageContent;
 
 /**
  * DTO model for creating a response with paged results

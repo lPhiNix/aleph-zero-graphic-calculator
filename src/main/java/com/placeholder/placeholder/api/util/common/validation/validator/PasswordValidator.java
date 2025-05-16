@@ -1,11 +1,18 @@
 package com.placeholder.placeholder.api.util.common.validation.validator;
 
-import com.placeholder.placeholder.api.util.common.validation.conditions.ValidPassword;
+import com.placeholder.placeholder.api.util.common.validation.annotations.ValidPassword;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 /**
- * Custom {@link ConstraintValidator} to validate user passwords
+ * Custom {@link jakarta.validation.ConstraintValidator} to validate user passwords.
+ * This validator checks if a given password meets the following criteria:
+ * <ul>
+ * <li>Contains at least one uppercase letter.</li>
+ * <li>Contains at least one lowercase letter.</li>
+ * <li>Contains at least one digit.</li>
+ * <li>Has a length between 8 and 255 characters (inclusive).</li>
+ * </ul>
  */
 public class PasswordValidator implements ConstraintValidator<ValidPassword, String> {
     private static final String UPPERCASE_REGEX = ".*[A-Z].*";
@@ -15,6 +22,13 @@ public class PasswordValidator implements ConstraintValidator<ValidPassword, Str
     private static final int MIN_LENGTH = 8;
     private static final int MAX_LENGTH = 255;
 
+    /**
+     * Checks if the given password is valid according to the defined criteria.
+     *
+     * @param password The password to validate.
+     * @param context  Context in which the constraint is evaluated.
+     * @return {@code true} if the password is valid, {@code false} otherwise.
+     */
     @Override
     public boolean isValid(String password, ConstraintValidatorContext context) {
         if (password == null) {
@@ -23,7 +37,7 @@ public class PasswordValidator implements ConstraintValidator<ValidPassword, Str
 
         boolean valid = true;
 
-        //Clears previous messages
+        // Clears previously added constraint violations to allow for multiple error messages.
         context.disableDefaultConstraintViolation();
 
         if (!password.matches(UPPERCASE_REGEX)) {
@@ -45,7 +59,7 @@ public class PasswordValidator implements ConstraintValidator<ValidPassword, Str
         }
 
         if (password.length() < MIN_LENGTH || password.length() > MAX_LENGTH) {
-            context.buildConstraintViolationWithTemplate("Password must be at least 8 characters long and less than 255.")
+            context.buildConstraintViolationWithTemplate("Password must be at least " + MIN_LENGTH + " characters long and less than " + MAX_LENGTH + ".")
                     .addConstraintViolation();
             valid = false;
         }
