@@ -1,9 +1,16 @@
 package com.placeholder.placeholder.api.math.services;
 
+import com.placeholder.placeholder.api.math.dto.request.MathExpressionRequest;
+import com.placeholder.placeholder.api.math.dto.request.MathExpression;
+import com.placeholder.placeholder.api.math.dto.response.MathExpressionEvaluation;
 import com.placeholder.placeholder.api.math.dto.response.ExpressionResultResponse;
-import com.placeholder.placeholder.api.math.facade.MathExpressionEvaluation;
+import com.placeholder.placeholder.api.math.dto.response.MathEvaluation;
 import com.placeholder.placeholder.api.math.facade.MathLibFacade;
+import com.placeholder.placeholder.api.math.facade.symja.MathEclipseEvaluation;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MathExpressionService {
@@ -14,19 +21,13 @@ public class MathExpressionService {
         this.mathEclipse = mathEclipse;
     }
 
-    public ExpressionResultResponse getEvaluation(String expression) {
-        return null;
-    }
 
-    public ExpressionResultResponse evaluate(String expression) {
-        MathExpressionEvaluation evaluation = mathEclipse.evaluate(expression);
-        return new ExpressionResultResponse(
-                evaluation.getExpressionEvaluated(),
-                evaluation.getEvaluationProblems().orElse(null)
-        );
-    }
 
-    public String calculate(String expression, int decimals) {
-        return mathEclipse.calculate(expression, decimals).getExpressionEvaluated();
+    /**
+     * A functional interface for math operations on expressions.
+     */
+    @FunctionalInterface
+    public interface MathOperation {
+        MathEvaluation compute(MathExpression expression);
     }
 }
