@@ -1,0 +1,18 @@
+{
+  "properties": [
+    {
+      "name": "jwt.provider.issuer-uri",
+      "type": "java.lang.String",
+      "description": "Uri for the defined JWT provider platform."
+    },
+    {
+      "name": "jwt.provider",
+      "type": "java.lang.String",
+      "description": "What JWT provider to use: external, manual."
+    },
+    {
+      "name": "jwt.secret",
+      "type": "java.lang.String",
+      "description": "Secret key to generate JWT tokens, if empty a random one will be generated."
+    }
+  ] }

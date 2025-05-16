@@ -28,6 +28,10 @@ public class UserService {
                 .orElseThrow(() -> new UsernameNotFoundException(username));
     }
 
+    public User findUserByEmail(String email) {
+        return userRepository.findUserByEmail(email).orElseThrow(() -> new UsernameNotFoundException(email));
+    }
+
     public UserDto createUser(UserCreationRequest userCreationRequest) {
         User user = new User();
         user.setEmail(userCreationRequest.email());

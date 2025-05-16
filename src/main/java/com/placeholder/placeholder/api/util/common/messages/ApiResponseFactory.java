@@ -258,4 +258,16 @@ public class ApiResponseFactory {
         ErrorResponse error = buildError(title, summary, details);
         return ResponseEntity.status(code.getStatus()).body(error);
     }
+
+    public ResponseEntity<ErrorResponse> forbidden() {
+        AppCode code = AppCode.FORBIDDEN;
+        String message = "Not enough permissions to perform this request";
+        return error(code, code.getSimpleMessage(), message);
+    }
+
+    public ResponseEntity<ErrorResponse> unauthorized() {
+        AppCode code = AppCode.UNAUTHORIZED;
+        String message = "Not authorized to access this resource";
+        return error(code, code.getSimpleMessage(), message);
+    }
 }
