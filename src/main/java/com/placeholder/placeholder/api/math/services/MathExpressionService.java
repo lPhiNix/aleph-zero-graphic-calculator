@@ -1,11 +1,9 @@
 package com.placeholder.placeholder.api.math.services;
 
-import com.placeholder.placeholder.api.math.dto.ExpressionResultResponse;
+import com.placeholder.placeholder.api.math.dto.response.ExpressionResultResponse;
 import com.placeholder.placeholder.api.math.facade.MathExpressionEvaluation;
 import com.placeholder.placeholder.api.math.facade.MathLibFacade;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
 
 @Service
 public class MathExpressionService {

@@ -22,11 +22,28 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MathEclipseConfig {
 
+    /**
+     * Creates and configures a {@link MathEclipseFacade} instance using the core components.
+     * This method builds the facade by using utility methods to initialize necessary dependencies.
+     *
+     * @return an instance of {@code MathEclipseFacade} with required components
+     */
     public static MathEclipseFacade buildMathEclipseFacade() {
         return new MathEclipseFacade(
                 buildEvalUtilities(),
                 new MathEclipseExpressionValidator(),
                 buildTeXFormFactory()
+        );
+    }
+
+    public static MathEclipseFacade resetMathEclipseFacade(
+            MathEclipseExpressionValidator expressionValidator,
+            TeXFormFactory laTeXFactory
+    ) {
+        return new MathEclipseFacade(
+                buildEvalUtilities(),
+                expressionValidator,
+                laTeXFactory
         );
     }
 
@@ -48,14 +65,33 @@ public class MathEclipseConfig {
         return buildEvalEngine();
     }
 
+    /**
+     * Builds a default {@link EvalEngine} with a default session ID.
+     *
+     * @return a new {@code EvalEngine} instance
+     */
     public static EvalEngine buildEvalEngine() {
         return buildEvalEngine("default");
     }
 
+    /**
+     * Builds a {@link EvalEngine} with a specified session ID.
+     *
+     * @param sessionID the unique ID for the evaluation session
+     * @return a new {@code EvalEngine} instance
+     */
     public static EvalEngine buildEvalEngine(String sessionID) {
         return buildEvalEngine(sessionID, 100, 100);
     }
 
+    /**
+     * Builds a fully customized {@link EvalEngine} with specified parameters.
+     *
+     * @param sessionID      the unique ID for the evaluation session
+     * @param recursionLimit the maximum allowed recursion depth
+     * @param iterationLimit the maximum allowed iteration depth
+     * @return a new {@code EvalEngine} instance
+     */
     public static EvalEngine buildEvalEngine(String sessionID, int recursionLimit, int iterationLimit) {
         return new EvalEngine(
                 sessionID,
@@ -85,18 +121,43 @@ public class MathEclipseConfig {
         return buildEvalUtilities(engine);
     }
 
+    /**
+     * Builds a default {@link EvalUtilities} instance.
+     *
+     * @return a new {@code EvalUtilities} instance
+     */
     public static EvalUtilities buildEvalUtilities() {
         return new EvalUtilities(buildEvalEngine(), false, false);
     }
 
+    /**
+     * Builds an {@link EvalUtilities} instance with a specific {@link EvalEngine}.
+     *
+     * @param engine the evaluation engine to use
+     * @return a configured {@code EvalUtilities} instance
+     */
     public static EvalUtilities buildEvalUtilities(EvalEngine engine) {
         return new EvalUtilities(engine, false, false);
     }
 
+    /**
+     * Builds an {@link EvalUtilities} instance with a specific session ID.
+     *
+     * @param sessionID the session ID for evaluation context
+     * @return a configured {@code EvalUtilities} instance
+     */
     public static EvalUtilities buildEvalUtilities(String sessionID) {
         return new EvalUtilities(buildEvalEngine(sessionID), false, false);
     }
 
+    /**
+     * Builds an {@link EvalUtilities} instance with specified session ID and limits.
+     *
+     * @param sessionID      the session ID for evaluation context
+     * @param recursionLimit the recursion depth limit
+     * @param iterationLimit the iteration depth limit
+     * @return a configured {@code EvalUtilities} instance
+     */
     public static EvalUtilities buildEvalUtilities(String sessionID, int recursionLimit, int iterationLimit) {
         return new EvalUtilities(buildEvalEngine(sessionID, recursionLimit, iterationLimit), false, false);
     }
@@ -104,8 +165,8 @@ public class MathEclipseConfig {
     /**
      * Creates the LaTeX form converter used to render Symja expressions to LaTeX.
      * <p>
-     * The {@code TeXFormFactory} provides methods to convert symbolic expressions to LaTeX
-     * It has no internal state and can be reused safely
+     * The {@code TeXFormFactory} provides methods to convert symbolic expressions to LaTeX.
+     * It has no internal state and can be reused safely.
      *
      * @return a new {@code TeXFormFactory} instance
      */
@@ -114,6 +175,11 @@ public class MathEclipseConfig {
         return buildTeXFormFactory();
     }
 
+    /**
+     * Builds a default {@link TeXFormFactory} instance.
+     *
+     * @return a new {@code TeXFormFactory} instance
+     */
     public static TeXFormFactory buildTeXFormFactory() {
         return new TeXFormFactory();
     }

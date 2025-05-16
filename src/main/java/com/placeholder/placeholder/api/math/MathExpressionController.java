@@ -1,7 +1,7 @@
 package com.placeholder.placeholder.api.math;
 
-import com.placeholder.placeholder.api.math.dto.ExpressionRequest;
-import com.placeholder.placeholder.api.math.dto.ExpressionResultResponse;
+import com.placeholder.placeholder.api.math.dto.request.ExpressionRequest;
+import com.placeholder.placeholder.api.math.dto.response.ExpressionResultResponse;
 import com.placeholder.placeholder.api.math.services.MathExpressionService;
 import com.placeholder.placeholder.api.util.common.messages.ApiResponseFactory;
 import com.placeholder.placeholder.api.util.common.messages.dto.ApiResponse;
