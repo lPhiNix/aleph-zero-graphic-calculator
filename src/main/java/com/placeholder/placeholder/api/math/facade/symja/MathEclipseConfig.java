@@ -36,6 +36,25 @@ public class MathEclipseConfig {
         );
     }
 
+    /**
+     * Recreates and resets the {@link MathEclipseFacade} with a new {@link EvalUtilities} instance
+     * while preserving the provided expression validator and LaTeX factory.
+     * <p>
+     * This method is useful for resetting the symbolic evaluation context without losing
+     * previously configured validation and formatting settings.
+     * <p>
+     * Parameters:
+     * <ul>
+     *     <li>{@code expressionValidator} : the validator responsible for ensuring the syntax
+     *     of mathematical expressions is correct</li>
+     *     <li>{@code laTeXFactory} : the factory responsible for converting symbolic expressions
+     *     to LaTeX format</li>
+     * </ul>
+     *
+     * @param expressionValidator the validator for expression syntax
+     * @param laTeXFactory        the factory for LaTeX conversion
+     * @return a new {@code MathEclipseFacade} instance with a fresh {@code EvalUtilities} object
+     */
     public static MathEclipseFacade resetMathEclipseFacade(
             MathEclipseExpressionValidator expressionValidator,
             TeXFormFactory laTeXFactory
