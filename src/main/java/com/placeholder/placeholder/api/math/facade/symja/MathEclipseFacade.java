@@ -63,7 +63,7 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
     @Override
     public MathEclipseEvaluation evaluate(String expression) throws MathEclipseEvaluationException {
         String validatedExpression = validate(expression);
-        return safeEvaluate(validatedExpression);
+        return safeEvaluation(validatedExpression);
     }
 
     /**
@@ -77,7 +77,7 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
     public MathEclipseEvaluation calculate(String expression, int decimals) throws MathEclipseEvaluationException {
         String validatedExpression = validate(expression);
         String numericExpression = N(validatedExpression, decimals);
-        return safeEvaluate(numericExpression);
+        return safeEvaluation(numericExpression);
     }
 
     /**
@@ -93,7 +93,7 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
     public MathEclipseEvaluation draw(String expression, String variable, String origin, String bound) throws MathEclipseEvaluationException {
         String validatedExpression = validate(expression);
         String plotExpression = Plot(validatedExpression, variable, origin, bound);
-        return safeEvaluate(plotExpression);
+        return safeEvaluation(plotExpression);
     }
 
     /**
@@ -102,7 +102,7 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
      * @param expression the expression to evaluate
      * @return the result or formatted error message
      */
-    private MathEclipseEvaluation safeEvaluate(String expression) throws MathEclipseEvaluationException {
+    private MathEclipseEvaluation safeEvaluation(String expression) throws MathEclipseEvaluationException {
         System.setErr(new PrintStream(errorStream)); // Redirect System.err to capture evaluation warnings or errors
         try {
             String result = rawEvaluate(expression); // Evaluate the expression directly
