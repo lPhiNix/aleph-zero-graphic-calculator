@@ -2,7 +2,7 @@ package com.placeholder.placeholder.api.math.dto.response;
 
 import java.util.List;
 
-public record MathExpressionEvaluation(
+public record MathExpressionEvaluationDto(
         String expression,
-        List<MathEvaluation> evaluations
+        List<MathEvaluationDto> evaluations
 ) {}

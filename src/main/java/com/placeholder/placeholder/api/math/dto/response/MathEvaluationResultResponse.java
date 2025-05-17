@@ -4,6 +4,6 @@ import com.placeholder.placeholder.api.util.common.messages.dto.content.MessageC
 
 import java.util.List;
 
-public record ExpressionResultResponse(
-    List<MathExpressionEvaluation> expressionEvaluations
+public record MathEvaluationResultResponse(
+    List<MathExpressionEvaluationDto> expressionEvaluations
 ) implements MessageContent {}

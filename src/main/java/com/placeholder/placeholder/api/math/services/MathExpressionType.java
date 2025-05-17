@@ -7,6 +7,5 @@ public enum MathExpressionType {
     NUMERIC,    // integer, rational, decimal, or complex number without variables (e.g., 42, 3.14, 1/2, 5+3i)
     MATRIX,     // m x n matrix using nested braces (e.g., {{1, 2}, {3, 4}})
     VECTOR,     // One-dimensional vector using braces (e.g., {1, 2, 3})
-    ERROR,
     NONE
 }

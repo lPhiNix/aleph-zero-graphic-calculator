@@ -1,7 +1,7 @@
 package com.placeholder.placeholder.api.math;
 
-import com.placeholder.placeholder.api.math.dto.request.MathExpressionRequest;
-import com.placeholder.placeholder.api.math.dto.response.ExpressionResultResponse;
+import com.placeholder.placeholder.api.math.dto.request.MathEvaluationRequest;
+import com.placeholder.placeholder.api.math.dto.response.MathEvaluationResultResponse;
 import com.placeholder.placeholder.api.math.services.MathExpressionService;
 import com.placeholder.placeholder.api.util.common.messages.ApiResponseFactory;
 import com.placeholder.placeholder.api.util.common.messages.dto.ApiResponse;
@@ -23,12 +23,9 @@ public class MathExpressionController {
         this.apiResponseFactory = apiResponseFactory;
     }
 
-    /*
     @PostMapping("/evaluate")
-    public ResponseEntity<ApiResponse<ExpressionResultResponse>> evaluate(@RequestBody MathExpressionRequest mathExpressionRequest) {
-        ExpressionResultResponse response = service.evaluate(mathExpressionRequest.expression());
+    public ResponseEntity<ApiResponse<MathEvaluationResultResponse>> evaluate(@RequestBody MathEvaluationRequest mathExpressionRequest) {
+        MathEvaluationResultResponse response = service.evaluation(mathExpressionRequest);
         return apiResponseFactory.ok(response);
     }
-
-     */
 }

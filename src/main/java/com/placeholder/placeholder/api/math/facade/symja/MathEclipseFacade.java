@@ -61,7 +61,7 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
      * @return the result of the evaluation or a formatted error message
      */
     @Override
-    public MathEclipseEvaluation evaluate(String expression) {
+    public MathEclipseEvaluation evaluate(String expression) throws MathEclipseEvaluationException {
         String validatedExpression = validate(expression);
         return safeEvaluate(validatedExpression);
     }
@@ -74,7 +74,7 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
      * @return the evaluated numeric result or a formatted error message
      */
     @Override
-    public MathEclipseEvaluation calculate(String expression, int decimals) {
+    public MathEclipseEvaluation calculate(String expression, int decimals) throws MathEclipseEvaluationException {
         String validatedExpression = validate(expression);
         String numericExpression = N(validatedExpression, decimals);
         return safeEvaluate(numericExpression);
@@ -90,7 +90,7 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
      * @return the result of the plot expression evaluation, or an error message
      */
     @Override
-    public MathEclipseEvaluation draw(String expression, String variable, String origin, String bound) {
+    public MathEclipseEvaluation draw(String expression, String variable, String origin, String bound) throws MathEclipseEvaluationException {
         String validatedExpression = validate(expression);
         String plotExpression = Plot(validatedExpression, variable, origin, bound);
         return safeEvaluate(plotExpression);
@@ -102,7 +102,7 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
      * @param expression the expression to evaluate
      * @return the result or formatted error message
      */
-    private MathEclipseEvaluation safeEvaluate(String expression) {
+    private MathEclipseEvaluation safeEvaluate(String expression) throws MathEclipseEvaluationException {
         System.setErr(new PrintStream(errorStream)); // Redirect System.err to capture evaluation warnings or errors
         try {
             String result = rawEvaluate(expression); // Evaluate the expression directly

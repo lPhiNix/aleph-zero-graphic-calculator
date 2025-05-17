@@ -6,7 +6,7 @@ import com.placeholder.placeholder.api.math.services.MathExpressionType;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record MathEvaluation(
+public record MathEvaluationDto(
         MathExpressionType expressionType,
         String evaluation,
         List<String> evaluationProblems
