@@ -1,8 +1,8 @@
-package com.placeholder.placeholder.api.util.common.validation.validator;
+package com.placeholder.placeholder.api.user.validation.validator;
 
 import com.placeholder.placeholder.db.models.UserRole;
 import com.placeholder.placeholder.db.repositories.UserRoleRepository;
-import com.placeholder.placeholder.api.util.common.validation.annotations.ValidRole;
+import com.placeholder.placeholder.api.user.validation.annotations.ValidRole;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Autowired;

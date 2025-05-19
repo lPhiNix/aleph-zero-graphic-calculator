@@ -1,13 +1,10 @@
 package com.placeholder.placeholder.api.facade;
 
 import com.placeholder.placeholder.api.math.facade.symja.MathEclipseConfig;
-import com.placeholder.placeholder.api.math.facade.symja.MathEclipseExpressionValidator;
 import com.placeholder.placeholder.api.math.facade.symja.MathEclipseFacade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.matheclipse.core.eval.EvalUtilities;
-import org.matheclipse.core.form.tex.TeXFormFactory;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -21,14 +18,7 @@ class MathEclipseFacadeBenchmarkTest {
 
     @BeforeEach
     void setUp() {
-        EvalUtilities evaluator = MathEclipseConfig.buildEvalUtilities("benchmark");
-        TeXFormFactory laTeXParser = MathEclipseConfig.buildTeXFormFactory();
-
-        mathEclipseFacade = new MathEclipseFacade(
-                evaluator,
-                new MathEclipseExpressionValidator(),
-                laTeXParser
-        );
+        mathEclipseFacade = MathEclipseConfig.buildMathEclipseFacade();
     }
 
     // BENCHMARK (ms and seg per ONE iteration)

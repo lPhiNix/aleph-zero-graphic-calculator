@@ -31,7 +31,6 @@ public class MathEclipseConfig {
     public static MathEclipseFacade buildMathEclipseFacade() {
         return new MathEclipseFacade(
                 buildEvalUtilities(),
-                new MathEclipseExpressionValidator(),
                 buildTeXFormFactory()
         );
     }
@@ -56,12 +55,10 @@ public class MathEclipseConfig {
      * @return a new {@code MathEclipseFacade} instance with a fresh {@code EvalUtilities} object
      */
     public static MathEclipseFacade resetMathEclipseFacade(
-            MathEclipseExpressionValidator expressionValidator,
             TeXFormFactory laTeXFactory
     ) {
         return new MathEclipseFacade(
                 buildEvalUtilities(),
-                expressionValidator,
                 laTeXFactory
         );
     }

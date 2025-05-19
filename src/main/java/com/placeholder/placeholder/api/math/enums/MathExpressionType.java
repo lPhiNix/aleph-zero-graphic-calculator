@@ -1,4 +1,4 @@
-package com.placeholder.placeholder.api.math.services;
+package com.placeholder.placeholder.api.math.enums;
 
 public enum MathExpressionType {
     FUNCTION,   // It includes at least one variable (e.g., x^2 + sin(x))

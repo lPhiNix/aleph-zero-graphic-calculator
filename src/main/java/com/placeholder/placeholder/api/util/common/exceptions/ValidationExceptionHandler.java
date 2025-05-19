@@ -56,7 +56,7 @@ public class ValidationExceptionHandler {
         return apiResponseFactory.validationError(
                 "Validation failed for one or more arguments, check your request.",
                 validationErrorDetails
-                );
+        );
     }
 
     /**

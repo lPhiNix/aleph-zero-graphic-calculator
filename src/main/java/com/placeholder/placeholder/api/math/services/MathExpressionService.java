@@ -6,6 +6,7 @@ import com.placeholder.placeholder.api.math.dto.request.MathExpressionDto;
 import com.placeholder.placeholder.api.math.dto.response.MathEvaluationDto;
 import com.placeholder.placeholder.api.math.dto.response.MathEvaluationResultResponse;
 import com.placeholder.placeholder.api.math.dto.response.MathExpressionEvaluationDto;
+import com.placeholder.placeholder.api.math.enums.MathExpressionType;
 import com.placeholder.placeholder.api.math.facade.MathExpressionEvaluation;
 import com.placeholder.placeholder.api.math.facade.MathLibFacade;
 import org.springframework.stereotype.Service;

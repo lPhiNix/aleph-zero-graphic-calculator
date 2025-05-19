@@ -1,7 +1,6 @@
 package com.placeholder.placeholder.api.math.facade.symja;
 
 import com.placeholder.placeholder.api.math.facade.MathLibFacade;
-import com.placeholder.placeholder.api.math.facade.symja.exceptions.MathEclipseEvaluationException;
 import org.matheclipse.core.eval.EvalUtilities;
 import org.matheclipse.core.eval.ExprEvaluator;
 import org.matheclipse.core.form.tex.TeXFormFactory;
@@ -21,37 +20,22 @@ import java.io.PrintStream;
  * library's native validator (syntactic) and its own validator (grammatical and semantic).
  *
  * @see MathLibFacade
- * @see MathEclipseExpressionValidator
  */
 @Component
 public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
 
     private EvalUtilities mathEclipseEvaluator; // Symja native expression evaluator
-    private final MathEclipseExpressionValidator mathEclipseExpressionValidator; // Custom validator
     private final TeXFormFactory teXParser; // LaTeX parser
 
     // Buffer to capture any errors printed to System.err during evaluation
     private final ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
 
     public MathEclipseFacade(
-            EvalUtilities mathEclipseEvaluator, 
-            MathEclipseExpressionValidator mathEclipseExpressionValidator,
+            EvalUtilities mathEclipseEvaluator,
             TeXFormFactory teXParser
     ) {
         this.mathEclipseEvaluator = mathEclipseEvaluator;
-        this.mathEclipseExpressionValidator = mathEclipseExpressionValidator;
         this.teXParser = teXParser;
-    }
-
-    /**
-     * Validates a mathematical expression using the custom validator.
-     *
-     * @param expression the input expression
-     * @return the original expression if valid, or an error message if invalid
-     */
-    @Override
-    public String validate(String expression) {
-        return mathEclipseExpressionValidator.validate(expression);
     }
 
     /**
@@ -61,9 +45,9 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
      * @return the result of the evaluation or a formatted error message
      */
     @Override
-    public MathEclipseEvaluation evaluate(String expression) throws MathEclipseEvaluationException {
-        String validatedExpression = validate(expression);
-        return safeEvaluation(validatedExpression);
+    public MathEclipseEvaluation evaluate(String expression) {
+        String formattedExpression = initialFormatted(expression);
+        return safeEvaluation(formattedExpression);
     }
 
     /**
@@ -74,9 +58,9 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
      * @return the evaluated numeric result or a formatted error message
      */
     @Override
-    public MathEclipseEvaluation calculate(String expression, int decimals) throws MathEclipseEvaluationException {
-        String validatedExpression = validate(expression);
-        String numericExpression = N(validatedExpression, decimals);
+    public MathEclipseEvaluation calculate(String expression, int decimals) {
+        String formattedExpression = initialFormatted(expression);
+        String numericExpression = N(formattedExpression, decimals);
         return safeEvaluation(numericExpression);
     }
 
@@ -90,9 +74,9 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
      * @return the result of the plot expression evaluation, or an error message
      */
     @Override
-    public MathEclipseEvaluation draw(String expression, String variable, String origin, String bound) throws MathEclipseEvaluationException {
-        String validatedExpression = validate(expression);
-        String plotExpression = Plot(validatedExpression, variable, origin, bound);
+    public MathEclipseEvaluation draw(String expression, String variable, String origin, String bound) {
+        String formattedExpression = initialFormatted(expression);
+        String plotExpression = Plot(formattedExpression, variable, origin, bound);
         return safeEvaluation(plotExpression);
     }
 
@@ -102,7 +86,7 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
      * @param expression the expression to evaluate
      * @return the result or formatted error message
      */
-    private MathEclipseEvaluation safeEvaluation(String expression) throws MathEclipseEvaluationException {
+    private MathEclipseEvaluation safeEvaluation(String expression) {
         System.setErr(new PrintStream(errorStream)); // Redirect System.err to capture evaluation warnings or errors
         try {
             String result = rawEvaluate(expression); // Evaluate the expression directly
@@ -112,8 +96,6 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
             evaluation.addErrorsFromErrorStream(errors);
 
             return evaluation;
-        } catch (Exception e) {
-            throw new MathEclipseEvaluationException(e.getMessage(), e);
         } finally {
             // Restore the original System.err to avoid affecting other code
             System.setErr(System.err);
@@ -142,6 +124,12 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
 
     public void resetEvaluator() {
         mathEclipseEvaluator = MathEclipseConfig.buildEvalUtilities();
+    }
+
+    private String initialFormatted(String expression) {
+        expression = removeSpaces(expression);
+        expression = formatBranches(expression);
+        return expression;
     }
 
     /**
@@ -189,5 +177,22 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
      */
     private IExpr createIExpr(String expression) {
         return new ExprEvaluator().parse(expression);
+    }
+
+    /**
+     * Utility method to remove all whitespace characters from an expression.
+     *
+     * @param expression the original expression
+     * @return the expression without spaces
+     */
+    private String removeSpaces(String expression) {
+        return expression.replaceAll("\\s+", "");
+    }
+
+    private String formatBranches(String expression) {
+        if (expression == null || expression.isBlank()) {
+            return expression;
+        }
+        return expression.replace("[", "(").replace("]", ")");
     }
 }

@@ -1,35 +1,22 @@
-package com.placeholder.placeholder.api.math.facade.symja;
+package com.placeholder.placeholder.api.math.validation.validator;
 
-import com.placeholder.placeholder.api.math.facade.MathLibFacade;
-import com.placeholder.placeholder.api.math.facade.symja.exceptions.MathEclipseGrammaticalException;
-import com.placeholder.placeholder.api.math.facade.symja.exceptions.MathEclipseSemanticException;
-import com.placeholder.placeholder.api.math.facade.symja.exceptions.MathEclipseSyntaxException;
+import com.placeholder.placeholder.api.math.exceptions.MathGrammaticalException;
+import com.placeholder.placeholder.api.math.exceptions.MathSemanticException;
+import com.placeholder.placeholder.api.math.exceptions.MathSyntaxException;
+import com.placeholder.placeholder.api.math.validation.annotations.ValidMathEclipseExpression;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+import lombok.SneakyThrows;
 import org.matheclipse.core.eval.ExprEvaluator;
 import org.matheclipse.core.interfaces.IExpr;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * {@code MathExpressionValidator} is a Spring component that validates mathematical
- * expressions using both syntactic checks from the MathEclipse library and custom
- * grammatical and semantic rules defined by the application.
- * <p>
- * It includes:
- * <ul>
- *     <li>Validation of variable and symbol names</li>
- *     <li>Whitelist filtering for allowed constants and functions</li>
- *     <li>Syntactic parsing using MathEclipse to catch malformed expressions</li>
- *     <li>A standardized error reporting format</li>
- * </ul>
- *
- * @see MathEclipseFacade
- * @see MathLibFacade
- */
 @Component
-public class MathEclipseExpressionValidator {
+public class MathEclipseExpressionValidator implements ConstraintValidator<ValidMathEclipseExpression, String> {
 
     // Pattern to detect symbols (e.g. variables and constants) in the expression.
     private static final Pattern SYMBOL_PATTERN = Pattern.compile("\\b([a-zA-Z][a-zA-Z0-9]*)\\b");
@@ -47,11 +34,11 @@ public class MathEclipseExpressionValidator {
             "gamma", "zeta", "erf", "fresnelc", "c",
             "d", "diff", "integrate", "taylor", "solve", "limit", "dsolve", "logicalexpand",
             "dot", "cross", "norm", "normalize", "vectorangle", "projection",
-            "eigenvalues", "inverse", "transpose", "gcd", "lcm",
-            "simplify", "expand", "sqrt", "exp", "log", "log10", "log2", "abs",
+            "eigenvalues", "inverse", "transpose",
+            "gcd", "lcm", "simplify", "expand", "sqrt", "exp", "log", "log10", "log2", "abs",
             "sin", "cos", "tan", "csc", "cot", "sec",
-            "arcsin", "arccos", "arctan", "arccsc", "arccot", "arcsec",
-            "sinh", "cosh", "tanh", "coth", "sech", "csch",
+            "arcsin", "arccos", "arctan", "arccsc", "arccot",
+            "arcsec", "sinh", "cosh", "tanh", "coth", "sech", "csch",
             "arcsinh", "arccosh", "arctanh", "arccoth", "arcsech", "arccsch"
     );
 
@@ -63,20 +50,26 @@ public class MathEclipseExpressionValidator {
      * and MathEclipse's parser to ensure both syntactic and semantic correctness.
      *
      * @param expression the input expression to validate
+     * @param context evaluation context without pretext
      * @return the input expression if valid; otherwise, a string beginning with "ERROR" followed by the cause
      */
-    public String validate(String expression) {
-        expression = removeSpaces(expression);
-        expression = formatBranches(expression);
+    @SneakyThrows
+    @Override
+    public boolean isValid(String expression, ConstraintValidatorContext context) {
+        if (expression == null || expression.isEmpty()) {
+            return false;
+        }
 
         // Validate symbols (variables/constants).
-        validateSymbols(expression);
+        validateGrammar(expression);
 
         // Validate function calls.
-        validateFunctionCalls(expression);
+        validateSemantic(expression);
 
         // Validate syntax using MathEclipse.
-        return validateSyntax(expression);
+        validateSyntax(expression);
+
+        return true;
     }
 
     /**
@@ -86,7 +79,7 @@ public class MathEclipseExpressionValidator {
      * @param input the expression with no whitespace
      * @return null if valid, or an error message describing the invalid symbol
      */
-    private void validateSymbols(String input) {
+    private void validateGrammar(String input) throws MathGrammaticalException {
         Matcher matcher = SYMBOL_PATTERN.matcher(input);
         while (matcher.find()) {
             String symbol = matcher.group(1);
@@ -99,7 +92,7 @@ public class MathEclipseExpressionValidator {
 
             // Check if the symbol is a valid variable.
             if (!isValidSymbol(symbol)) {
-                throw new MathEclipseGrammaticalException("Invalid variable name: '" + symbol + "'.");
+                throw new MathGrammaticalException("Invalid variable name: '" + symbol + "'.");
             }
         }
     }
@@ -154,12 +147,12 @@ public class MathEclipseExpressionValidator {
      * @param input the expression to scan
      * @return null if all function calls are valid, otherwise an error message
      */
-    private void validateFunctionCalls(String input) {
+    private void validateSemantic(String input) throws MathSemanticException {
         Matcher matcher = FUNCTION_CALL_PATTERN.matcher(input);
         while (matcher.find()) {
             String function = matcher.group(1).toLowerCase();
             if (!VALID_FUNCTION_WHITELIST.contains(function)) {
-                throw new MathEclipseSemanticException("Invalid function: '" + function + "' is not allowed.");
+                throw new MathSemanticException("Invalid function: '" + function + "' is not allowed.");
             }
         }
     }
@@ -170,29 +163,15 @@ public class MathEclipseExpressionValidator {
      * @param expression the cleaned expression
      * @return true if the expression parses correctly, false if a syntax error occurs
      */
-    private String validateSyntax(String expression) {
+    private void validateSyntax(String expression) throws MathSyntaxException {
         try {
             IExpr expr = syntaxEvaluator.parse(expression);
-            return expr.toString();
+
+            if (expr == null) {
+                throw new MathSyntaxException("Syntax error in expression: '" + expression + "'.");
+            }
         } catch (Exception e) {
-            throw new MathEclipseSyntaxException("Syntax error in expression: " + e.getMessage());
+            throw new MathSyntaxException("Syntax error in expression: " + e.getMessage());
         }
-    }
-
-    /**
-     * Utility method to remove all whitespace characters from an expression.
-     *
-     * @param expression the original expression
-     * @return the expression without spaces
-     */
-    private String removeSpaces(String expression) {
-        return expression.replaceAll("\\s+", "");
-    }
-
-    private String formatBranches(String expression) {
-        if (expression == null || expression.isBlank()) {
-            return expression;
-        }
-        return expression.replace("[", "(").replace("]", ")");
     }
 }

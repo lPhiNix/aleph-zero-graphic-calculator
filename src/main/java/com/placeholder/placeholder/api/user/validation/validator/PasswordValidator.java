@@ -1,6 +1,6 @@
-package com.placeholder.placeholder.api.util.common.validation.validator;
+package com.placeholder.placeholder.api.user.validation.validator;
 
-import com.placeholder.placeholder.api.util.common.validation.annotations.ValidPassword;
+import com.placeholder.placeholder.api.user.validation.annotations.ValidPassword;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

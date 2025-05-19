@@ -11,13 +11,6 @@ package com.placeholder.placeholder.api.math.facade;
  */
 public interface MathLibFacade<E extends MathExpressionEvaluation> {
     /**
-     * Checks whether a mathematical expression is syntactically, grammatically and semantically valid.
-     * @param expression mathematical expression to validate.
-     * @return error message if expression is not valid or same expression if it is valid.
-     */
-    String validate(String expression);
-
-    /**
      * Processes a mathematical expression in a generic way depending on its structure.
      * @param expression mathematical expression to evaluate.
      * @return error message if expression is not valid or an evaluated result if is valid.
@@ -58,4 +51,13 @@ public interface MathLibFacade<E extends MathExpressionEvaluation> {
      * ensuring that the computation process can be controlled and stopped if necessary.
      */
     void stopRequest();
+
+    /**
+     * Checks whether a mathematical expression is syntactically, grammatically and semantically valid.
+     * @param expression mathematical expression to validate.
+     * @return error message if expression is not valid or same expression if it is valid.
+     */
+    default boolean validate(String expression) {
+        return false;
+    }
 }
