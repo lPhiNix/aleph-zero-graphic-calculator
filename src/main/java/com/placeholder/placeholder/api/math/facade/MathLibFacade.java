@@ -1,63 +1,62 @@
 package com.placeholder.placeholder.api.math.facade;
 
 /**
- * {@code MathLibFacade} is an interface that defines the behavior and
- * methods that the implementation of the mathematical expressions computing
- * library that is used must have.
+ * {@code MathLibFacade} defines the core interface for mathematical expression evaluation,
+ * providing methods for evaluating, calculating, drawing, formatting, and validating expressions.
  * <p>
- * This hierarchical structure allows the ability to implement several mathematical
- * expression computation libraries in a simple way, ensuring extensibility and code
- * decoupling.
+ * This structure allows flexibility in integrating different mathematical libraries, promoting
+ * code decoupling and extensibility.
  */
 public interface MathLibFacade<E extends MathExpressionEvaluation> {
     /**
-     * Processes a mathematical expression in a generic way depending on its structure.
-     * @param expression mathematical expression to evaluate.
-     * @return error message if expression is not valid or an evaluated result if is valid.
+     * Evaluates a mathematical expression, returning the result as an instance of {@link MathExpressionEvaluation}.
+     *
+     * @param expression the mathematical expression to evaluate.
+     * @return the evaluated result.
      */
     E evaluate(String expression);
 
     /**
-     * Processes a mathematical expression to return its exact numerical value with a given number of decimal places
-     * @param expression mathematical expression to calculate its exact numerical value.
-     * @param decimals number of decimal places you want the result to have.
-     * @return error message if expression is not valid or an evaluated result if is valid.
+     * Computes the exact numerical value of a mathematical expression, formatted to the specified number of decimal places.
+     *
+     * @param expression the mathematical expression to calculate.
+     * @param decimals the number of decimal places to include in the result.
+     * @return the calculated result.
      */
     E calculate(String expression, int decimals);
 
     /**
-     * Processes a mathematical function or equation to return a list of points
-     * in it evaluated within a specified range.
+     * Generates a series of evaluated points from a mathematical function or equation over a specified range.
      *
-     * @param expression mathematical expression to calculate its points in it evaluated within a specified range.
-     * @param variable variable from which the expression will be evaluated.
-     * @param origin origin of the range through which the points are to be calculated.
-     * @param bound limit of the range through which the points are to be calculated.
-     * @return return a list of points in it evaluated within a specified range.
+     * @param expression the mathematical expression to evaluate.
+     * @param variable the variable with respect to which the expression is evaluated.
+     * @param origin the starting point of the evaluation range.
+     * @param bound the ending point of the evaluation range.
+     * @return a list of evaluated points within the specified range.
      */
     E draw(String expression, String variable, String origin, String bound);
 
     /**
-     * Used to format the mathematical expression resulting from the defined operations.
-     * @param expression mathematical expression to format
-     * @return mathematical formated expression.
+     * Formats a mathematical expression result, ensuring consistent output presentation.
+     *
+     * @param expression the mathematical expression to format.
+     * @return the formatted mathematical expression as a string.
      */
     String formatResult(String expression);
 
     /**
-     * Stops the ongoing evaluation of a mathematical expression.
+     * Stops the ongoing evaluation of a mathematical expression, if supported by the underlying library.
      * <p>
-     * This method is intended to interrupt long or potentially infinite evaluations,
-     * ensuring that the computation process can be controlled and stopped if necessary.
+     * This method is useful for interrupting long or potentially infinite evaluations,
+     * allowing for controlled cancellation.
      */
     void stopRequest();
 
     /**
-     * Checks whether a mathematical expression is syntactically, grammatically and semantically valid.
-     * @param expression mathematical expression to validate.
-     * @return error message if expression is not valid or same expression if it is valid.
+     * Cleans the internal state of the mathematical evaluator, resetting all variable assignments and cached values.
+     * <p>
+     * This method is typically used to clear the internal context after a series of evaluations,
+     * ensuring a fresh evaluation state for subsequent computations.
      */
-    default boolean validate(String expression) {
-        return false;
-    }
+    void clean();
 }

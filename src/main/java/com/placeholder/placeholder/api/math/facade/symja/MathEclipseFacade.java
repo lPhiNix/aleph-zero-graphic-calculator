@@ -46,6 +46,7 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
      */
     @Override
     public MathEclipseEvaluation evaluate(String expression) {
+        // Initial format to clean up the input expression
         String formattedExpression = initialFormatted(expression);
         return safeEvaluation(formattedExpression);
     }
@@ -59,6 +60,7 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
      */
     @Override
     public MathEclipseEvaluation calculate(String expression, int decimals) {
+        // Prepare the expression for numerical approximation
         String formattedExpression = initialFormatted(expression);
         String numericExpression = N(formattedExpression, decimals);
         return safeEvaluation(numericExpression);
@@ -75,6 +77,7 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
      */
     @Override
     public MathEclipseEvaluation draw(String expression, String variable, String origin, String bound) {
+        // Format and validate the expression before plotting
         String formattedExpression = initialFormatted(expression);
         String evaluatedExpression = evaluate(formattedExpression).getExpressionEvaluated();
         String plotExpression = Plot(evaluatedExpression, variable, origin, bound);
@@ -88,11 +91,16 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
      * @return the result or formatted error message
      */
     private MathEclipseEvaluation safeEvaluation(String expression) {
-        System.setErr(new PrintStream(errorStream)); // Redirect System.err to capture evaluation warnings or errors
+        // Redirect System.err to capture evaluation warnings or errors
+        System.setErr(new PrintStream(errorStream));
         try {
-            String result = rawEvaluate(expression); // Evaluate the expression directly
-            String errors = errorStream.toString().trim(); // Read any error messages written during evaluation
+            // Evaluate the expression directly without further validation
+            String result = rawEvaluate(expression);
 
+            // Capture any error messages written during evaluation
+            String errors = errorStream.toString().trim();
+
+            // Create the evaluation result object
             MathEclipseEvaluation evaluation = new MathEclipseEvaluation(result);
             evaluation.addErrorsFromErrorStream(errors);
 
@@ -105,28 +113,47 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
     }
 
     /**
-     * Symja evaluation without validation and error handlers
+     * Performs direct Symja evaluation without validation and error handlers.
      * @param expression expression to validate
      * @return evaluated expression
      */
     private String rawEvaluate(String expression) {
+        // Use the internal Symja evaluator to compute the result
         return mathEclipseEvaluator.evaluate(expression).toString();
     }
-    
+
+    /**
+     * Formats the result of a mathematical expression into LaTeX format.
+     * @param expression the expression to format
+     * @return the formatted LaTeX expression
+     */
     @Override
     public String formatResult(String expression) {
         return parseToLateX(expression);
     }
 
+    /**
+     * Stops any ongoing evaluations in the Symja evaluator.
+     */
     @Override
     public void stopRequest() {
         mathEclipseEvaluator.stopRequest();
     }
 
-    public void resetEvaluator() {
+    /**
+     * Resets the internal evaluator to its initial state, removing all variable definitions.
+     */
+    @Override
+    public void clean() {
+        // Rebuild the evaluator to clear all stored variables and state
         mathEclipseEvaluator = MathEclipseConfig.buildEvalUtilities();
     }
 
+    /**
+     * Applies initial formatting to the expression, including removing spaces and formatting brackets.
+     * @param expression the raw expression to format
+     * @return the formatted expression
+     */
     private String initialFormatted(String expression) {
         expression = removeSpaces(expression);
         expression = formatBranches(expression);
@@ -190,6 +217,12 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
         return expression.replaceAll("\\s+", "");
     }
 
+    /**
+     * Formats square brackets to parentheses for consistency in Symja.
+     *
+     * @param expression the original expression
+     * @return the expression with standardized brackets
+     */
     private String formatBranches(String expression) {
         if (expression == null || expression.isBlank()) {
             return expression;

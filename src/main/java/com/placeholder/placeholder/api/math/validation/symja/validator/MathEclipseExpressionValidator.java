@@ -3,7 +3,6 @@ package com.placeholder.placeholder.api.math.validation.symja.validator;
 import com.placeholder.placeholder.api.math.validation.symja.annotations.ValidMathEclipseExpression;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import lombok.SneakyThrows;
 import org.matheclipse.core.eval.ExprEvaluator;
 import org.matheclipse.core.interfaces.IExpr;
 import org.springframework.stereotype.Component;
@@ -12,6 +11,19 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * {@code MathExpressionValidator} is a mathematical expressions validator using both
+ * syntactic checks from the MathEclipse library and custom grammatical and semantic
+ * rules defined by the application.
+ * <p>
+ * It includes:
+ * <ul>
+ *     <li>Validation of variable and symbol names</li>
+ *     <li>Whitelist filtering for allowed constants and functions</li>
+ *     <li>Syntactic parsing using MathEclipse to catch malformed expressions</li>
+ *     <li>A standardized error reporting format</li>
+ * </ul>
+ */
 @Component
 public class MathEclipseExpressionValidator implements ConstraintValidator<ValidMathEclipseExpression, String> {
 
@@ -42,29 +54,35 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
     // Evaluator used to parse and validate expressions syntactically using MathEclipse.
     private final ExprEvaluator syntaxEvaluator = new ExprEvaluator();
 
-    @SneakyThrows
+    /**
+     * Validates the input expression against grammar, semantics, and syntax.
+     * @param expression the mathematical expression to validate.
+     * @param context the validation context to build violation messages.
+     * @return true if expression is valid, false otherwise.
+     */
     @Override
     public boolean isValid(String expression, ConstraintValidatorContext context) {
+        // Check if the expression is null or empty, which is invalid
         if (expression == null || expression.isEmpty()) {
-            context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("Expression cannot be null or empty.")
+            context.disableDefaultConstraintViolation(); // Disable the default error message
+            context.buildConstraintViolationWithTemplate("Expression cannot be null or empty.") // Add custom error message
                     .addConstraintViolation();
             return false;
         }
 
         boolean isValid = true;
 
-        // Validate symbols (variables/constants).
+        // Validate grammar (variables/constants)
         if (!validateGrammar(expression, context)) {
             isValid = false;
         }
 
-        // Validate function calls.
+        // Validate semantic (functions)
         if (!validateSemantic(expression, context)) {
             isValid = false;
         }
 
-        // Validate syntax using MathEclipse.
+        // Validate syntax (using MathEclipse parser)
         if (!validateSyntax(expression, context)) {
             isValid = false;
         }
@@ -72,8 +90,14 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
         return isValid;
     }
 
+    /**
+     * Checks if all symbols (variables/constants) in the expression are grammatically valid.
+     * @param input the expression string to check.
+     * @param context the validation context to report errors.
+     * @return true if all symbols are valid, false otherwise.
+     */
     private boolean validateGrammar(String input, ConstraintValidatorContext context) {
-        Matcher matcher = SYMBOL_PATTERN.matcher(input);
+        Matcher matcher = SYMBOL_PATTERN.matcher(input); // Find all symbols in the expression
         boolean valid = true;
         while (matcher.find()) {
             String symbol = matcher.group(1);
@@ -85,7 +109,7 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
             if (isValidConstant(symbol)) continue;
 
             // Check if the symbol is a valid variable.
-            if (!isValidSymbol(symbol)) {
+            if (!isValidSymbol(symbol)) { // Check if symbol is a valid variable
                 context.disableDefaultConstraintViolation();
                 context.buildConstraintViolationWithTemplate("Grammatical Error: Invalid variable name: '" + symbol + "'.")
                         .addConstraintViolation();
@@ -95,26 +119,42 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
         return valid;
     }
 
+    /**
+     * Validates all function calls in the expression against the whitelist of allowed functions.
+     * @param input the expression string to check.
+     * @param context the validation context to report errors.
+     * @return true if all function calls are allowed, false otherwise.
+     */
     private boolean validateSemantic(String input, ConstraintValidatorContext context) {
-        Matcher matcher = FUNCTION_CALL_PATTERN.matcher(input);
+        Matcher matcher = FUNCTION_CALL_PATTERN.matcher(input); // Find all function calls
         boolean valid = true;
+        // Iterate over each function call found
         while (matcher.find()) {
-            String function = matcher.group(1).toLowerCase();
-            if (!VALID_FUNCTION_WHITELIST.contains(function)) {
-                context.disableDefaultConstraintViolation();
-                context.buildConstraintViolationWithTemplate("Semantic Error: Invalid function: '" + function + "' is not allowed.")
+            String function = matcher.group(1).toLowerCase(); // Extract function name in lowercase
+            if (!VALID_FUNCTION_WHITELIST.contains(function)) { // Check if function is allowed
+                context.disableDefaultConstraintViolation(); // Disable default message
+                context.buildConstraintViolationWithTemplate("Semantic Error: Invalid function: '" + function + "' is not allowed.") // Custom message
                         .addConstraintViolation();
-                valid = false;
+                valid = false; // Mark as invalid
             }
         }
         return valid;
     }
 
+    /**
+     * Parses the expression to check for syntax correctness using MathEclipse.
+     * @param expression the mathematical expression string.
+     * @param context the validation context to report syntax errors.
+     * @return true if syntax is correct, false otherwise.
+     */
     private boolean validateSyntax(String expression, ConstraintValidatorContext context) {
         try {
             IExpr expr = syntaxEvaluator.parse(expression);
             if (expr == null) {
-                throw new Exception("Null expression");
+                context.disableDefaultConstraintViolation();
+                context.buildConstraintViolationWithTemplate("Syntax error found in expression.")
+                        .addConstraintViolation();
+                return false;
             }
         } catch (Exception e) {
             context.disableDefaultConstraintViolation();
@@ -125,14 +165,30 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
         return true;
     }
 
+    /**
+     * Checks if the symbol is a valid variable (single character).
+     * @param symbol the symbol to check.
+     * @return true if valid variable, false otherwise.
+     */
     private boolean isValidSymbol(String symbol) {
         return symbol.length() == 1;
     }
 
+    /**
+     * Checks if the symbol is a valid constant from the whitelist.
+     * @param symbol the symbol to check.
+     * @return true if symbol is a valid constant, false otherwise.
+     */
     private boolean isValidConstant(String symbol) {
         return VALID_CONSTANT_WHITELIST.contains(symbol.toLowerCase());
     }
 
+    /**
+     * Determines if a symbol is used as a function call in the expression.
+     * @param input the expression string.
+     * @param symbol the symbol to check.
+     * @return true if symbol is a function call, false otherwise.
+     */
     private boolean isFunctionCall(String input, String symbol) {
         int index = input.indexOf(symbol);
         while (index != -1) {
@@ -149,23 +205,19 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
     }
 
     /**
-     * Extracts the relevant part of a MathEclipse syntax error message.
-     *
-     * @param errorMessage The full error message from MathEclipse.
-     * @return The cleaned, user-friendly error message.
+     * Cleans and formats the raw syntax error message from MathEclipse to be user-friendly.
+     * @param errorMessage the original error message.
+     * @return a simplified, clear error message.
      */
     private String formatSyntaxErrorMessage(String errorMessage) {
-        // Regex to capture the line causing the error.
         String pattern = "Syntax Error: Syntax error in line: \\d+ - Error in .*? (Token:\\d+ \\\\ \\))?\\n(.*?)\\n\\s*\\^";
         Pattern regex = Pattern.compile(pattern, Pattern.DOTALL);
         Matcher matcher = regex.matcher(errorMessage);
 
         if (matcher.find()) {
-            // Return the problematic line without leading/trailing whitespace.
             return "Syntax error in: '" + matcher.group(2).trim() + "'";
         }
 
-        // Fallback if the message doesn't match the expected pattern.
         return "Syntax error: " + errorMessage;
     }
 }
