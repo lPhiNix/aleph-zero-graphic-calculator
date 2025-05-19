@@ -76,7 +76,8 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
     @Override
     public MathEclipseEvaluation draw(String expression, String variable, String origin, String bound) {
         String formattedExpression = initialFormatted(expression);
-        String plotExpression = Plot(formattedExpression, variable, origin, bound);
+        String evaluatedExpression = evaluate(formattedExpression).getExpressionEvaluated();
+        String plotExpression = Plot(evaluatedExpression, variable, origin, bound);
         return safeEvaluation(plotExpression);
     }
 

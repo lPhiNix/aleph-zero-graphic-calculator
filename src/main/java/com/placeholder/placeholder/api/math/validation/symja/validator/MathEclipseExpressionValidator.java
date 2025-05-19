@@ -1,9 +1,6 @@
-package com.placeholder.placeholder.api.math.validation.validator;
+package com.placeholder.placeholder.api.math.validation.symja.validator;
 
-import com.placeholder.placeholder.api.math.exceptions.MathGrammaticalException;
-import com.placeholder.placeholder.api.math.exceptions.MathSemanticException;
-import com.placeholder.placeholder.api.math.exceptions.MathSyntaxException;
-import com.placeholder.placeholder.api.math.validation.annotations.ValidMathEclipseExpression;
+import com.placeholder.placeholder.api.math.validation.symja.annotations.ValidMathEclipseExpression;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.SneakyThrows;
@@ -45,42 +42,39 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
     // Evaluator used to parse and validate expressions syntactically using MathEclipse.
     private final ExprEvaluator syntaxEvaluator = new ExprEvaluator();
 
-    /**
-     * Validates a full mathematical expression using custom grammar, allowed functions/variables,
-     * and MathEclipse's parser to ensure both syntactic and semantic correctness.
-     *
-     * @param expression the input expression to validate
-     * @param context evaluation context without pretext
-     * @return the input expression if valid; otherwise, a string beginning with "ERROR" followed by the cause
-     */
     @SneakyThrows
     @Override
     public boolean isValid(String expression, ConstraintValidatorContext context) {
         if (expression == null || expression.isEmpty()) {
+            context.disableDefaultConstraintViolation();
+            context.buildConstraintViolationWithTemplate("Expression cannot be null or empty.")
+                    .addConstraintViolation();
             return false;
         }
 
+        boolean isValid = true;
+
         // Validate symbols (variables/constants).
-        validateGrammar(expression);
+        if (!validateGrammar(expression, context)) {
+            isValid = false;
+        }
 
         // Validate function calls.
-        validateSemantic(expression);
+        if (!validateSemantic(expression, context)) {
+            isValid = false;
+        }
 
         // Validate syntax using MathEclipse.
-        validateSyntax(expression);
+        if (!validateSyntax(expression, context)) {
+            isValid = false;
+        }
 
-        return true;
+        return isValid;
     }
 
-    /**
-     * Validates the individual symbols found in the expression,
-     * including variables and constants, ensuring they conform to allowed rules.
-     *
-     * @param input the expression with no whitespace
-     * @return null if valid, or an error message describing the invalid symbol
-     */
-    private void validateGrammar(String input) throws MathGrammaticalException {
+    private boolean validateGrammar(String input, ConstraintValidatorContext context) {
         Matcher matcher = SYMBOL_PATTERN.matcher(input);
+        boolean valid = true;
         while (matcher.find()) {
             String symbol = matcher.group(1);
 
@@ -92,40 +86,53 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
 
             // Check if the symbol is a valid variable.
             if (!isValidSymbol(symbol)) {
-                throw new MathGrammaticalException("Invalid variable name: '" + symbol + "'.");
+                context.disableDefaultConstraintViolation();
+                context.buildConstraintViolationWithTemplate("Grammatical Error: Invalid variable name: '" + symbol + "'.")
+                        .addConstraintViolation();
+                valid = false;
             }
         }
+        return valid;
     }
 
-    /**
-     * Checks if a symbol is a valid variable name.
-     * Only single-character variables are allowed.
-     *
-     * @param symbol the symbol to check
-     * @return true if valid, false otherwise
-     */
+    private boolean validateSemantic(String input, ConstraintValidatorContext context) {
+        Matcher matcher = FUNCTION_CALL_PATTERN.matcher(input);
+        boolean valid = true;
+        while (matcher.find()) {
+            String function = matcher.group(1).toLowerCase();
+            if (!VALID_FUNCTION_WHITELIST.contains(function)) {
+                context.disableDefaultConstraintViolation();
+                context.buildConstraintViolationWithTemplate("Semantic Error: Invalid function: '" + function + "' is not allowed.")
+                        .addConstraintViolation();
+                valid = false;
+            }
+        }
+        return valid;
+    }
+
+    private boolean validateSyntax(String expression, ConstraintValidatorContext context) {
+        try {
+            IExpr expr = syntaxEvaluator.parse(expression);
+            if (expr == null) {
+                throw new Exception("Null expression");
+            }
+        } catch (Exception e) {
+            context.disableDefaultConstraintViolation();
+            context.buildConstraintViolationWithTemplate("Syntax Error: " + formatSyntaxErrorMessage(e.getMessage()))
+                    .addConstraintViolation();
+            return false;
+        }
+        return true;
+    }
+
     private boolean isValidSymbol(String symbol) {
         return symbol.length() == 1;
     }
 
-    /**
-     * Checks if a symbol is a predefined constant like "pi" or "infinity".
-     *
-     * @param symbol the symbol to check
-     * @return true if it is a valid constant
-     */
     private boolean isValidConstant(String symbol) {
         return VALID_CONSTANT_WHITELIST.contains(symbol.toLowerCase());
     }
 
-    /**
-     * Determines if a symbol is a function by checking if it appears
-     * followed by an open parenthesis or bracket (used for function calls).
-     *
-     * @param input  the full expression
-     * @param symbol the symbol to search for
-     * @return true if the symbol is used as a function call
-     */
     private boolean isFunctionCall(String input, String symbol) {
         int index = input.indexOf(symbol);
         while (index != -1) {
@@ -142,36 +149,23 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
     }
 
     /**
-     * Validates that all function calls in the expression are whitelisted.
+     * Extracts the relevant part of a MathEclipse syntax error message.
      *
-     * @param input the expression to scan
-     * @return null if all function calls are valid, otherwise an error message
+     * @param errorMessage The full error message from MathEclipse.
+     * @return The cleaned, user-friendly error message.
      */
-    private void validateSemantic(String input) throws MathSemanticException {
-        Matcher matcher = FUNCTION_CALL_PATTERN.matcher(input);
-        while (matcher.find()) {
-            String function = matcher.group(1).toLowerCase();
-            if (!VALID_FUNCTION_WHITELIST.contains(function)) {
-                throw new MathSemanticException("Invalid function: '" + function + "' is not allowed.");
-            }
-        }
-    }
+    private String formatSyntaxErrorMessage(String errorMessage) {
+        // Regex to capture the line causing the error.
+        String pattern = "Syntax Error: Syntax error in line: \\d+ - Error in .*? (Token:\\d+ \\\\ \\))?\\n(.*?)\\n\\s*\\^";
+        Pattern regex = Pattern.compile(pattern, Pattern.DOTALL);
+        Matcher matcher = regex.matcher(errorMessage);
 
-    /**
-     * Uses MathEclipse to parse the expression and ensure it is syntactically correct.
-     *
-     * @param expression the cleaned expression
-     * @return true if the expression parses correctly, false if a syntax error occurs
-     */
-    private void validateSyntax(String expression) throws MathSyntaxException {
-        try {
-            IExpr expr = syntaxEvaluator.parse(expression);
-
-            if (expr == null) {
-                throw new MathSyntaxException("Syntax error in expression: '" + expression + "'.");
-            }
-        } catch (Exception e) {
-            throw new MathSyntaxException("Syntax error in expression: " + e.getMessage());
+        if (matcher.find()) {
+            // Return the problematic line without leading/trailing whitespace.
+            return "Syntax error in: '" + matcher.group(2).trim() + "'";
         }
+
+        // Fallback if the message doesn't match the expected pattern.
+        return "Syntax error: " + errorMessage;
     }
 }

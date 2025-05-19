@@ -5,4 +5,8 @@ import java.util.List;
 public record MathExpressionEvaluationDto(
         String expression,
         List<MathEvaluationDto> evaluations
-) {}
+) {
+    public MathExpressionEvaluationDto(String expression) {
+        this(expression, null);
+    }
+}

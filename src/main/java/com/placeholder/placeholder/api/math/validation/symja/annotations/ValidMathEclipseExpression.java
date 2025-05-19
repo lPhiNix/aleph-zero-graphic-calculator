@@ -1,6 +1,6 @@
-package com.placeholder.placeholder.api.math.validation.annotations;
+package com.placeholder.placeholder.api.math.validation.symja.annotations;
 
-import com.placeholder.placeholder.api.math.validation.validator.MathEclipseExpressionValidator;
+import com.placeholder.placeholder.api.math.validation.symja.validator.MathEclipseExpressionValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 

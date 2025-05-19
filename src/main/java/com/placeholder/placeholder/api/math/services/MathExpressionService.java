@@ -6,6 +6,7 @@ import com.placeholder.placeholder.api.math.dto.request.MathExpressionDto;
 import com.placeholder.placeholder.api.math.dto.response.MathEvaluationDto;
 import com.placeholder.placeholder.api.math.dto.response.MathEvaluationResultResponse;
 import com.placeholder.placeholder.api.math.dto.response.MathExpressionEvaluationDto;
+import com.placeholder.placeholder.api.math.enums.MathEvaluationType;
 import com.placeholder.placeholder.api.math.enums.MathExpressionType;
 import com.placeholder.placeholder.api.math.facade.MathExpressionEvaluation;
 import com.placeholder.placeholder.api.math.facade.MathLibFacade;
@@ -43,70 +44,115 @@ public class MathExpressionService {
     ) {
         String expression = mathExpression.expression();
 
-        MathExpressionType type = checkExpressionType(expression);
+        MathExpressionType type = MathExpressionType.detectType(expression);
+
+        MathEvaluationDto evaluation, calculation, representation;
 
         switch (type) {
-            case NONE:
-                MathEvaluationDto evaluation =  processMathOperation(this::evaluate, mathExpression, data, type);
-                MathEvaluationDto calculation =  processMathOperation(this::calculate, mathExpression, data, type);
-                MathEvaluationDto representation =  processMathOperation(this::draw, mathExpression, data, type);
+            case FUNCTION:
+                evaluation = processMathOperation(this::evaluate, mathExpression, data, type, MathEvaluationType.EVALUATION);
+                representation = processMathOperation(this::draw, mathExpression, data, type, MathEvaluationType.DRAWING);
 
-                List<MathEvaluationDto> list = Arrays.asList(evaluation, calculation, representation);
-                return new MathExpressionEvaluationDto(expression, list);
+                return new MathExpressionEvaluationDto(expression, createOperationList(
+                        evaluation, representation
+                ));
+            case ASSIGNMENT:
+                evaluation = processMathOperation(this::evaluate, mathExpression, data, type, MathEvaluationType.EVALUATION);
+
+                return new MathExpressionEvaluationDto(expression, createOperationList(
+                        evaluation
+                ));
+            case EQUATION:
+                evaluation = processMathOperation(this::evaluate, mathExpression, data, type, MathEvaluationType.EVALUATION);
+
+                return new MathExpressionEvaluationDto(expression, createOperationList(
+                        evaluation
+                ));
+            case NUMERIC:
+                calculation = processMathOperation(this::calculate, mathExpression, data, type, MathEvaluationType.CALCULATION);
+
+                return new MathExpressionEvaluationDto(expression, createOperationList(
+                        calculation
+                ));
+            case MATRIX:
+                evaluation = processMathOperation(this::evaluate, mathExpression, data, type, MathEvaluationType.EVALUATION);
+
+                return new MathExpressionEvaluationDto(expression, createOperationList(
+                        evaluation
+                ));
+            case VECTOR:
+                evaluation = processMathOperation(this::evaluate, mathExpression, data, type, MathEvaluationType.EVALUATION);
+
+                return new MathExpressionEvaluationDto(expression, createOperationList(
+                        evaluation
+                ));
+            case UNKNOWN:
+                evaluation = processMathOperation(this::evaluate, mathExpression, data, type, MathEvaluationType.EVALUATION);
+                calculation = processMathOperation(this::calculate, mathExpression, data, type, MathEvaluationType.CALCULATION);
+                representation = processMathOperation(this::draw, mathExpression, data, type, MathEvaluationType.DRAWING);
+
+                return new MathExpressionEvaluationDto(expression, createOperationList(
+                        evaluation, calculation, representation
+                ));
             default:
-                return null;
+                return new MathExpressionEvaluationDto(expression);
         }
     }
 
-    private MathExpressionType checkExpressionType(String expression) {
-        return MathExpressionType.NONE;
+    private List<MathEvaluationDto> createOperationList(MathEvaluationDto... evaluations) {
+        return Arrays.asList(evaluations);
     }
 
     private MathEvaluationDto processMathOperation(
             MathOperation mathOperation,
             MathExpressionDto mathExpression,
             MathDataDto data,
-            MathExpressionType type
+            MathExpressionType type,
+            MathEvaluationType evaluationType
     ) {
-        return mathOperation.compute(mathExpression, data, type);
+        return mathOperation.compute(mathExpression, data, type, evaluationType);
     }
 
 
     private MathEvaluationDto evaluate(
             MathExpressionDto mathExpression,
             MathDataDto data,
-            MathExpressionType type
+            MathExpressionType type,
+            MathEvaluationType evaluationType
     ) {
         String expression = mathExpression.expression();
         MathExpressionEvaluation evaluationResult = mathEclipse.evaluate(expression);
-        return map(evaluationResult, type);
+        return map(evaluationResult, type, evaluationType);
     }
 
     private MathEvaluationDto calculate(
             MathExpressionDto mathExpression,
             MathDataDto data,
-            MathExpressionType type
+            MathExpressionType type,
+            MathEvaluationType evaluationType
     ) {
         String expression = mathExpression.expression();
         int decimals = data.decimals();
         MathExpressionEvaluation evaluationResult = mathEclipse.calculate(expression, decimals);
-        return map(evaluationResult, type);
+        return map(evaluationResult, type, evaluationType);
     }
 
     private MathEvaluationDto draw(
             MathExpressionDto mathExpression,
             MathDataDto data,
-            MathExpressionType type
+            MathExpressionType type,
+            MathEvaluationType evaluationType
     ) {
         String expression = mathExpression.expression();
         String origin = data.origin();
         String bound = data.bound();
         MathExpressionEvaluation evaluationResult = mathEclipse.draw(expression, "x", origin, bound);
-        return map(evaluationResult, type);
+        return map(evaluationResult, type, evaluationType);
     }
 
-    private MathEvaluationDto map(MathExpressionEvaluation evaluationResult, MathExpressionType type) {
+    private MathEvaluationDto map(MathExpressionEvaluation evaluationResult, MathExpressionType type, MathEvaluationType evaluationType) {
         return new MathEvaluationDto(
+                evaluationType,
                 type,
                 evaluationResult.getExpressionEvaluated(),
                 evaluationResult.getEvaluationProblems().orElse(null)
@@ -121,7 +167,8 @@ public class MathExpressionService {
         MathEvaluationDto compute(
                 MathExpressionDto expression,
                 MathDataDto data,
-                MathExpressionType type
+                MathExpressionType type,
+                MathEvaluationType evaluationType
         );
     }
 }
