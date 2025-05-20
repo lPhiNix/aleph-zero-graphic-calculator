@@ -57,7 +57,7 @@ public class MathExpressionService {
 
         mathEclipse.clean();
 
-        return new MathExpressionEvaluationDto(expr.expression(), evaluations);
+        return new MathExpressionEvaluationDto(expr.expression(), type, evaluations);
     }
 
     private MathEvaluationDto processMathOperation(
@@ -70,7 +70,6 @@ public class MathExpressionService {
         MathExpressionEvaluation result = operation.compute(expr, data);
         return new MathEvaluationDto(
                 evalType,
-                type,
                 result.getExpressionEvaluated(),
                 result.getEvaluationProblems().orElse(null)
         );

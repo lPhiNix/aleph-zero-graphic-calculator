@@ -50,7 +50,6 @@ public class MathEclipseConfig {
      *     to LaTeX format</li>
      * </ul>
      *
-     * @param expressionValidator the validator for expression syntax
      * @param laTeXFactory        the factory for LaTeX conversion
      * @return a new {@code MathEclipseFacade} instance with a fresh {@code EvalUtilities} object
      */
