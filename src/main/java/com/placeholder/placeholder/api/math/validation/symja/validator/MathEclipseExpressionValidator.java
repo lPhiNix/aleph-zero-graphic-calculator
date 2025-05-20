@@ -35,7 +35,7 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
 
     // Whitelist of constants that can be used as-is in expressions without being one-character variables.
     private static final Set<String> VALID_CONSTANT_WHITELIST = Set.of(
-            "pi", "phi", "infinity", "complexinfinity"
+            "pi", "infinity", "complexinfinity"
     );
 
     // Whitelist of allowed function names the user can include in their input.

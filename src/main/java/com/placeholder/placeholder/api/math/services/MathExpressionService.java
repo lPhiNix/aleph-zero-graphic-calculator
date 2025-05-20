@@ -1,5 +1,6 @@
 package com.placeholder.placeholder.api.math.services;
 
+import com.placeholder.placeholder.api.math.cache.MathAssignmentMemory;
 import com.placeholder.placeholder.api.math.dto.request.MathDataDto;
 import com.placeholder.placeholder.api.math.dto.request.MathEvaluationRequest;
 import com.placeholder.placeholder.api.math.dto.request.MathExpressionDto;
@@ -20,9 +21,11 @@ import java.util.stream.Collectors;
 public class MathExpressionService {
 
     private final MathLibFacade mathEclipse;
+    private final MathAssignmentMemory assignmentMemory;
 
     public MathExpressionService(MathLibFacade mathEclipse) {
         this.mathEclipse = mathEclipse;
+        this.assignmentMemory = new MathAssignmentMemory();
     }
 
     public MathEvaluationResultResponse evaluation(MathEvaluationRequest request) {
@@ -37,8 +40,10 @@ public class MathExpressionService {
     }
 
     private MathExpressionEvaluationDto evaluateExpression(MathExpressionDto expr, MathDataDto data) {
-        MathExpressionType type = MathExpressionType.detectType(expr.expression());
-        String expression = expr.expression();
+        String expression = assignmentMemory.process(expr.expression());
+
+        MathExpressionType type = MathExpressionType.detectType(expression);
+
         List<MathEvaluationDto> evaluations = switch (type) {
             case FUNCTION -> evaluateFunction(expression, data);
             case ASSIGNMENT, EQUATION, MATRIX, VECTOR -> List.of(
@@ -53,6 +58,7 @@ public class MathExpressionService {
 
         return new MathExpressionEvaluationDto(expr.expression(), type, evaluations);
     }
+
 
     private List<MathEvaluationDto> evaluateFunction(String expression, MathDataDto data) {
         MathEvaluationDto evaluationDto = processMathOperation(this::evaluate, expression, data, MathEvaluationType.EVALUATION);
