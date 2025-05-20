@@ -1,10 +1,13 @@
-package com.placeholder.placeholder.api.math.cache;
+package com.placeholder.placeholder.api.math.services.cache;
+
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Component
 public class MathAssignmentMemory {
 
     private final Map<String, String> variableMap = new HashMap<>();
@@ -39,12 +42,5 @@ public class MathAssignmentMemory {
 
     public Map<String, String> getVariables() {
         return Map.copyOf(variableMap);
-    }
-
-    public static void main(String[] args) {
-        MathAssignmentMemory memory = new MathAssignmentMemory();
-        System.out.println(memory.process("I = 1"));
-        System.out.println(memory.process("I"));
-
     }
 }

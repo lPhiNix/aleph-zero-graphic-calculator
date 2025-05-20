@@ -1,6 +1,6 @@
 package com.placeholder.placeholder.api.math.services;
 
-import com.placeholder.placeholder.api.math.cache.MathAssignmentMemory;
+import com.placeholder.placeholder.api.math.services.cache.MathAssignmentMemory;
 import com.placeholder.placeholder.api.math.dto.request.MathDataDto;
 import com.placeholder.placeholder.api.math.dto.request.MathEvaluationRequest;
 import com.placeholder.placeholder.api.math.dto.request.MathExpressionDto;
@@ -11,21 +11,32 @@ import com.placeholder.placeholder.api.math.enums.MathEvaluationType;
 import com.placeholder.placeholder.api.math.enums.MathExpressionType;
 import com.placeholder.placeholder.api.math.facade.MathExpressionEvaluation;
 import com.placeholder.placeholder.api.math.facade.MathLibFacade;
+import com.placeholder.placeholder.api.math.services.micro.MathExpressionTypeDetector;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
+@Service @Lazy
 public class MathExpressionService {
 
     private final MathLibFacade mathEclipse;
     private final MathAssignmentMemory assignmentMemory;
+    private final MathExpressionTypeDetector expressionTypeDetector;
 
-    public MathExpressionService(MathLibFacade mathEclipse) {
+    @Autowired
+    public MathExpressionService(
+            MathLibFacade mathEclipse,
+            MathAssignmentMemory assignmentMemory,
+            MathExpressionTypeDetector expressionTypeDetector
+    ) {
         this.mathEclipse = mathEclipse;
-        this.assignmentMemory = new MathAssignmentMemory();
+        this.assignmentMemory = assignmentMemory;
+        this.expressionTypeDetector = expressionTypeDetector;
     }
 
     public MathEvaluationResultResponse evaluation(MathEvaluationRequest request) {
@@ -42,18 +53,18 @@ public class MathExpressionService {
     private MathExpressionEvaluationDto evaluateExpression(MathExpressionDto expr, MathDataDto data) {
         String expression = assignmentMemory.process(expr.expression());
 
-        MathExpressionType type = MathExpressionType.detectType(expression);
+        MathExpressionType type = expressionTypeDetector.detectType(expression);
 
         List<MathEvaluationDto> evaluations = switch (type) {
             case FUNCTION -> evaluateFunction(expression, data);
-            case ASSIGNMENT, EQUATION, MATRIX, VECTOR -> List.of(
+            case EQUATION, MATRIX, VECTOR -> List.of(
                     processMathOperation(this::evaluate, expression, data, MathEvaluationType.EVALUATION)
             );
             case NUMERIC -> List.of(
                     processMathOperation(this::calculate, expression, data, MathEvaluationType.CALCULATION)
             );
             case UNKNOWN -> evaluateUnknown(expression, data);
-            case NONE -> Collections.emptyList();
+            case NONE, ASSIGNMENT -> Collections.emptyList();
         };
 
         return new MathExpressionEvaluationDto(expr.expression(), type, evaluations);
@@ -87,20 +98,26 @@ public class MathExpressionService {
         );
     }
 
-    private MathExpressionEvaluation evaluate(String expression, MathDataDto data) {
+    @Cacheable(value = "evaluate", key = "#expression")
+    public MathExpressionEvaluation evaluate(String expression, MathDataDto data) {
+        System.out.println("Evaluating expression: " + expression);
         return mathEclipse.evaluate(expression);
     }
 
-    private MathExpressionEvaluation calculate(String expression, MathDataDto data) {
+    @Cacheable(value = "calculate", key = "#expression + '_' + #data.decimals()")
+    public MathExpressionEvaluation calculate(String expression, MathDataDto data) {
+        System.out.println("Calculating expression: " + expression + "_" + data.decimals());
         return mathEclipse.calculate(expression, data.decimals());
     }
 
-    private MathExpressionEvaluation draw(String expression, MathDataDto data) {
+    @Cacheable(value = "draw", key = "#expression + '_' + #data.origin() + '_' + #data.bound()")
+    public MathExpressionEvaluation draw(String expression, MathDataDto data) {
+        System.out.println("Evaluating expression: " + expression + "_" + data.origin() + "_" + data.bound());
         return mathEclipse.draw(expression, "x", data.origin(), data.bound());
     }
 
     @FunctionalInterface
-    public interface MathOperation {
+    private interface MathOperation {
         MathExpressionEvaluation compute(String expression, MathDataDto data);
     }
 }
