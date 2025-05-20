@@ -26,48 +26,54 @@ public class MathExpressionService {
     }
 
     public MathEvaluationResultResponse evaluation(MathEvaluationRequest request) {
-        return new MathEvaluationResultResponse(
+        MathEvaluationResultResponse response = new MathEvaluationResultResponse(
                 request.expressions().stream()
                         .map(expr -> evaluateExpression(expr, request.data()))
                         .collect(Collectors.toList())
         );
+
+        mathEclipse.clean();
+        return response;
     }
 
     private MathExpressionEvaluationDto evaluateExpression(MathExpressionDto expr, MathDataDto data) {
         MathExpressionType type = MathExpressionType.detectType(expr.expression());
-
+        String expression = expr.expression();
         List<MathEvaluationDto> evaluations = switch (type) {
-            case FUNCTION -> List.of(
-                    processMathOperation(this::evaluate, expr, data, type, MathEvaluationType.EVALUATION),
-                    processMathOperation(this::draw, expr, data, type, MathEvaluationType.DRAWING)
-            );
+            case FUNCTION -> evaluateFunction(expression, data);
             case ASSIGNMENT, EQUATION, MATRIX, VECTOR -> List.of(
-                    processMathOperation(this::evaluate, expr, data, type, MathEvaluationType.EVALUATION)
+                    processMathOperation(this::evaluate, expression, data, MathEvaluationType.EVALUATION)
             );
             case NUMERIC -> List.of(
-                    processMathOperation(this::calculate, expr, data, type, MathEvaluationType.CALCULATION)
+                    processMathOperation(this::calculate, expression, data, MathEvaluationType.CALCULATION)
             );
-            case UNKNOWN -> List.of(
-                    processMathOperation(this::evaluate, expr, data, type, MathEvaluationType.EVALUATION),
-                    processMathOperation(this::calculate, expr, data, type, MathEvaluationType.CALCULATION),
-                    processMathOperation(this::draw, expr, data, type, MathEvaluationType.DRAWING)
-            );
+            case UNKNOWN -> evaluateUnknown(expression, data);
             case NONE -> Collections.emptyList();
         };
-
-        mathEclipse.clean();
 
         return new MathExpressionEvaluationDto(expr.expression(), type, evaluations);
     }
 
+    private List<MathEvaluationDto> evaluateFunction(String expression, MathDataDto data) {
+        MathEvaluationDto evaluationDto = processMathOperation(this::evaluate, expression, data, MathEvaluationType.EVALUATION);
+        MathEvaluationDto drawingDto = processMathOperation(this::draw, expression, data, MathEvaluationType.DRAWING);
+        return List.of(evaluationDto, drawingDto);
+    }
+
+    private List<MathEvaluationDto> evaluateUnknown(String expression, MathDataDto data) {
+        MathEvaluationDto evaluationDto = processMathOperation(this::evaluate, expression, data, MathEvaluationType.EVALUATION);
+        MathEvaluationDto calcDto = processMathOperation(this::calculate, expression, data, MathEvaluationType.CALCULATION);
+        MathEvaluationDto drawDto = processMathOperation(this::draw, evaluationDto.evaluation(), data, MathEvaluationType.DRAWING);
+        return List.of(evaluationDto, calcDto, drawDto);
+    }
+
     private MathEvaluationDto processMathOperation(
-                    MathOperation operation,
-                    MathExpressionDto expr,
-                    MathDataDto data,
-                    MathExpressionType type,
-                    MathEvaluationType evalType
+            MathOperation operation,
+            String expression,
+            MathDataDto data,
+            MathEvaluationType evalType
     ) {
-        MathExpressionEvaluation result = operation.compute(expr, data);
+        MathExpressionEvaluation result = operation.compute(expression, data);
         return new MathEvaluationDto(
                 evalType,
                 result.getExpressionEvaluated(),
@@ -75,26 +81,20 @@ public class MathExpressionService {
         );
     }
 
-    private MathExpressionEvaluation evaluate(MathExpressionDto expr, MathDataDto data) {
-        return mathEclipse.evaluate(expr.expression());
+    private MathExpressionEvaluation evaluate(String expression, MathDataDto data) {
+        return mathEclipse.evaluate(expression);
     }
 
-    private MathExpressionEvaluation calculate(MathExpressionDto expr, MathDataDto data) {
-        return mathEclipse.calculate(expr.expression(), data.decimals());
+    private MathExpressionEvaluation calculate(String expression, MathDataDto data) {
+        return mathEclipse.calculate(expression, data.decimals());
     }
 
-    private MathExpressionEvaluation draw(MathExpressionDto expr, MathDataDto data) {
-        return mathEclipse.draw(expr.expression(), "x", data.origin(), data.bound());
+    private MathExpressionEvaluation draw(String expression, MathDataDto data) {
+        return mathEclipse.draw(expression, "x", data.origin(), data.bound());
     }
 
-    /**
-     * A functional interface for math operations on expressions.
-     */
     @FunctionalInterface
     public interface MathOperation {
-           MathExpressionEvaluation compute(
-                   MathExpressionDto expression,
-                   MathDataDto data
-           );
+        MathExpressionEvaluation compute(String expression, MathDataDto data);
     }
 }
