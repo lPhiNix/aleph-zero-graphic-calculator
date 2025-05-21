@@ -19,9 +19,11 @@ public class MathExpressionService {
     private final MathExpressionClassifier typeDetector;
     private final EvaluationStrategyContext context;
 
-    public MathExpressionService(MathAssignmentMemory memory,
-                                 MathExpressionClassifier typeDetector,
-                                 EvaluationStrategyContext context) {
+    public MathExpressionService(
+            MathAssignmentMemory memory,
+            MathExpressionClassifier typeDetector,
+            EvaluationStrategyContext context
+    ) {
         this.memory = memory;
         this.typeDetector = typeDetector;
         this.context = context;
@@ -29,9 +31,9 @@ public class MathExpressionService {
 
     public MathEvaluationResultResponse evaluation(MathEvaluationRequest request) {
         List<MathExpressionEvaluationDto> responses = request.expressions().stream().map(expr -> {
-            String processed = memory.process(expr.expression());
-            MathExpressionType type = typeDetector.detectType(processed);
-            List<MathEvaluationDto> results = context.getStrategy(type).compute(processed, request.data());
+            String expressionToEvaluate = memory.process(expr.expression());
+            MathExpressionType type = typeDetector.detectType(expressionToEvaluate);
+            List<MathEvaluationDto> results = context.getStrategy(type).compute(expressionToEvaluate, request.data());
             return new MathExpressionEvaluationDto(expr.expression(), type, results);
         }).toList();
 

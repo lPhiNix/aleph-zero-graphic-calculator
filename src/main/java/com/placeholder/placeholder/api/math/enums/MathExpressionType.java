@@ -9,5 +9,5 @@ public enum MathExpressionType {
     MATRIX,     // m x n matrix using nested braces (e.g., {{1, 2}, {3, 4}})
     VECTOR,     // One-dimensional vector using braces (e.g., {1, 2, 3})
     UNKNOWN,
-    NONE;
+    NONE
 }
