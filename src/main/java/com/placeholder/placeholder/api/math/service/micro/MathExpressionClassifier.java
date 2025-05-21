@@ -21,7 +21,7 @@ public class MathExpressionClassifier {
     }
 
     public static final Pattern FUNCTION_PATTERN = Pattern.compile("(?=.*[a-zA-Z])[-+*/^()a-zA-Z0-9\\s]+");
-    public static final Pattern ASSIGNMENT_PATTERN = Pattern.compile("\\s*[a-zA-Z]\\s*=\\s*.+");
+    public static final Pattern ASSIGNMENT_PATTERN = Pattern.compile("\\s*[a-z]\\s*=\\s*.+");
     public static final Pattern EQUATION_PATTERN = Pattern.compile(".+==.+");
     public static final Pattern NUMERIC_PATTERN = Pattern.compile("-?\\d+(\\.\\d+)?([+-]\\d+i)?|-\\d+i|\\d+/\\d+");
     public static final Pattern MATRIX_PATTERN = Pattern.compile("\\{\\{\\s*-?\\d+(\\.\\d+)?(\\s*,\\s*-?\\d+(\\.\\d+)?)*\\s*}(,\\s*\\{\\s*-?\\d+(\\.\\d+)?(\\s*,\\s*-?\\d+(\\.\\d+)?)*\\s*})+}");

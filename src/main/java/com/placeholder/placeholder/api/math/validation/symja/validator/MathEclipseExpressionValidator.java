@@ -7,6 +7,7 @@ import org.matheclipse.core.eval.ExprEvaluator;
 import org.matheclipse.core.interfaces.IExpr;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.CharacterCodingException;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,12 +35,12 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
     private static final Pattern FUNCTION_CALL_PATTERN = Pattern.compile("([a-zA-Z][a-zA-Z0-9]*)\\s*[(\\[]");
 
     // Whitelist of constants that can be used as-is in expressions without being one-character variables.
-    private static final Set<String> VALID_CONSTANT_WHITELIST = Set.of(
-            "pi", "infinity", "complexinfinity"
+    public static final Set<String> VALID_CONSTANT_WHITELIST = Set.of(
+            "e", "i", "pi", "goldenratio", "infinity", "complexinfinity", "zeta", "gamma", "erf"
     );
 
     // Whitelist of allowed function names the user can include in their input.
-    private static final Set<String> VALID_FUNCTION_WHITELIST = Set.of(
+    public static final Set<String> VALID_FUNCTION_WHITELIST = Set.of(
             "gamma", "zeta", "erf", "fresnelc", "c",
             "d", "diff", "integrate", "taylor", "solve", "limit", "dsolve", "logicalexpand",
             "dot", "cross", "norm", "normalize", "vectorangle", "projection",
@@ -166,12 +167,15 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
     }
 
     /**
-     * Checks if the symbol is a valid variable (single character).
+     * Checks if the symbol is a valid variable (single character and low case).
      * @param symbol the symbol to check.
      * @return true if valid variable, false otherwise.
      */
     private boolean isValidSymbol(String symbol) {
-        return symbol.length() == 1;
+        if (symbol.length() != 1) return false;
+
+        char character = symbol.charAt(0);
+        return !Character.isUpperCase(character);
     }
 
     /**

@@ -25,7 +25,9 @@ public class MathExpressionController {
     }
 
     @PostMapping("/evaluation")
-    public ResponseEntity<ApiResponse<MathEvaluationResultResponse>> evaluate(@RequestBody @Valid MathEvaluationRequest mathExpressionRequest) {
+    public ResponseEntity<ApiResponse<MathEvaluationResultResponse>> evaluate(
+            @RequestBody @Valid MathEvaluationRequest mathExpressionRequest
+    ) {
         MathEvaluationResultResponse response = service.evaluation(mathExpressionRequest);
         return apiResponseFactory.ok(response);
     }
