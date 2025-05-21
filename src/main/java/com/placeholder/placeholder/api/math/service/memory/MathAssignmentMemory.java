@@ -1,4 +1,4 @@
-package com.placeholder.placeholder.api.math.services.cache;
+package com.placeholder.placeholder.api.math.service.memory;
 
 import org.springframework.stereotype.Component;
 
@@ -20,14 +20,11 @@ public class MathAssignmentMemory {
             String var = matcher.group(1);
             String value = matcher.group(2);
             variableMap.put(var, value);
-            return var + " = " + value; // Solo devolvemos la asignación formateada (puedes adaptar esto)
+            return var + " = " + value;
         }
         return replaceVariables(expression);
     }
 
-    /**
-     * Reemplaza las variables conocidas por sus valores en la expresión.
-     */
     public String replaceVariables(String expression) {
         String result = expression;
         for (Map.Entry<String, String> entry : variableMap.entrySet()) {

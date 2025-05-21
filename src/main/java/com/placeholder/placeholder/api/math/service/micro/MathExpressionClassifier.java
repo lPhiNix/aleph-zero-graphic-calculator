@@ -1,21 +1,21 @@
-package com.placeholder.placeholder.api.math.services.micro;
+package com.placeholder.placeholder.api.math.service.micro;
 
 import com.placeholder.placeholder.api.math.enums.MathExpressionType;
 import com.placeholder.placeholder.api.math.facade.MathLibFacade;
-import com.placeholder.placeholder.api.math.services.cache.MathAssignmentMemory;
+import com.placeholder.placeholder.api.math.service.memory.MathAssignmentMemory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.regex.Pattern;
 
 @Component
-public class MathExpressionTypeDetector {
+public class MathExpressionClassifier {
 
     private final MathLibFacade mathEclipse;
     private final MathAssignmentMemory assignmentMemory;
 
     @Autowired
-    public MathExpressionTypeDetector(MathLibFacade mathEclipse, MathAssignmentMemory assignmentMemory) {
+    public MathExpressionClassifier(MathLibFacade mathEclipse, MathAssignmentMemory assignmentMemory) {
         this.mathEclipse = mathEclipse;
         this.assignmentMemory = assignmentMemory;
     }
@@ -49,5 +49,4 @@ public class MathExpressionTypeDetector {
 
         return MathExpressionType.UNKNOWN;
     }
-
 }
