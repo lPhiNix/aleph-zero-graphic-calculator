@@ -25,12 +25,20 @@ public class MathExpressionController {
     }
 
     @PostMapping("/evaluation")
-    public ResponseEntity<ApiResponse<MathEvaluationResultResponse>> evaluate(
+    public ResponseEntity<ApiResponse<MathEvaluationResultResponse>> evaluation(
             @RequestBody @Valid MathEvaluationRequest mathExpressionRequest
     ) {
         MathEvaluationResultResponse response = service.evaluation(mathExpressionRequest);
         return apiResponseFactory.ok(response);
     }
 
-
+    /* TODO Implementation when Frontend is over.
+    @PostMapping("draw")
+    public ResponseEntity<ApiResponse<MathEvaluationResultResponse>> draw(
+            @RequestBody @Valid MathEvaluationRequest mathExpressionRequest
+    ) {
+        MathEvaluationResultResponse response = service.evaluation(mathExpressionRequest);
+        return apiResponseFactory.ok(response);
+    }
+     */
 }

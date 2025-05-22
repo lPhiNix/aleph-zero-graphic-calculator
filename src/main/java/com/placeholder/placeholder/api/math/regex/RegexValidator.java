@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -52,5 +53,9 @@ public class RegexValidator {
 
     public static boolean match(String expression, Pattern pattern)  {
         return pattern.matcher(expression).matches();
+    }
+
+    public static Matcher matcher(String expression, Pattern pattern) {
+        return pattern.matcher(expression);
     }
 }

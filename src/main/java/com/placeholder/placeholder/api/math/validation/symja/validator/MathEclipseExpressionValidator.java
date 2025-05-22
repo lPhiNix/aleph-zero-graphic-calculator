@@ -56,8 +56,9 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
 
     /**
      * Validates the input expression against grammar, semantics, and syntax.
+     *
      * @param expression the mathematical expression to validate.
-     * @param context the validation context to build violation messages.
+     * @param context    the validation context to build violation messages.
      * @return true if expression is valid, false otherwise.
      */
     @Override
@@ -92,7 +93,8 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
 
     /**
      * Checks if all symbols (variables/constants) in the expression are grammatically valid.
-     * @param input the expression string to check.
+     *
+     * @param input   the expression string to check.
      * @param context the validation context to report errors.
      * @return true if all symbols are valid, false otherwise.
      */
@@ -121,7 +123,8 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
 
     /**
      * Validates all function calls in the expression against the whitelist of allowed functions.
-     * @param input the expression string to check.
+     *
+     * @param input   the expression string to check.
      * @param context the validation context to report errors.
      * @return true if all function calls are allowed, false otherwise.
      */
@@ -133,10 +136,9 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
             String function = matcher.group(1).toLowerCase(); // Extract function name in lowercase
             // Check if function is allowed
             if (
-                    VALID_FUNCTION_WHITELIST
-                    .stream()
-                    .map(Functions::getName)
-                    .noneMatch(name -> name.equalsIgnoreCase(function))
+                    VALID_FUNCTION_WHITELIST.stream()
+                            .map(Functions::getName)
+                            .noneMatch(name -> name.equalsIgnoreCase(function))
             ) {
                 context.disableDefaultConstraintViolation(); // Disable default message
                 context.buildConstraintViolationWithTemplate("Semantic Error: Invalid function: '" + function + "' is not allowed.") // Custom message
@@ -149,8 +151,9 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
 
     /**
      * Parses the expression to check for syntax correctness using MathEclipse.
+     *
      * @param expression the mathematical expression string.
-     * @param context the validation context to report syntax errors.
+     * @param context    the validation context to report syntax errors.
      * @return true if syntax is correct, false otherwise.
      */
     private boolean validateSyntax(String expression, ConstraintValidatorContext context) {
@@ -173,6 +176,7 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
 
     /**
      * Checks if the symbol is a valid variable (single character and low case).
+     *
      * @param symbol the symbol to check.
      * @return true if valid variable, false otherwise.
      */
@@ -185,6 +189,7 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
 
     /**
      * Checks if the symbol is a valid constant from the whitelist.
+     *
      * @param symbol the symbol to check.
      * @return true if symbol is a valid constant, false otherwise.
      */
@@ -198,7 +203,8 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
 
     /**
      * Determines if a symbol is used as a function call in the expression.
-     * @param input the expression string.
+     *
+     * @param input  the expression string.
      * @param symbol the symbol to check.
      * @return true if symbol is a function call, false otherwise.
      */
@@ -219,18 +225,12 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
 
     /**
      * Cleans and formats the raw syntax error message from MathEclipse to be user-friendly.
+     *
      * @param errorMessage the original error message.
      * @return a simplified, clear error message.
      */
     private String formatSyntaxErrorMessage(String errorMessage) {
-        String pattern = "Syntax Error: Syntax error in line: \\d+ - Error in .*? (Token:\\d+ \\\\ \\))?\\n(.*?)\\n\\s*\\^";
-        Pattern regex = Pattern.compile(pattern, Pattern.DOTALL);
-        Matcher matcher = regex.matcher(errorMessage);
 
-        if (matcher.find()) {
-            return "Syntax error in: '" + matcher.group(2).trim() + "'";
-        }
-
-        return "Syntax error: " + errorMessage;
+        return errorMessage;
     }
 }

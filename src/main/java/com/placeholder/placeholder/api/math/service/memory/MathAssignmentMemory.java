@@ -1,9 +1,12 @@
 package com.placeholder.placeholder.api.math.service.memory;
 
 import com.placeholder.placeholder.api.math.enums.validation.constants.MathConstants;
+import com.placeholder.placeholder.api.math.regex.RegexValidator;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,11 +14,13 @@ import java.util.regex.Pattern;
 @Component
 public class MathAssignmentMemory {
 
-    private final Map<String, String> variableMap = new HashMap<>();
-
     private static final Pattern ASSIGNMENT_PATTERN = Pattern.compile("^([a-z])=(.+)$");
 
-    public MathAssignmentMemory() {
+    private final Map<String, String> variableMap = new HashMap<>();
+    private final RegexValidator regexValidator;
+
+    public MathAssignmentMemory(RegexValidator regexValidator) {
+        this.regexValidator = regexValidator;
         init();
     }
 
@@ -58,5 +63,18 @@ public class MathAssignmentMemory {
 
     public Map<String, String> getVariables() {
         return Map.copyOf(variableMap);
+    }
+
+    public String[] getVariablesInExpression(String expression) {
+        Matcher matcher = RegexValidator.matcher(expression, regexValidator.SYMBOL_PATTERN);
+        List<String> variables = new ArrayList<>();
+        while (matcher.find()) {
+            String symbol = matcher.group(1);
+            if (!variableMap.containsKey(symbol)) {
+                variables.add(symbol);
+            }
+        }
+
+        return variables.toArray(new String[0]);
     }
 }

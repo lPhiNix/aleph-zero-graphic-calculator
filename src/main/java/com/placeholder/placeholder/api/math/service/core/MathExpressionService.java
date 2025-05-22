@@ -8,6 +8,7 @@ import com.placeholder.placeholder.api.math.enums.computation.MathExpressionType
 import com.placeholder.placeholder.api.math.service.classifier.Classifier;
 import com.placeholder.placeholder.api.math.service.memory.MathAssignmentMemory;
 import com.placeholder.placeholder.api.math.service.strategy.EvaluationStrategyContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class MathExpressionService implements MathEvaluationService {
     private final Classifier mathExpressionClassifier;
     private final EvaluationStrategyContext context;
 
+    @Autowired
     public MathExpressionService(
             MathAssignmentMemory memory,
             Classifier mathExpressionClassifier,

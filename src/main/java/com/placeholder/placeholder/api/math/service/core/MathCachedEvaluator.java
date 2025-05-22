@@ -3,15 +3,16 @@ package com.placeholder.placeholder.api.math.service.core;
 import com.placeholder.placeholder.api.math.dto.request.MathDataDto;
 import com.placeholder.placeholder.api.math.facade.MathExpressionEvaluation;
 import com.placeholder.placeholder.api.math.facade.MathLibFacade;
+import com.placeholder.placeholder.api.math.service.memory.MathAssignmentMemory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MathEvaluationCached {
+public class MathCachedEvaluator {
 
     private final MathLibFacade mathEclipse;
 
-    public MathEvaluationCached(MathLibFacade mathEclipse) {
+    public MathCachedEvaluator(MathLibFacade mathEclipse) {
         this.mathEclipse = mathEclipse;
     }
 
