@@ -28,6 +28,7 @@ public class EvaluationStrategyContext {
         return switch (strategy) {
             case FunctionEvaluationStrategy s -> MathExpressionType.FUNCTION;
             case EquationEvaluationStrategy s -> MathExpressionType.EQUATION;
+            case BooleanEvaluationStrategy s -> MathExpressionType.BOOLEAN;
             case NumericEvaluationStrategy s -> MathExpressionType.NUMERIC;
             case VectorEvaluationStrategy s -> MathExpressionType.VECTOR;
             case MatrixEvaluationStrategy s -> MathExpressionType.MATRIX;

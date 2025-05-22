@@ -2,6 +2,7 @@ package com.placeholder.placeholder.api.math.enums.validation.functions;
 
 import com.placeholder.placeholder.api.math.enums.validation.io.MathInputType;
 import com.placeholder.placeholder.api.math.enums.validation.io.MathOutputType;
+import lombok.Getter;
 
 public enum SymjaFunctions implements Functions {
 
@@ -31,11 +32,11 @@ public enum SymjaFunctions implements Functions {
     LCM("lcm", MathOutputType.NUMERIC, MathInputType.NUMBER, MathInputType.NUMBER);
 
     private final String name;
-    private final MathInputType[] inputType;
-    private final MathOutputType resultType;
 
-    SymjaFunctions(String name, MathOutputType resultType, MathInputType
-            ... inputType) {
+    @Getter private final MathInputType[] inputType;
+    @Getter private final MathOutputType resultType;
+
+    SymjaFunctions(String name, MathOutputType resultType, MathInputType... inputType) {
         this.name = name;
         this.inputType = inputType;
         this.resultType = resultType;
@@ -46,7 +47,4 @@ public enum SymjaFunctions implements Functions {
         return name;
     }
 
-    public MathOutputType getResultType() {
-        return resultType;
-    }
 }

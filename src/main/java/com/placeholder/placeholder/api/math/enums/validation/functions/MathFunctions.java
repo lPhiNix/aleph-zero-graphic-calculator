@@ -2,8 +2,13 @@ package com.placeholder.placeholder.api.math.enums.validation.functions;
 
 import com.placeholder.placeholder.api.math.enums.validation.io.MathInputType;
 import com.placeholder.placeholder.api.math.enums.validation.io.MathOutputType;
+import lombok.Getter;
 
 public enum MathFunctions implements Functions {
+
+    F("f", MathOutputType.FUNCTION, MathInputType.FUNCTION),
+    G("g", MathOutputType.FUNCTION, MathInputType.FUNCTION),
+    H("h", MathOutputType.FUNCTION, MathInputType.FUNCTION),
 
     X("x", MathOutputType.FUNCTION, MathInputType.VARIABLE),
     Y("Y", MathOutputType.FUNCTION, MathInputType.VARIABLE),
@@ -29,30 +34,31 @@ public enum MathFunctions implements Functions {
     COT("cot", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
     SEC("sec", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
 
-    ARCSIN("arcsin", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
-    ARCCOS("arccos", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
-    ARCTAN("arctan", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
-    ARCCSC("arccsc", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
-    ARCCOT("arccot", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
-    ARCSEC("arcsec", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
+    ARC_SIN("arcsin", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
+    ARC_COS("arccos", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
+    ARC_TAN("arctan", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
+    ARC_CSC("arccsc", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
+    ARC_COT("arccot", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
+    ARC_SEC("arcsec", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
 
-    SINH("sinh", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
-    COSH("cosh", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
+    SIN_H("sinh", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
+    COS_H("cosh", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
     TAN_H("tanh", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
     COT_H("coth", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
     SEC_H("sech", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
     CSC_H("csch", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
 
-    ARCSIN_H("arcsinh", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
-    ARCCOS_H("arccosh", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
-    ARCTAN_H("arctanh", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
-    ARCCOT_H("arccoth", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
-    ARCSEC_H("arcsech", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
-    ARCCSC_H("arccsch", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION);
+    ARC_SIN_H("arcsinh", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
+    ARC_COS_H("arccosh", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
+    ARC_TAN_H("arctanh", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
+    ARC_COT_H("arccoth", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
+    ARC_SEC_H("arcsech", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
+    ARC_CSC_H("arccsch", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION);
 
     private final String name;
-    private final MathInputType[] inputType;
-    private final MathOutputType resultType;
+
+    @Getter private final MathInputType[] inputType;
+    @Getter private final MathOutputType resultType;
 
     MathFunctions(String name, MathOutputType resultType, MathInputType... inputType) {
         this.name = name;
@@ -65,7 +71,4 @@ public enum MathFunctions implements Functions {
         return name;
     }
 
-    public MathOutputType getResultType() {
-        return resultType;
-    }
 }

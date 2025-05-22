@@ -1,5 +1,8 @@
 package com.placeholder.placeholder.api.math.enums.validation.constants;
 
+import lombok.Getter;
+
+@Getter
 public enum MathConstants {
 
     PI("Pi"),
@@ -18,7 +21,4 @@ public enum MathConstants {
         this.valor = valor;
     }
 
-    public String getValor() {
-        return valor;
-    }
 }

@@ -15,7 +15,9 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Global exception handler for the application.  This class provides centralized handling for various
@@ -57,14 +59,21 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllExceptions(Exception ex) {
+        String stackTrace = Arrays.stream(ex.getStackTrace())
+                .map(StackTraceElement::toString)
+                .collect(Collectors.joining("\n"));
+
         return responseFactory.error(
-                AppCode.INTERNAL_ERROR,  // Application-specific error code
-                DEFAULT_ERROR_MESSAGE, // User-friendly message
-                List.of(new ErrorDetail(ErrorCategory.INTERNAL,
-                        (ex.getCause() != null) ? ex.getCause().getMessage() : DEFAULT_ERROR_MESSAGE,
-                        DEFAULT_ERROR_MESSAGE))
+                AppCode.INTERNAL_ERROR,
+                DEFAULT_ERROR_MESSAGE,
+                List.of(new ErrorDetail(
+                        ErrorCategory.INTERNAL,
+                        (ex.getCause() != null) ? ex.getCause().getMessage() : ex.getMessage(),
+                        DEFAULT_ERROR_MESSAGE + "\n\nStack trace:\n" + stackTrace
+                ))
         );
     }
+
 
     /**
      * Handles {@link RuntimeException}.  Runtime exceptions are typically caused by programming errors.
