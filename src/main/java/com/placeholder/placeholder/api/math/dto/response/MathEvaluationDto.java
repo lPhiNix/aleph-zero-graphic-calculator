@@ -1,7 +1,7 @@
 package com.placeholder.placeholder.api.math.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.placeholder.placeholder.api.math.enums.MathEvaluationType;
+import com.placeholder.placeholder.api.math.enums.computation.MathEvaluationType;
 
 import java.util.List;
 

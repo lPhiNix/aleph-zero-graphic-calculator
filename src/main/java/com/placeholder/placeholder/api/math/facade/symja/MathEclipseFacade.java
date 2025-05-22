@@ -1,7 +1,6 @@
 package com.placeholder.placeholder.api.math.facade.symja;
 
 import com.placeholder.placeholder.api.math.facade.MathLibFacade;
-import jakarta.validation.constraints.NotNull;
 import org.matheclipse.core.eval.EvalUtilities;
 import org.matheclipse.core.eval.ExprEvaluator;
 import org.matheclipse.core.form.tex.TeXFormFactory;
