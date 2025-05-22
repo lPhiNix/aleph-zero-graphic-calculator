@@ -8,9 +8,10 @@ public enum MathConstants {
     PHI("Phi", "GoldenRatio"),
     INFINITY("Infinity"),
     COMPLEX_INFINITY("ComplexInfinity"),
-    EulerGamma("EulerGamma"),
+    EULER_GAMMA("EulerGamma"),
     DEGREE("Degree"),
-    CATALAN("Catalan");
+    CATALAN("Catalan"),
+    MEISSEL_MERTNESS("MeisselMertens");
 
     private final String valor1;
     private final String valor2;

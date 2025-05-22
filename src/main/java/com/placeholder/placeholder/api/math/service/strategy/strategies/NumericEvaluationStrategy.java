@@ -20,9 +20,14 @@ public class NumericEvaluationStrategy implements EvaluationStrategy {
 
     @Override
     public List<MathEvaluationDto> compute(String expression, MathDataDto data) {
+        MathExpressionEvaluation evaluation = mathEvaluator.evaluate(expression);
         MathExpressionEvaluation calculation = mathEvaluator.calculate(expression, data);
 
         return List.of(
+                new MathEvaluationDto(MathEvaluationType.EVALUATION,
+                        evaluation.getExpressionEvaluated(),
+                        evaluation.getEvaluationProblems().orElse(null)
+                ),
                 new MathEvaluationDto(MathEvaluationType.CALCULATION,
                         calculation.getExpressionEvaluated(),
                         calculation.getEvaluationProblems().orElse(null)

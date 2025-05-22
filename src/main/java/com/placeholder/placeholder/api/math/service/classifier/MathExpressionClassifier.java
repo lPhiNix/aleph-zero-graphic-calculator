@@ -35,7 +35,6 @@ public class MathExpressionClassifier implements Classifier {
         MathExpressionType preEvaluationExpressionType = rawClassify(preEvaluation);
         MathExpressionType expressionType = rawClassify(expression);
 
-
         if (expressionType == ASSIGNMENT) {
             return ASSIGNMENT;
         }

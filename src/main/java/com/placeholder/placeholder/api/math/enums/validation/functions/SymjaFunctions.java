@@ -1,50 +1,36 @@
 package com.placeholder.placeholder.api.math.enums.validation.functions;
 
-import com.placeholder.placeholder.api.math.enums.validation.io.MathInputType;
-import com.placeholder.placeholder.api.math.enums.validation.io.MathOutputType;
-import lombok.Getter;
-
 public enum SymjaFunctions implements Functions {
 
-    D("d", MathOutputType.FUNCTION, MathInputType.NUMBER_OR_FUNCTION),
-    DIFF("diff", MathOutputType.FUNCTION, MathInputType.NUMBER_OR_FUNCTION),
-    INTEGRATE("integrate", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION, MathInputType.SYMBOL_OR_VECTOR),
-    TAYLOR("taylor", MathOutputType.FUNCTION, MathInputType.FUNCTION),
-    SOLVE("solve", MathOutputType.VECTOR, MathInputType.EQUATION),
-    LIMIT("limit", MathOutputType.NUMERIC, MathInputType.LIMIT_NOTATION),
-    D_SOLVE("dsolve", MathOutputType.VECTOR, MathInputType.EQUATION),
-
-    SIMPLIFY("simplify", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
-    EXPAND("expand", MathOutputType.NEED_PREVIOUS_EVALUATION, MathInputType.NUMBER_OR_FUNCTION),
-
-    DOT("dot", MathOutputType.NUMERIC, MathInputType.VECTOR, MathInputType.VECTOR),
-    CROSS("cross", MathOutputType.VECTOR, MathInputType.VECTOR, MathInputType.VECTOR),
-    NORM("norm", MathOutputType.NUMERIC, MathInputType.VECTOR),
-    NORMALIZE("normalize", MathOutputType.VECTOR, MathInputType.VECTOR),
-    VECTOR_ANGLE("vectorangle", MathOutputType.NUMERIC, MathInputType.VECTOR, MathInputType.VECTOR),
-    PROJECTION("projection", MathOutputType.VECTOR, MathInputType.VECTOR, MathInputType.VECTOR),
-
-    EIGENVALUES("eigenvalues", MathOutputType.VECTOR, MathInputType.VECTOR, MathInputType.VECTOR),
-    INVERSE("inverse", MathOutputType.MATRIX, MathInputType.MATRIX),
-    TRANSPOSE("transpose", MathOutputType.MATRIX, MathInputType.MATRIX),
-
-    GCD("gcd", MathOutputType.NUMERIC, MathInputType.NUMBER, MathInputType.NUMBER),
-    LCM("lcm", MathOutputType.NUMERIC, MathInputType.NUMBER, MathInputType.NUMBER);
+    D("d"),
+    DIFF("diff"),
+    INTEGRATE("integrate"),
+    TAYLOR("taylor"),
+    SOLVE("solve"),
+    LIMIT("limit"),
+    D_SOLVE("dsolve"),
+    SIMPLIFY("simplify"),
+    EXPAND("expand"),
+    DOT("dot"),
+    CROSS("cross"),
+    NORM("norm"),
+    NORMALIZE("normalize"),
+    VECTOR_ANGLE("vectorangle"),
+    PROJECTION("projection"),
+    EIGENVALUES("eigenvalues"),
+    INVERSE("inverse"),
+    TRANSPOSE("transpose"),
+    GCD("gcd"),
+    LCM("lcm");
 
     private final String name;
 
-    @Getter private final MathInputType[] inputType;
-    @Getter private final MathOutputType resultType;
-
-    SymjaFunctions(String name, MathOutputType resultType, MathInputType... inputType) {
+    SymjaFunctions(String name) {
         this.name = name;
-        this.inputType = inputType;
-        this.resultType = resultType;
     }
 
     @Override
     public String getName() {
         return name;
     }
-
 }

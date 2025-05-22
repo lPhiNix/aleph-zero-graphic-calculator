@@ -11,7 +11,6 @@ import java.util.Optional;
  * and any potential issues encountered during the evaluation process.
  */
 public interface MathExpressionEvaluation {
-
     /**
      * Returns the evaluated form of the mathematical expression.
      * <p>
