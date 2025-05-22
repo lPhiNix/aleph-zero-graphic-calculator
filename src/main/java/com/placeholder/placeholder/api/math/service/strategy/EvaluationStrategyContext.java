@@ -1,6 +1,6 @@
 package com.placeholder.placeholder.api.math.service.strategy;
 
-import com.placeholder.placeholder.api.math.enums.MathExpressionType;
+import com.placeholder.placeholder.api.math.enums.computation.MathExpressionType;
 import com.placeholder.placeholder.api.math.service.strategy.strategies.*;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +31,6 @@ public class EvaluationStrategyContext {
             case NumericEvaluationStrategy s -> MathExpressionType.NUMERIC;
             case VectorEvaluationStrategy s -> MathExpressionType.VECTOR;
             case MatrixEvaluationStrategy s -> MathExpressionType.MATRIX;
-            case AssignmentEvaluationStrategy s -> MathExpressionType.ASSIGNMENT;
             case UnknownEvaluationStrategy s -> MathExpressionType.UNKNOWN;
             default -> throw new IllegalStateException("Unsupported strategy: " + strategy.getClass().getSimpleName());
         };

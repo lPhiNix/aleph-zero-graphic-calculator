@@ -1,6 +1,6 @@
 package com.placeholder.placeholder.api.math.dto.response;
 
-import com.placeholder.placeholder.api.math.enums.MathExpressionType;
+import com.placeholder.placeholder.api.math.enums.computation.MathExpressionType;
 
 import java.util.List;
 

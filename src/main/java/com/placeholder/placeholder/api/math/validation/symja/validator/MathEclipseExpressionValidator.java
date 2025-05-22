@@ -1,15 +1,25 @@
 package com.placeholder.placeholder.api.math.validation.symja.validator;
 
+import com.placeholder.placeholder.api.math.enums.validation.constants.MathConstants;
+import com.placeholder.placeholder.api.math.enums.validation.functions.Functions;
+import com.placeholder.placeholder.api.math.enums.validation.functions.MathFunctions;
+import com.placeholder.placeholder.api.math.enums.validation.functions.SymjaFunctions;
+import com.placeholder.placeholder.api.math.regex.RegexValidator;
 import com.placeholder.placeholder.api.math.validation.symja.annotations.ValidMathEclipseExpression;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.matheclipse.core.eval.ExprEvaluator;
 import org.matheclipse.core.interfaces.IExpr;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * {@code MathExpressionValidator} is a mathematical expressions validator using both
@@ -27,32 +37,23 @@ import java.util.regex.Pattern;
 @Component
 public class MathEclipseExpressionValidator implements ConstraintValidator<ValidMathEclipseExpression, String> {
 
-    // Pattern to detect symbols (e.g. variables and constants) in the expression.
-    private static final Pattern SYMBOL_PATTERN = Pattern.compile("\\b([a-zA-Z][a-zA-Z0-9]*)\\b");
-
-    // Pattern to detect function calls by looking for a name followed by ( or [.
-    private static final Pattern FUNCTION_CALL_PATTERN = Pattern.compile("([a-zA-Z][a-zA-Z0-9]*)\\s*[(\\[]");
-
     // Whitelist of constants that can be used as-is in expressions without being one-character variables.
-    private static final Set<String> VALID_CONSTANT_WHITELIST = Set.of(
-            "pi", "infinity", "complexinfinity"
-    );
+    public static final Set<MathConstants> VALID_CONSTANT_WHITELIST = Set.of(MathConstants.values());
 
     // Whitelist of allowed function names the user can include in their input.
-    private static final Set<String> VALID_FUNCTION_WHITELIST = Set.of(
-            "gamma", "zeta", "erf", "fresnelc", "c",
-            "d", "diff", "integrate", "taylor", "solve", "limit", "dsolve", "logicalexpand",
-            "dot", "cross", "norm", "normalize", "vectorangle", "projection",
-            "eigenvalues", "inverse", "transpose",
-            "gcd", "lcm", "simplify", "expand", "sqrt", "exp", "log", "log10", "log2", "abs",
-            "sin", "cos", "tan", "csc", "cot", "sec",
-            "arcsin", "arccos", "arctan", "arccsc", "arccot",
-            "arcsec", "sinh", "cosh", "tanh", "coth", "sech", "csch",
-            "arcsinh", "arccosh", "arctanh", "arccoth", "arcsech", "arccsch"
-    );
+    public static final Set<Functions> VALID_FUNCTION_WHITELIST = Stream.of(MathFunctions.values(), SymjaFunctions.values())
+            .flatMap(Arrays::stream)
+            .collect(Collectors.toSet());
 
     // Evaluator used to parse and validate expressions syntactically using MathEclipse.
     private final ExprEvaluator syntaxEvaluator = new ExprEvaluator();
+
+    private final RegexValidator regexValidator;
+
+    @Autowired
+    public MathEclipseExpressionValidator(RegexValidator regexValidator) {
+        this.regexValidator = regexValidator;
+    }
 
     /**
      * Validates the input expression against grammar, semantics, and syntax.
@@ -97,7 +98,7 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
      * @return true if all symbols are valid, false otherwise.
      */
     private boolean validateGrammar(String input, ConstraintValidatorContext context) {
-        Matcher matcher = SYMBOL_PATTERN.matcher(input); // Find all symbols in the expression
+        Matcher matcher = regexValidator.SYMBOL_PATTERN.matcher(input); // Find all symbols in the expression
         boolean valid = true;
         while (matcher.find()) {
             String symbol = matcher.group(1);
@@ -126,12 +127,18 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
      * @return true if all function calls are allowed, false otherwise.
      */
     private boolean validateSemantic(String input, ConstraintValidatorContext context) {
-        Matcher matcher = FUNCTION_CALL_PATTERN.matcher(input); // Find all function calls
+        Matcher matcher = regexValidator.FUNCTION_CALL_PATTERN.matcher(input); // Find all function calls
         boolean valid = true;
         // Iterate over each function call found
         while (matcher.find()) {
             String function = matcher.group(1).toLowerCase(); // Extract function name in lowercase
-            if (!VALID_FUNCTION_WHITELIST.contains(function)) { // Check if function is allowed
+            // Check if function is allowed
+            if (
+                    VALID_FUNCTION_WHITELIST
+                    .stream()
+                    .map(Functions::getName)
+                    .noneMatch(name -> name.equalsIgnoreCase(function))
+            ) {
                 context.disableDefaultConstraintViolation(); // Disable default message
                 context.buildConstraintViolationWithTemplate("Semantic Error: Invalid function: '" + function + "' is not allowed.") // Custom message
                         .addConstraintViolation();
@@ -166,12 +173,15 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
     }
 
     /**
-     * Checks if the symbol is a valid variable (single character).
+     * Checks if the symbol is a valid variable (single character and low case).
      * @param symbol the symbol to check.
      * @return true if valid variable, false otherwise.
      */
     private boolean isValidSymbol(String symbol) {
-        return symbol.length() == 1;
+        if (symbol.length() != 1) return false;
+
+        char character = symbol.charAt(0);
+        return !Character.isUpperCase(character);
     }
 
     /**
@@ -180,7 +190,11 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
      * @return true if symbol is a valid constant, false otherwise.
      */
     private boolean isValidConstant(String symbol) {
-        return VALID_CONSTANT_WHITELIST.contains(symbol.toLowerCase());
+        return VALID_CONSTANT_WHITELIST
+                .stream().anyMatch(
+                        constant -> constant.getValor()
+                                .equalsIgnoreCase(symbol)
+                );
     }
 
     /**

@@ -14,6 +14,10 @@ public class MathAssignmentMemory {
 
     private static final Pattern ASSIGNMENT_PATTERN = Pattern.compile("^([a-z])=(.+)$");
 
+    public MathAssignmentMemory() {
+
+    }
+
     public String process(String expression) {
         Matcher matcher = ASSIGNMENT_PATTERN.matcher(expression.replaceAll("\\s+", ""));
         if (matcher.matches()) {

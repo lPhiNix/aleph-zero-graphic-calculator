@@ -1,4 +1,4 @@
-package com.placeholder.placeholder.api.math.service.micro;
+package com.placeholder.placeholder.api.math.service.core;
 
 import com.placeholder.placeholder.api.math.dto.request.MathDataDto;
 import com.placeholder.placeholder.api.math.facade.MathExpressionEvaluation;
