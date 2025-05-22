@@ -79,8 +79,7 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
     public MathEclipseEvaluation draw(String expression, String variable, String origin, String bound) {
         // Format and validate the expression before plotting
         String formattedExpression = initialFormatted(expression);
-        String evaluatedExpression = evaluate(formattedExpression).getExpressionEvaluated();
-        String plotExpression = Plot(evaluatedExpression, variable, origin, bound);
+        String plotExpression = Plot(formattedExpression, variable, origin, bound);
         return safeEvaluation(plotExpression);
     }
 
@@ -144,7 +143,7 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
      * Resets the internal evaluator to its initial state, removing all variable definitions.
      */
     @Override
-    public void clean() {
+    public void clear() {
         // Rebuild the evaluator to clear all stored variables and state
         mathEclipseEvaluator = MathEclipseConfig.buildEvalUtilities();
     }

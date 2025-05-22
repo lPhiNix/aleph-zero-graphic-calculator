@@ -2,7 +2,7 @@ package com.placeholder.placeholder.api.math;
 
 import com.placeholder.placeholder.api.math.dto.request.MathEvaluationRequest;
 import com.placeholder.placeholder.api.math.dto.response.MathEvaluationResultResponse;
-import com.placeholder.placeholder.api.math.services.MathExpressionService;
+import com.placeholder.placeholder.api.math.service.core.MathExpressionService;
 import com.placeholder.placeholder.api.util.common.messages.ApiResponseFactory;
 import com.placeholder.placeholder.api.util.common.messages.dto.ApiResponse;
 import jakarta.validation.Valid;

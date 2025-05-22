@@ -58,5 +58,5 @@ public interface MathLibFacade<E extends MathExpressionEvaluation> {
      * This method is typically used to clear the internal context after a series of evaluations,
      * ensuring a fresh evaluation state for subsequent computations.
      */
-    void clean();
+    void clear();
 }
