@@ -38,6 +38,8 @@ public class MathExpressionService implements MathEvaluationService {
             return new MathExpressionEvaluationDto(expr.expression(), type, results);
         }).toList();
 
+        memory.clear();
+
         return new MathEvaluationResultResponse(responses);
     }
 }

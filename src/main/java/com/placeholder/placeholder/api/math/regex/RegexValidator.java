@@ -53,8 +53,4 @@ public class RegexValidator {
     public static boolean match(String expression, Pattern pattern)  {
         return pattern.matcher(expression).matches();
     }
-
-    public static void main(String[] args) {
-
-    }
 }
