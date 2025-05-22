@@ -11,7 +11,9 @@ public enum MathConstants {
     EULER_GAMMA("EulerGamma"),
     DEGREE("Degree"),
     CATALAN("Catalan"),
-    MEISSEL_MERTNESS("MeisselMertens");
+    MEISSEL_MERTNESS("MeisselMertens"),
+    GLAISHER("Glaisher"),
+    KHINCHIN("Khinchin");
 
     private final String valor1;
     private final String valor2;

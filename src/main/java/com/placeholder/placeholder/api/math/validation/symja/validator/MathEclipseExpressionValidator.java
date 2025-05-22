@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -230,7 +229,6 @@ public class MathEclipseExpressionValidator implements ConstraintValidator<Valid
      * @return a simplified, clear error message.
      */
     private String formatSyntaxErrorMessage(String errorMessage) {
-
         return errorMessage;
     }
 }

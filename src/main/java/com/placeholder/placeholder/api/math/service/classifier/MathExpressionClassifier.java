@@ -3,7 +3,7 @@ package com.placeholder.placeholder.api.math.service.classifier;
 import com.placeholder.placeholder.api.math.dto.request.MathDataDto;
 import com.placeholder.placeholder.api.math.enums.computation.MathExpressionType;
 import com.placeholder.placeholder.api.math.regex.RegexValidator;
-import com.placeholder.placeholder.api.math.service.core.MathCachedEvaluator;
+import com.placeholder.placeholder.api.math.service.core.MathCachedEvaluationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,12 +12,12 @@ import static com.placeholder.placeholder.api.math.enums.computation.MathExpress
 @Component
 public class MathExpressionClassifier implements Classifier {
 
-    private final MathCachedEvaluator mathEclipse;
+    private final MathCachedEvaluationService mathEclipse;
     private final RegexValidator regexValidator;
 
     @Autowired
     public MathExpressionClassifier(
-            MathCachedEvaluator mathEclipse,
+            MathCachedEvaluationService mathEclipse,
             RegexValidator regexValidator
     ) {
         this.mathEclipse = mathEclipse;
@@ -27,7 +27,7 @@ public class MathExpressionClassifier implements Classifier {
     @Override
     public MathExpressionType classify(String expression) {
         if (expression == null || expression.trim().isEmpty()) {
-            return MathExpressionType.NONE;
+            return NONE;
         }
 
         String preEvaluation = preEvaluation(expression);
