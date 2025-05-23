@@ -59,18 +59,12 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllExceptions(Exception ex) {
-        String stackTrace = Arrays.stream(ex.getStackTrace())
-                .map(StackTraceElement::toString)
-                .collect(Collectors.joining("\n"));
-
         return responseFactory.error(
                 AppCode.INTERNAL_ERROR,
-                DEFAULT_ERROR_MESSAGE,
-                List.of(new ErrorDetail(
-                        ErrorCategory.INTERNAL,
-                        (ex.getCause() != null) ? ex.getCause().getMessage() : ex.getMessage(),
-                        DEFAULT_ERROR_MESSAGE + "\n\nStack trace:\n" + stackTrace
-                ))
+                "Runtime error",
+                List.of(new ErrorDetail(ErrorCategory.INTERNAL,
+                        (ex.getCause() != null) ? ex.getCause().getMessage() : DEFAULT_ERROR_MESSAGE,
+                        DEFAULT_ERROR_MESSAGE))
         );
     }
 
@@ -83,18 +77,12 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex) {
-        String stackTrace = Arrays.stream(ex.getStackTrace())
-                .map(StackTraceElement::toString)
-                .collect(Collectors.joining("\n"));
-
         return responseFactory.error(
                 AppCode.INTERNAL_ERROR,
-                DEFAULT_ERROR_MESSAGE,
-                List.of(new ErrorDetail(
-                        ErrorCategory.INTERNAL,
-                        (ex.getCause() != null) ? ex.getCause().getMessage() : ex.getMessage(),
-                        DEFAULT_ERROR_MESSAGE + "\n\nStack trace:\n" + stackTrace
-                ))
+                "Runtime error",
+                List.of(new ErrorDetail(ErrorCategory.INTERNAL,
+                        (ex.getCause() != null) ? ex.getCause().getMessage() : DEFAULT_ERROR_MESSAGE,
+                        DEFAULT_ERROR_MESSAGE))
         );
     }
 

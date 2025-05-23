@@ -53,6 +53,13 @@ public enum AppCode {
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "Bad request"),
 
     /**
+     * The server timed out waiting for the request.
+     * <p>
+     * Maps to HTTP 408 Request Timeout.
+     */
+    TIMEOUT(HttpStatus.REQUEST_TIMEOUT, "Request timeout"),
+
+    /**
      * Authentication failed or user does not have permissions for the desired action.
      * <p>
      * Maps to HTTP 401 Unauthorized.
