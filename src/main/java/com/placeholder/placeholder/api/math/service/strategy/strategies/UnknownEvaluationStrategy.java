@@ -35,4 +35,9 @@ public class UnknownEvaluationStrategy implements EvaluationStrategy {
                 )
         );
     }
+
+    @Override
+    public MathCachedEvaluationService getEvaluatorService() {
+        return mathEvaluator;
+    }
 }

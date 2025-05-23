@@ -29,4 +29,9 @@ public class VectorEvaluationStrategy implements EvaluationStrategy {
                 )
         );
     }
+
+    @Override
+    public MathCachedEvaluationService getEvaluatorService() {
+        return mathEvaluator;
+    }
 }

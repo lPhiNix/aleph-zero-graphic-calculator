@@ -30,4 +30,9 @@ public class EquationEvaluationStrategy implements EvaluationStrategy {
                 )
         );
     }
+
+    @Override
+    public MathCachedEvaluationService getEvaluatorService() {
+        return mathEvaluator;
+    }
 }

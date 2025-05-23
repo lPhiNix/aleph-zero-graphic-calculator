@@ -36,6 +36,7 @@ public class MathExpressionClassifier implements Classifier {
         MathExpressionType expressionType = rawClassify(expression);
 
         if (expressionType == ASSIGNMENT) {
+            System.out.println("si");
             return ASSIGNMENT;
         }
 

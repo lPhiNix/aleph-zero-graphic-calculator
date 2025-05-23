@@ -32,8 +32,13 @@ public class EvaluationStrategyContext {
             case NumericEvaluationStrategy s -> MathExpressionType.NUMERIC;
             case VectorEvaluationStrategy s -> MathExpressionType.VECTOR;
             case MatrixEvaluationStrategy s -> MathExpressionType.MATRIX;
+            case AssignmentEvaluationStrategy s -> MathExpressionType.ASSIGNMENT;
             case UnknownEvaluationStrategy s -> MathExpressionType.UNKNOWN;
             default -> throw new IllegalStateException("Unsupported strategy: " + strategy.getClass().getSimpleName());
         };
+    }
+
+    public void stopCurrentEvaluation() {
+        evaluationStrategyMap.values().forEach(EvaluationStrategy::stopRequestIfSupported);
     }
 }

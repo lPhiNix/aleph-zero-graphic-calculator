@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 @Component
 public class RegexValidator {
 
-    private final Set<String> CONSTANTS_PATTERN;
+    private final Set<String> CONSTANTS;
 
     // Pattern to detect symbols (e.g. variables and constants) in the expression.
     public final Pattern SYMBOL_PATTERN = Pattern.compile("\\b([a-zA-Z][a-zA-Z0-9]*)\\b");
@@ -29,23 +29,18 @@ public class RegexValidator {
     public final Pattern VECTOR_PATTERN = Pattern.compile("\\{\\s*-?\\d+(\\.\\d+)?(\\s*,\\s*-?\\d+(\\.\\d+)?)*\\s*}");
 
     public RegexValidator() {
-        // Construimos un patrón para constantes como: Pi|E|I|GoldenRatio|infinity|...
-        CONSTANTS_PATTERN = Arrays.stream(MathConstants.values())
+        CONSTANTS = Arrays.stream(MathConstants.values())
                 .map(MathConstants::getValor)
                 .collect(Collectors.toSet());
 
-        // Unimos las constantes con | y escapamos caracteres especiales
-        String constantsRegex = CONSTANTS_PATTERN.stream()
+        String constantsRegex = CONSTANTS.stream()
                 .map(Pattern::quote)
                 .collect(Collectors.joining("|"));
 
-        // Patrón para números reales, fracciones o complejos simples
         String numberRegex = "-?\\d+(\\.\\d+)?|-?\\d+/\\d+";
 
-        // Un "término" puede ser una constante o un número
         String termRegex = String.format("(%s|%s)", numberRegex, constantsRegex);
 
-        // Soporta expresiones del tipo: "term [op term]*", ej: E + I - 2/3
         String expressionRegex = String.format("\\s*%s(\\s*[-+*/]\\s*%s)*\\s*", termRegex, termRegex);
 
         NUMERIC_PATTERN = Pattern.compile(expressionRegex);

@@ -34,4 +34,9 @@ public class NumericEvaluationStrategy implements EvaluationStrategy {
                 )
         );
     }
+
+    @Override
+    public MathCachedEvaluationService getEvaluatorService() {
+        return mathEvaluator;
+    }
 }

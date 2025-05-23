@@ -33,5 +33,9 @@ public class MathCachedEvaluationService {
     public void clearEvaluator() {
         mathEclipse.clear();
     }
+
+    public void stopRequest() {
+        mathEclipse.stopRequest();
+    }
 }
 

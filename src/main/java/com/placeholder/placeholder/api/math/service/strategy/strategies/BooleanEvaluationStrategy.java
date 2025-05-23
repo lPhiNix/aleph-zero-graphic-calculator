@@ -6,9 +6,11 @@ import com.placeholder.placeholder.api.math.enums.computation.MathEvaluationType
 import com.placeholder.placeholder.api.math.facade.MathExpressionEvaluation;
 import com.placeholder.placeholder.api.math.service.core.MathCachedEvaluationService;
 import com.placeholder.placeholder.api.math.service.strategy.EvaluationStrategy;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class BooleanEvaluationStrategy implements EvaluationStrategy {
 
     private final MathCachedEvaluationService mathEvaluator;
@@ -27,5 +29,10 @@ public class BooleanEvaluationStrategy implements EvaluationStrategy {
                         evaluation.getEvaluationProblems().orElse(null)
                 )
         );
+    }
+
+    @Override
+    public MathCachedEvaluationService getEvaluatorService() {
+        return mathEvaluator;
     }
 }
