@@ -5,6 +5,7 @@ import org.matheclipse.core.eval.EvalUtilities;
 import org.matheclipse.core.eval.ExprEvaluator;
 import org.matheclipse.core.form.tex.TeXFormFactory;
 import org.matheclipse.core.interfaces.IExpr;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
@@ -30,6 +31,7 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
     // Buffer to capture any errors printed to System.err during evaluation
     private final ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
 
+    @Autowired
     public MathEclipseFacade(
             EvalUtilities mathEclipseEvaluator,
             TeXFormFactory teXParser

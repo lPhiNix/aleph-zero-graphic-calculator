@@ -12,18 +12,36 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * REST controller that exposes endpoints related to mathematical expression processing.
+ * <p>
+ * Handles operations such as evaluation of mathematical expressions using a service layer.
+ * </p>
+ */
 @RestController
 @RequestMapping("api/v1/math")
 public class MathExpressionController {
 
     private final MathExpressionService service;
     private final ApiResponseFactory apiResponseFactory;
-    
+
+    /**
+     * Constructor for {@link MathExpressionController}.
+     *
+     * @param service            The service responsible for evaluating mathematical expressions
+     * @param apiResponseFactory A factory for creating standardized API responses
+     */
     public MathExpressionController(MathExpressionService service, ApiResponseFactory apiResponseFactory) {
         this.service = service;
         this.apiResponseFactory = apiResponseFactory;
     }
 
+    /**
+     * Evaluates one or more mathematical expressions with optional formatting settings.
+     *
+     * @param mathExpressionRequest A request object containing a list of expressions to evaluate and optional evaluation data
+     * @return A {@link ResponseEntity} containing an {@link ApiResponse} with the evaluation result
+     */
     @PostMapping("/evaluation")
     public ResponseEntity<ApiResponse<MathEvaluationResultResponse>> evaluation(
             @RequestBody @Valid MathEvaluationRequest mathExpressionRequest
@@ -31,14 +49,4 @@ public class MathExpressionController {
         MathEvaluationResultResponse response = service.evaluation(mathExpressionRequest);
         return apiResponseFactory.ok(response);
     }
-
-    /* TODO Implementation when Frontend is over.
-    @PostMapping("draw")
-    public ResponseEntity<ApiResponse<MathEvaluationResultResponse>> draw(
-            @RequestBody @Valid MathEvaluationRequest mathExpressionRequest
-    ) {
-        MathEvaluationResultResponse response = service.evaluation(mathExpressionRequest);
-        return apiResponseFactory.ok(response);
-    }
-     */
 }

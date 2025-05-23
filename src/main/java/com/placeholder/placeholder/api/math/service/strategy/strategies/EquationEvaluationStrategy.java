@@ -10,15 +10,35 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * {@code EquationEvaluationStrategy} implements the {@link EvaluationStrategy} interface
+ * providing the evaluation logic for mathematical equations.
+ * <p>
+ * This strategy evaluates equations using the underlying {@link MathCachedEvaluationService},
+ * returning the result encapsulated in {@link MathEvaluationDto} instances.
+ * </p>
+ */
 @Component
 public class EquationEvaluationStrategy implements EvaluationStrategy {
 
     private final MathCachedEvaluationService mathEvaluator;
 
+    /**
+     * Constructs an {@code EquationEvaluationStrategy} with the specified evaluation service.
+     *
+     * @param mathEvaluator the cached evaluation service to perform computations
+     */
     public EquationEvaluationStrategy(MathCachedEvaluationService mathEvaluator) {
         this.mathEvaluator = mathEvaluator;
     }
 
+    /**
+     * Computes the evaluation of the provided equation expression.
+     *
+     * @param expression the equation expression to evaluate
+     * @param data       additional context data wrapped in {@link MathDataDto}
+     * @return a list with a single {@link MathEvaluationDto} containing the evaluation result and any problems
+     */
     @Override
     public List<MathEvaluationDto> compute(String expression, MathDataDto data) {
         MathExpressionEvaluation evaluation = mathEvaluator.evaluate(expression);
@@ -31,6 +51,11 @@ public class EquationEvaluationStrategy implements EvaluationStrategy {
         );
     }
 
+    /**
+     * Returns the underlying cached evaluation service used by this strategy.
+     *
+     * @return the {@link MathCachedEvaluationService} instance
+     */
     @Override
     public MathCachedEvaluationService getEvaluatorService() {
         return mathEvaluator;
