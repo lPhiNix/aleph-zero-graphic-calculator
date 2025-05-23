@@ -6,5 +6,5 @@ import java.util.List;
 
 public record MathEvaluationRequest(
         @Valid List<MathExpressionDto> expressions,
-        MathDataDto data
+        @Valid MathDataDto data
 ) {}

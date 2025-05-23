@@ -83,12 +83,18 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex) {
+        String stackTrace = Arrays.stream(ex.getStackTrace())
+                .map(StackTraceElement::toString)
+                .collect(Collectors.joining("\n"));
+
         return responseFactory.error(
                 AppCode.INTERNAL_ERROR,
-                "Runtime error",
-                List.of(new ErrorDetail(ErrorCategory.INTERNAL,
-                        (ex.getCause() != null) ? ex.getCause().getMessage() : DEFAULT_ERROR_MESSAGE,
-                        DEFAULT_ERROR_MESSAGE))
+                DEFAULT_ERROR_MESSAGE,
+                List.of(new ErrorDetail(
+                        ErrorCategory.INTERNAL,
+                        (ex.getCause() != null) ? ex.getCause().getMessage() : ex.getMessage(),
+                        DEFAULT_ERROR_MESSAGE + "\n\nStack trace:\n" + stackTrace
+                ))
         );
     }
 
