@@ -19,7 +19,7 @@ import java.util.concurrent.*;
 @Service
 public class MathExpressionService implements MathEvaluationService {
 
-    private static final long TIMEOUT_SECONDS = 3 * 60;
+    private static final long TIMEOUT_SECONDS = 60; // TODO
 
     private final MathAssignmentMemory memory;
     private final Classifier mathExpressionClassifier;
