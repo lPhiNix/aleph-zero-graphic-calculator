@@ -1,14 +1,12 @@
-package com.placeholder.placeholder.db.basicdto;
+package com.placeholder.placeholder.api.auth.dto;
 
 import com.placeholder.placeholder.api.util.common.messages.dto.content.MessageContent;
 
 import java.io.Serializable;
 
-
-public record UserDto(
-        String publicId,
+public record UserRegisterRequestDto(
         String username,
-        String email,
-        UserRoleDto role
+        String password,
+        String email
 ) implements MessageContent {
 }

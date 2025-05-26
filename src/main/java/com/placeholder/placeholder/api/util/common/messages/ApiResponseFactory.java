@@ -3,8 +3,10 @@ package com.placeholder.placeholder.api.util.common.messages;
 import com.placeholder.placeholder.api.util.common.messages.dto.ApiResponse;
 import com.placeholder.placeholder.api.util.common.messages.dto.content.MessageContent;
 import com.placeholder.placeholder.api.util.common.messages.dto.content.responses.EmptyContentResponse;
+import com.placeholder.placeholder.api.util.common.messages.dto.error.ErrorCategory;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.ErrorResponse;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.details.ApiErrorDetail;
+import com.placeholder.placeholder.api.util.common.messages.dto.error.details.ErrorDetail;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.details.ValidationErrorDetail;
 import com.placeholder.placeholder.util.enums.AppCode;
 import jakarta.servlet.http.HttpServletRequest;
@@ -205,7 +207,7 @@ public class ApiResponseFactory {
      * @param details A list of {@link ApiErrorDetail} objects providing additional detail.
      * @return A {@link ResponseEntity} representing the error response with the appropriate HTTP status.
      */
-    public ResponseEntity<ErrorResponse> error(AppCode code, String title, String summary, List<ApiErrorDetail> details) {
+    public ResponseEntity<ErrorResponse> error(AppCode code, String title, String summary, List<? extends ApiErrorDetail> details) {
         ErrorResponse error = buildError(title, summary, details);
         return ResponseEntity.status(code.getStatus()).body(error);
     }
@@ -220,7 +222,7 @@ public class ApiResponseFactory {
      * @param details A list of {@link ApiErrorDetail} objects providing detailed error context.
      * @return A {@link ResponseEntity} representing the error response with the appropriate HTTP status.
      */
-    public ResponseEntity<ErrorResponse> error(AppCode code, String title, List<ApiErrorDetail> details) {
+    public ResponseEntity<ErrorResponse> error(AppCode code, String title, List<? extends ApiErrorDetail> details) {
         ErrorResponse error = buildError(title, null, details);
         return ResponseEntity.status(code.getStatus()).body(error);
     }
@@ -257,6 +259,11 @@ public class ApiResponseFactory {
         String summary = getErrorSummary(details);
         ErrorResponse error = buildError(title, summary, details);
         return ResponseEntity.status(code.getStatus()).body(error);
+    }
+
+    public ResponseEntity<ErrorResponse> authenticationError(String message, List<ErrorDetail> details) {
+        AppCode code = AppCode.UNAUTHORIZED;
+        return error(code, message, details);
     }
 
     public ResponseEntity<ErrorResponse> forbidden() {

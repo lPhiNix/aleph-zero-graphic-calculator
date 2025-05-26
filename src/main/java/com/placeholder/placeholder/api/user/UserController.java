@@ -5,15 +5,15 @@ import com.placeholder.placeholder.api.user.dto.UserCreationRequest;
 import com.placeholder.placeholder.api.util.common.messages.ApiResponseFactory;
 import com.placeholder.placeholder.api.util.common.messages.dto.ApiResponse;
 import com.placeholder.placeholder.api.util.common.messages.dto.content.responses.SimpleResponse;
+import com.placeholder.placeholder.db.basicdto.UserDto;
+import com.placeholder.placeholder.db.mappers.UserMapper;
+import com.placeholder.placeholder.db.models.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -23,14 +23,12 @@ public class UserController {
 
     private final UserService userService;
     private final ApiResponseFactory apiResponseFactory;
+    private final UserMapper userMapper;
 
-
-    @PostMapping("/register")
-    public ResponseEntity<ApiResponse<SimpleResponse>> register(@RequestBody @Valid UserCreationRequest userCreationRequest) {
-        logger.info("Registering user: {}", userCreationRequest.username());
-        userService.createUser(userCreationRequest);
-
-        SimpleResponse response = new SimpleResponse("User successfuly created");
-        return apiResponseFactory.ok(response);
+    // Example endpoint for gettin the identification of a user.
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<UserDto>> getUserById(@PathVariable int id) {
+        User user = userService.findUserById(id);
+        return apiResponseFactory.ok(userMapper.toDto(user));
     }
 }

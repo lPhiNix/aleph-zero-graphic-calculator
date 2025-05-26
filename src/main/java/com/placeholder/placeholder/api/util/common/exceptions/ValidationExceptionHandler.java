@@ -31,7 +31,7 @@ import java.util.List;
  * that occur during request handling, providing standardized error responses.
  */
 @ControllerAdvice
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(1)
 public class ValidationExceptionHandler {
     private final ApiResponseFactory apiResponseFactory;
 

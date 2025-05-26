@@ -7,6 +7,8 @@ import com.placeholder.placeholder.api.util.common.messages.dto.error.ErrorCateg
 import com.placeholder.placeholder.api.util.common.messages.dto.error.details.ErrorDetail;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.details.ValidationErrorDetail;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.ErrorResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -34,6 +36,8 @@ public class GlobalExceptionHandler {
      * The default error message used when a more specific message is not available.
      */
     public static final String DEFAULT_ERROR_MESSAGE = "An unexpected error occurred";
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
 
     private final ApiResponseFactory responseFactory;
 
@@ -57,9 +61,10 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllExceptions(Exception ex) {
+        logger.error("Unhandled exception caught: {}", ex.getMessage(), ex);
         return responseFactory.error(
-                AppCode.INTERNAL_ERROR,  // Application-specific error code
-                DEFAULT_ERROR_MESSAGE, // User-friendly message
+                AppCode.INTERNAL_ERROR,
+                DEFAULT_ERROR_MESSAGE,
                 List.of(new ErrorDetail(ErrorCategory.INTERNAL,
                         (ex.getCause() != null) ? ex.getCause().getMessage() : DEFAULT_ERROR_MESSAGE,
                         DEFAULT_ERROR_MESSAGE))
@@ -74,6 +79,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex) {
+        logger.error("RuntimeException caught: {}", ex.getMessage(), ex);
         return responseFactory.error(
                 AppCode.INTERNAL_ERROR,
                 "Runtime error",
@@ -91,6 +97,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
+        logger.warn("IllegalArgumentException caught: {}", ex.getMessage(), ex);
         return responseFactory.error(
                 AppCode.BAD_REQUEST,
                 "Invalid argument",
@@ -109,6 +116,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ErrorResponse> handleIllegalStateException(IllegalStateException ex) {
+        logger.warn("IllegalStateException caught: {}", ex.getMessage(), ex);
         return responseFactory.error(
                 AppCode.CONFLICT,
                 "Illegal state",
@@ -127,6 +135,9 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(TypeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleTypeMismatchException(TypeMismatchException ex) {
+        logger.info("TypeMismatchException caught: parameter='{}', value='{}', requiredType='{}'",
+                ex.getPropertyName(), ex.getValue(), ex.getRequiredType());
+
         String param = ex.getPropertyName();
         String expectedType = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown";
         String message = String.format("Invalid value for parameter '%s': expected type %s", param, expectedType);
@@ -154,6 +165,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        logger.warn("HttpMessageNotReadableException caught: {}", ex.getMessage(), ex);
         ErrorDetail detail = new ErrorDetail(
                 ErrorCategory.VALIDATION,
                 "Request body error",

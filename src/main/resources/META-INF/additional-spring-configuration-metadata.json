@@ -6,13 +6,13 @@
       "description": "Uri for the defined JWT provider platform."
     },
     {
-      "name": "jwt.provider",
-      "type": "java.lang.String",
-      "description": "What JWT provider to use: external, manual."
-    },
-    {
       "name": "jwt.secret",
       "type": "java.lang.String",
-      "description": "Secret key to generate JWT tokens, if empty a random one will be generated."
+      "description": "Secret key to generate JWT tokens. If left empty a random one will be generated."
+    },
+    {
+      "name": "jwt.expiration",
+      "type": "java.lang.String",
+      "description": "Default expiration time for the generated token (in ms). If missing the default is 1h (3600000 ms)."
     }
   ] }
