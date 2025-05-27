@@ -2,13 +2,6 @@
 import { AuthForm } from '../AuthForm.tsx';
 import { AuthFormField } from '../AuthForm.tsx';
 
-interface RegisterFormData {
-    username: string;
-    email: string;
-    password: string;
-    confirmPassword: string;
-}
-
 export function SignUpForm() {
     const initialState: RegisterFormData = {
         username: '',

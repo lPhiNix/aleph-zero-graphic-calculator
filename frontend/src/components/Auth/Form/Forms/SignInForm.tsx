@@ -1,11 +1,6 @@
 import { AuthForm } from '../AuthForm.tsx';
 import { AuthFormField } from '../AuthForm.tsx';
-
-interface LoginFormData {
-    username: string;
-    password: string;
-    rememberMe: boolean;
-}
+import {LoginFormData} from "../../../../types/login";
 
 export function SignInForm() {
     const initialState: LoginFormData = {
@@ -30,7 +25,7 @@ export function SignInForm() {
                     type="checkbox"
                     name="rememberMe"
                     checked={initialState.rememberMe}
-                    onChange={() => {}} // para cumplir con React
+                    onChange={() => {}}
                 />
                 Remember me
             </label>

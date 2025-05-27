@@ -1,4 +1,5 @@
 // pages/LoginPage.tsx
+import { Link } from 'react-router-dom';
 import { AuthLayout } from '../components/Auth/AuthLayout';
 import { SignInForm } from '../components/Auth/Form/Forms/SignInForm.tsx';
 
@@ -9,7 +10,7 @@ export default function LoginPage() {
             subtitle={
                 <p className="registerText">
                     Please enter your login credentials<br /> or{' '}
-                    <a href="/register" className="link">click here</a> to register.
+                    <Link to="/register" className="link">click here</Link> to register.
                 </p>
             }
         >
