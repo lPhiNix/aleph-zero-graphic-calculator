@@ -10,7 +10,7 @@ import java.util.*;
  * This class stores the evaluated expression and any errors encountered during the process.
  */
 public class MathEclipseEvaluation implements MathExpressionEvaluation {
-    private final String expressionEvaluated; // The evaluated expression
+    private String expressionEvaluated; // The evaluated expression
     private final Set<String> evaluationProblems; // Set of errors encountered during evaluation
 
     public MathEclipseEvaluation(String expressionEvaluated) {
@@ -38,6 +38,12 @@ public class MathEclipseEvaluation implements MathExpressionEvaluation {
         return evaluationProblems.isEmpty()
                 ? Optional.empty()
                 : Optional.of(new ArrayList<>(evaluationProblems));
+    }
+
+    @Override
+    public String format(String newExpression) {
+        this.expressionEvaluated = newExpression;
+        return newExpression;
     }
 
     /**

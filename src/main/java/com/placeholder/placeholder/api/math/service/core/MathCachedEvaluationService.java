@@ -83,4 +83,8 @@ public class MathCachedEvaluationService {
     public void stopRequest() {
         mathEclipse.stopRequest();
     }
+
+    public MathLibFacade getFacade() {
+        return mathEclipse;
+    }
 }

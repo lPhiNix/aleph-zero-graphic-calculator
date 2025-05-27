@@ -20,6 +20,8 @@ public interface MathExpressionEvaluation {
      */
     String getExpressionEvaluated();
 
+    String format(String newExpression);
+
     /**
      * Returns an optional list of evaluation problems encountered during the processing of the expression.
      * <p>
