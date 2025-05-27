@@ -45,7 +45,7 @@ public class DecimalsValidator implements ConstraintValidator<ValidDecimals, Int
             // (v - 1) is non-negative if v ≥ 1
             // (32768 - v) is positive if v ≤ 32767
             // The product is positive only when v ∈ [1, 32767]
-            int product = (v - 1) * (32768 - v);
+            int product = (v - MINIMUM_VALUE) * ((MAXIMUM_VALUE + 1) - v);
 
             // Right shift the sign bit to the least significant position:
             // - If product > 0 → sign bit = 0 → result = 0 → valid
