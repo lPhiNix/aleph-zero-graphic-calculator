@@ -2,6 +2,8 @@ package com.placeholder.placeholder.api.math.service.strategy;
 
 import com.placeholder.placeholder.api.math.dto.request.MathDataDto;
 import com.placeholder.placeholder.api.math.dto.response.MathEvaluationDto;
+import com.placeholder.placeholder.api.math.facade.MathExpressionEvaluation;
+import com.placeholder.placeholder.api.math.facade.MathLibFacade;
 import com.placeholder.placeholder.api.math.service.core.MathCachedEvaluationService;
 
 import java.util.List;
@@ -33,6 +35,12 @@ public interface EvaluationStrategy {
      * @return the {@link MathCachedEvaluationService} instance used for computation and caching
      */
     MathCachedEvaluationService getEvaluatorService();
+
+    default void formatOperations(MathLibFacade mathLibFacade, MathExpressionEvaluation... evaluations) {
+        for (MathExpressionEvaluation evaluation : evaluations) {
+            evaluation.format(mathLibFacade.formatResult(evaluation.getExpressionEvaluated()));
+        }
+    }
 
     /**
      * Requests to stop any ongoing evaluation if supported by the underlying evaluation service.
