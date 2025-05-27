@@ -1,5 +1,5 @@
 // components/Auth/AuthLayout.tsx
-import styles from '../../styles/login.module.css';
+import styles from '../../styles/dialog.module.css';
 import * as React from "react";
 
 interface AuthLayoutProps {

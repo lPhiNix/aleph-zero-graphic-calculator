@@ -1,5 +1,5 @@
 import { InputHTMLAttributes } from 'react';
-import styles from '../../styles/login.module.css';
+import styles from '../../styles/dialog.module.css';
 
 interface AuthInputProps extends InputHTMLAttributes<HTMLInputElement> {
     label: string;

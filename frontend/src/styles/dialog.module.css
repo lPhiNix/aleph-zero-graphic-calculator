@@ -3,30 +3,30 @@
     height: 100vh;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(150deg, #ffffff, #7A7A7A);
+    background: linear-gradient(150deg, var(--color-white), var(--color-gray-light));
 }
 
 .loginBox {
     display: flex;
     width: 800px;
     height: 500px;
-    background: linear-gradient(150deg, #0b0c45, #011173);
+    background: linear-gradient(150deg, var(--color-blue-dark-1), var(--color-blue-dark-2));
     border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 10px 25px var(--color-shadow);
 }
 
 .left {
     flex: 1;
     padding: 40px;
-    color: white;
+    color: var(--color-white);
     display: flex;
     flex-direction: column;
 }
 
 .right {
     flex: 1.5;
-    background-color: #4433cc;
+    background-color: var(--color-blue-main);
     background-image: url('../assets/react.svg');
     background-size: contain;
     background-position: center;
@@ -35,14 +35,13 @@
 
 .title {
     font-size: 2.5rem;
-    line-height: 1.3; /* o 1.4 si sigue cortándose */
+    line-height: 1.3;
     margin-bottom: 10px;
     text-align: center;
-    background: linear-gradient(150deg, #ffffff, #7A7A7A);
+    background: linear-gradient(150deg, var(--color-white), var(--color-gray-light));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
-
 
 .inputGroup {
     width: 80%;
@@ -57,11 +56,10 @@
     padding: 10px;
     background: none;
     border: none;
-    border-bottom: 2px solid #666;
-    color: white;
+    border-bottom: 2px solid var(--color-gray-medium);
+    color: var(--color-white);
     font-size: 1rem;
 }
-
 
 .formOptions {
     display: flex;
@@ -69,7 +67,7 @@
     align-items: center;
     font-size: 0.85rem;
     margin: 15px 0;
-    color: #aaa;
+    color: var(--color-gray-muted);
 }
 
 .checkbox input {
@@ -80,21 +78,21 @@
     width: 75%;
     padding: 10px;
     margin-top: 10px;
-    background-color: #5c4dde;
+    background-color: var(--color-blue-button);
     border: none;
     border-radius: 20px;
-    color: white;
+    color: var(--color-white);
     font-size: 1rem;
     cursor: pointer;
     transition: background 0.3s ease;
 }
 
 .button:hover {
-    background-color: #4433cc;
+    background-color: var(--color-blue-button-hover);
 }
 
 .link {
-    color: #aaaaff;
+    color: var(--color-gray-muted-link);
     text-decoration: none;
 }
 
@@ -105,7 +103,7 @@
 .registerText {
     margin-top: 20px;
     font-size: 0.85rem;
-    color: #aaa;
+    color: var(--color-gray-muted);
     text-align: center;
 }
 
@@ -115,4 +113,3 @@
     align-items: center;
     width: 100%;
 }
-

@@ -6,7 +6,7 @@ import { SignUpForm } from '../components/Auth/Form/Forms/SignUpForm.tsx';
 export default function RegisterPage() {
     return (
         <AuthLayout
-            title="Sign Up"
+            title="Register"
             subtitle={
                 <p className="registerText">
                     Already have an account?{' '}
