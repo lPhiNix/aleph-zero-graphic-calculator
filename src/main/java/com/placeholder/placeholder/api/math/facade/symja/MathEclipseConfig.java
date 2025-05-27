@@ -96,7 +96,7 @@ public class MathEclipseConfig {
      * @return a new {@code EvalEngine} instance
      */
     public static EvalEngine buildEvalEngine(String sessionID) {
-        return buildEvalEngine(sessionID, 100, 100);
+        return buildEvalEngine(sessionID, 1000, 1000);
     }
 
     /**
