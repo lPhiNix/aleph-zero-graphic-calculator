@@ -76,6 +76,10 @@ public class RegexValidator {
      */
     public final Pattern BOOLEAN_PATTERN = Pattern.compile("True|False");
 
+    public final Pattern POINT_LINE_PATTERN = Pattern.compile("Line\\s*\\(\\s*\\{(\\{[^}]+}(?:\\s*,\\s*\\{[^}]+})*)}");
+
+    public final Pattern POINTER_EXTRACTOR_PATTERN = Pattern.compile("\\{\\s*([\\-\\d.Ee]+)\\s*,\\s*([\\-\\d.Ee]+)\\s*}");
+
     /**
      * Pattern to validate matrix notation in Symja syntax (e.g., {{1,2},{3,4}}).
      * Accepts matrices of decimal or integer numbers enclosed in nested curly braces.
