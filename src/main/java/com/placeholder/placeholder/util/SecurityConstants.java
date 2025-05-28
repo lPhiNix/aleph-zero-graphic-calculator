@@ -10,8 +10,8 @@ public class SecurityConstants {
     @Bean
     public Set<String> allowedEndpoints() {
         return Set.of(
-                "/login",
-                "/register",
+                "/auth/login",
+                "/auth/register",
                 "/.well-known/openid-configuration",
                 "/recover",
                 "/api/public/**"

@@ -1,20 +1,17 @@
-package com.placeholder.placeholder.util;
+package com.placeholder.placeholder.api.auth;
 
 import com.placeholder.placeholder.api.util.common.auth.TokenClaims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.UUID;
 
 
 /**
@@ -44,7 +41,7 @@ public class JwtService {
         Date exp = new Date(now.getTime() + expirationMs);
 
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(UUID.randomUUID().toString())
                 .setIssuer(TokenClaims.CLAIM_ISSUER)
                 .setAudience(TokenClaims.CLAIM_AUDIENCE)
                 .claim(TokenClaims.CLAIM_KEY_EMAIL, email)
@@ -68,7 +65,7 @@ public class JwtService {
             Jwt jwt = jwtDecoder.decode(token);
             return new TokenClaims(jwt.getClaims());
         } catch (JwtException e) {
-            throw new JwtException("Invalid JWT token");
+            throw new JwtException(e.getMessage(), e);
         }
     }
 }

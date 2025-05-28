@@ -7,6 +7,8 @@ import com.placeholder.placeholder.api.util.common.messages.dto.error.ErrorCateg
 import com.placeholder.placeholder.api.util.common.messages.dto.error.details.ValidationErrorDetail;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.ErrorResponse;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -31,7 +33,7 @@ import java.util.Objects;
 @ControllerAdvice
 @Order(2)
 public class PersistenceExceptionHandler {
-
+    private final Logger logger = LoggerFactory.getLogger(PersistenceExceptionHandler.class);
     private final ApiResponseFactory responseFactory;
 
     /**
@@ -90,6 +92,7 @@ public class PersistenceExceptionHandler {
     public ResponseEntity<ErrorResponse> handleEntityNotFound(
             EntityNotFoundException ex
     ) {
+        logger.warn("Entity not found: {}", ex.getMessage(), ex);
         String message = "Entity not found: " + ex.getMessage();
 
         ValidationErrorDetail detail = new ValidationErrorDetail(

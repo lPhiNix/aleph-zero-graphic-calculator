@@ -68,9 +68,9 @@ public class JwtConfig {
                 .withSecretKey((SecretKey) jwtSecretKey())
                 .build();
 
-        OAuth2TokenValidator<Jwt> withIssuer = JwtValidators.createDefaultWithIssuer("placeholder");
+        OAuth2TokenValidator<Jwt> withIssuer = JwtValidators.createDefaultWithIssuer(TokenClaims.CLAIM_ISSUER);
         OAuth2TokenValidator<Jwt> withAudience = new JwtClaimValidator<List<String>>(
-                TokenClaims.CLAIM_AUDIENCE, aud -> aud != null && aud.contains("expected-audience")
+                TokenClaims.CLAIM_AUDIENCE, aud -> aud != null && aud.contains(TokenClaims.CLAIM_AUDIENCE)
         );
 
         OAuth2TokenValidator<Jwt> hasRoleClaim = new JwtClaimValidator<>(

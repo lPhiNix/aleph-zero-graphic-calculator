@@ -1,33 +1,31 @@
 package com.placeholder.placeholder.api.user.service;
 
-import com.placeholder.placeholder.db.mappers.UserMapper;
 import com.placeholder.placeholder.db.models.User;
-import com.placeholder.placeholder.db.repositories.UserPreferenceRepository;
 import com.placeholder.placeholder.db.repositories.UserRepository;
-import com.placeholder.placeholder.db.repositories.UserRoleRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
 public class UserService {
     private final UserRepository userRepository;
-    private final UserRoleRepository roleRepository;
-    private final UserPreferenceRepository userPreferenceRepository;
-    private final UserMapper userMapper;
-
-    private final PasswordEncoder passwordEncoder;
 
     public User findUserByUsername(String username) {
         return userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException(username));
+                .orElseThrow(() -> new EntityNotFoundException(username));
+    }
+
+    @Transactional(readOnly = true)
+    public User findUserByIdentifier(String identifier) {
+        return userRepository.findByUsernameOrEmail(identifier)
+                .orElseThrow(() -> new EntityNotFoundException(identifier));
     }
 
     public User findUserById(int id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException(String.valueOf(id)));
+                .orElseThrow(() -> new EntityNotFoundException(String.valueOf(id)));
     }
 
     public User save(User user) {

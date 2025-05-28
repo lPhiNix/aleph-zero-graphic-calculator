@@ -2,9 +2,9 @@ package com.placeholder.placeholder.api.auth;
 
 import com.placeholder.placeholder.api.user.service.UserService;
 import com.placeholder.placeholder.db.models.User;
-import com.placeholder.placeholder.util.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -14,7 +14,6 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 public class OidcController {
-    private final JwtService jwtService;
     private final UserService userService;
 
 
@@ -32,10 +31,12 @@ public class OidcController {
         );
     }
 
+
     @GetMapping("/userinfo")
+    @Transactional()
     public Map<String, Object> userInfo(Authentication authentication) {
         String username = authentication.getName();
-        User user = userService.findUserByUsername(username);
+        User user = userService.findUserByIdentifier(username);
         return Map.of(
                 "sub", user.getUsername(),
                 "email", user.getEmail(),

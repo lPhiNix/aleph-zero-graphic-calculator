@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserRoleService {
     private static final String DEFAULT_ROLE = "USER";
-    private UserRoleRepository repository;
+    private final UserRoleRepository repository;
 
     public UserRole findById(Integer id) {
         return repository.findById(id)

@@ -4,7 +4,7 @@ import com.placeholder.placeholder.api.user.service.UserService;
 import com.placeholder.placeholder.api.util.common.auth.TokenClaims;
 import com.placeholder.placeholder.db.models.User;
 import com.placeholder.placeholder.util.CustomAuthenticationEntryPoint;
-import com.placeholder.placeholder.util.JwtService;
+import com.placeholder.placeholder.api.auth.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +20,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @RequiredArgsConstructor
@@ -60,14 +61,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
-            String username = extractUsername(token);
+            String username = extractIdentifier(token);
             if (username == null || SecurityContextHolder.getContext().getAuthentication() != null) {
                 chain.doFilter(req, res);
                 return;
             }
             authenticateUser(req, username);
         } catch (Exception e) {
-            entryPoint.commence(req, res, new BadCredentialsException("Invalid JWT token"));
+            entryPoint.commence(req, res, new BadCredentialsException("Invalid JWT token: " + e.getMessage()));
             return;
         }
         chain.doFilter(req, res);
@@ -81,23 +82,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return null;
     }
 
-    private String extractUsername(String token) {
-        TokenClaims claims = jwtService.parseClaims(token); // This may throw
-        return claims.getSubject().orElse(null);
+    private String extractIdentifier(String token) {
+        return Optional.of(jwtService.parseClaims(token))
+                .flatMap(claims -> claims.getPreferredUsername().or(claims::getEmail))
+                .orElseThrow(() -> new BadCredentialsException("JWT token does not contain a valid identifier"));
     }
 
+
     /**
-     * Authenticates the user based on the username extracted from the JWT token.
+     * Authenticates the user based on the identifier extracted from the JWT token.
      * If the user is found, it sets the authentication in the SecurityContext.
      *
      * @param req      The HTTP request
-     * @param username The username extracted from the JWT token
+     * @param identifier The identifier (email or username) extracted from the JWT token
      */
-    private void authenticateUser(HttpServletRequest req, String username) {
-        User user = userService.findUserByUsername(username); // This may throw
+    private void authenticateUser(HttpServletRequest req, String identifier) {
+        User user = userService.findUserByIdentifier(identifier); // This may throw
         if (user != null) {
             var authorities = List.of(new SimpleGrantedAuthority(user.getRole().getName()));
-            var auth = new UsernamePasswordAuthenticationToken(user, null, authorities);
+            // Try to not authenticate the user with the JPA OBJECT, impossible challenge.
+            var auth = new UsernamePasswordAuthenticationToken(user.getUsername(), null, authorities);
             auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
