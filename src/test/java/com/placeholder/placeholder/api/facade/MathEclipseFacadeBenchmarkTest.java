@@ -1,13 +1,10 @@
 package com.placeholder.placeholder.api.facade;
 
-import com.placeholder.placeholder.api.math.facade.MathEclipseExpressionValidator;
-import com.placeholder.placeholder.api.math.facade.MathEclipseFacade;
+import com.placeholder.placeholder.api.math.facade.symja.MathEclipseConfig;
+import com.placeholder.placeholder.api.math.facade.symja.MathEclipseFacade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.matheclipse.core.eval.EvalEngine;
-import org.matheclipse.core.eval.EvalUtilities;
-import org.matheclipse.core.form.tex.TeXFormFactory;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -16,14 +13,12 @@ class MathEclipseFacadeBenchmarkTest {
 
     private static final int BASE_ITERATIONS = 1000;
     private static final boolean PRINT_RESULTS = true;
+
     private MathEclipseFacade mathEclipseFacade;
 
     @BeforeEach
     void setUp() {
-        EvalEngine engine = new EvalEngine("benchmark", 100, null, true);
-        EvalUtilities evaluator = new EvalUtilities(engine, false, false);
-        mathEclipseFacade = new MathEclipseFacade(evaluator, new MathEclipseExpressionValidator(), new TeXFormFactory());
-        mathEclipseFacade.isLaTeXFormat(false);
+        mathEclipseFacade = MathEclipseConfig.buildMathEclipseFacade();
     }
 
     // BENCHMARK (ms and seg per ONE iteration)
@@ -135,10 +130,6 @@ class MathEclipseFacadeBenchmarkTest {
     @Test void benchmarkMatrixEigen() { benchmark(50, () -> mathEclipseFacade.evaluate("Eigenvalues[{{2, 1}, {1, 2}}]")); }
 
     // Boolean Functions
-
-    /** 0,048789 ms, ~0,00005 seg */
-    @DisplayName("evaluate: PrimeQ[97]")
-    @Test void benchmarkPrimeQ() { benchmark(10, () -> mathEclipseFacade.evaluate("PrimeQ[97]")); }
 
     /** 0,065142 ms, ~0,00007 seg */
     @DisplayName("evaluate: GCD[252, 105]")

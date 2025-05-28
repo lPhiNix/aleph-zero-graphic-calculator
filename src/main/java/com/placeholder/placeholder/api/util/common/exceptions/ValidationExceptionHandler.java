@@ -2,7 +2,6 @@ package com.placeholder.placeholder.api.util.common.exceptions;
 
 import com.placeholder.placeholder.api.util.common.messages.ApiResponseFactory;
 import com.placeholder.placeholder.api.util.common.messages.ApiResponseUtils;
-import com.placeholder.placeholder.api.util.common.messages.dto.ApiResponse;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.ErrorCategory;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.details.ValidationErrorDetail;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.ErrorResponse;
@@ -56,7 +55,7 @@ public class ValidationExceptionHandler {
         return apiResponseFactory.validationError(
                 "Validation failed for one or more arguments, check your request.",
                 validationErrorDetails
-                );
+        );
     }
 
     /**

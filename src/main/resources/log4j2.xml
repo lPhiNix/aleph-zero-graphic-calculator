@@ -1,25 +1,2 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Configuration>
-    <Appenders>
-        <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level - %msg%n"/>
-        </Console>
-    </Appenders>
-
-    <Loggers>
-        <!-- Estos 2 paquetes tiran mas mensajes que una cacatua en domingo -->
-        <Logger name="org.matheclipse.core" level="OFF" additivity="false">
-            <AppenderRef ref="Console"/>
-        </Logger>
-        <Logger name="edu.jas.ufd" level="OFF" additivity="false">
-            <AppenderRef ref="Console"/>
-        </Logger>
-
-        <Root level="debug">
-            <AppenderRef ref="Console"/>
-        </Root>
-    </Loggers>
-</Configuration>
-
 
 

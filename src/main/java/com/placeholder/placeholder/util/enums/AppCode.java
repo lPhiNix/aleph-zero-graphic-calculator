@@ -1,5 +1,6 @@
 package com.placeholder.placeholder.util.enums;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
  *   <li>{@link #simpleMessage} - a human-readable, default message for the code</li>
  * </ul>
  */
+@Getter
 public enum AppCode {
 
     // --- Success responses ---
@@ -51,6 +53,13 @@ public enum AppCode {
      * Maps to HTTP 400 Bad Request.
      */
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "Bad request"),
+
+    /**
+     * The server timed out waiting for the request.
+     * <p>
+     * Maps to HTTP 408 Request Timeout.
+     */
+    TIMEOUT(HttpStatus.REQUEST_TIMEOUT, "Request timeout"),
 
     /**
      * Authentication failed or user does not have permissions for the desired action.
@@ -143,11 +152,21 @@ public enum AppCode {
 
     /**
      * The HTTP status associated with this application code.
+     * -- GETTER --
+     *  Returns the HTTP status code associated with this AppCode.
+     *
+     * @return the HTTP status
+
      */
     private final HttpStatus status;
 
     /**
      * A simple, default human-readable message for this code.
+     * -- GETTER --
+     *  Returns the default human-readable message for this AppCode.
+     *
+     * @return the simple message
+
      */
     private final String simpleMessage;
 
@@ -171,22 +190,5 @@ public enum AppCode {
         return name();
     }
 
-    /**
-     * Returns the HTTP status code associated with this AppCode.
-     *
-     * @return the HTTP status
-     */
-    public HttpStatus getStatus() {
-        return status;
-    }
-
-    /**
-     * Returns the default human-readable message for this AppCode.
-     *
-     * @return the simple message
-     */
-    public String getSimpleMessage() {
-        return simpleMessage;
-    }
 }
 

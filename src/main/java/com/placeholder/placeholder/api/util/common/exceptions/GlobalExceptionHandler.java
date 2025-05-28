@@ -61,10 +61,9 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllExceptions(Exception ex) {
-        logger.error("Unhandled exception caught: {}", ex.getMessage(), ex);
         return responseFactory.error(
                 AppCode.INTERNAL_ERROR,
-                DEFAULT_ERROR_MESSAGE,
+                "Runtime error",
                 List.of(new ErrorDetail(ErrorCategory.INTERNAL,
                         (ex.getCause() != null) ? ex.getCause().getMessage() : DEFAULT_ERROR_MESSAGE,
                         DEFAULT_ERROR_MESSAGE))
