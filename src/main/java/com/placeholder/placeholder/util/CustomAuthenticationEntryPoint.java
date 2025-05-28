@@ -48,7 +48,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
                          AuthenticationException authException) throws IOException {
 
         ResponseEntity<ErrorResponse> errorResponse = apiResponseFactory.unauthorized();
-        logger.warn("Unauthorized access attempt: {}", authException.getMessage());
+        logger.warn("Unauthorized access attempt: {}", authException.getMessage(), authException);
 
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

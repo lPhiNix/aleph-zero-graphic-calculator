@@ -21,4 +21,9 @@ public class UserRole {
 
     @Column(name = "description", length = 50)
     private String description;
+
+    @Override
+    public String toString() {
+        return String.format("ROLE_%s", name);
+    }
 }
