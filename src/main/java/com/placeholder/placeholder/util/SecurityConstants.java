@@ -12,7 +12,6 @@ public class SecurityConstants {
         return Set.of(
                 "/login",
                 "/register",
-                "/.well-known/openid-configuration",
                 "/recover",
                 "/api/public/**"
         );

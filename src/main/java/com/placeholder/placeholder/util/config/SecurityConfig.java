@@ -5,21 +5,25 @@ import com.placeholder.placeholder.util.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
 import java.util.Set;
@@ -33,34 +37,51 @@ public class SecurityConfig {
     // Oauth2 Auth Server Config
     // WARNING: MANUAL REVISION NEEDED, AVERAGE CHATGPT GARBAGE VOMIT TRASH CODE.
     @Bean
-    @Order(1)
+    @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
         OAuth2AuthorizationServerConfigurer authServer = OAuth2AuthorizationServerConfigurer.authorizationServer();
 
-        http.securityMatcher(authServer.getEndpointsMatcher())
+
+        http.
+                securityMatcher(authServer.getEndpointsMatcher())
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .with(authServer, configurer -> {
                     configurer
                             .oidc(Customizer.withDefaults()); // Enable OpenID Connect 1.0
                 })
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .permitAll()
-                )
                 .exceptionHandling(exceptions -> exceptions
                         .defaultAuthenticationEntryPointFor(
                                 new LoginUrlAuthenticationEntryPoint("/login"),
                                 new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
                         ));
 
-        return http.cors(Customizer.withDefaults()).build(); // Default CORS
+        return http.build(); // Default CORS
+    }
+
+
+    @Bean
+    @Order(Ordered.HIGHEST_PRECEDENCE+1) // Order = 1
+    public SecurityFilterChain formLoginSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+                // Let Spring Security handle /login and /login_process
+                .securityMatcher("/login", "/login_process", "/css/**", "/js/**", "/images/**")
+                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .formLogin(form -> form
+                        .loginPage("/login")                   // GET /login -> show your login form
+                        .loginProcessingUrl("/login_process") // POST /login_process -> processed by Spring Security
+                        .successHandler(new SavedRequestAwareAuthenticationSuccessHandler()) // redirect to the original URL after successful login
+                        .failureUrl("/login?error=true")            // on failure, redirect to /login?error
+                        .permitAll()
+                );
+
+        return http.build();
     }
 
 
 
     // For resource server
     @Bean
-    @Order(2)
+    @Order(Ordered.HIGHEST_PRECEDENCE+2)
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    Set<String> allowedEndpoints,
                                                    Set<String> allowedStaticEndpoints,
@@ -83,16 +104,18 @@ public class SecurityConfig {
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler)
                 )
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .permitAll()
-                )
+                .oauth2ResourceServer((oauth2 -> oauth2
+                        .jwt(Customizer.withDefaults())))
                 .build();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
+    public AuthenticationManager authenticationManager(UserDetailsService userDetailsService,
+                                                       PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder);
+        return new ProviderManager(provider);
     }
 
     @Bean

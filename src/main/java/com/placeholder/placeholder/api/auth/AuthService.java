@@ -6,6 +6,7 @@ import com.placeholder.placeholder.api.user.service.UserRoleService;
 import com.placeholder.placeholder.api.user.service.UserService;
 import com.placeholder.placeholder.db.models.User;
 import com.placeholder.placeholder.db.models.UserRole;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;

@@ -31,4 +31,8 @@ public class UserRoleService {
     public UserRole getDefaultRole() {
         return findByName(DEFAULT_ROLE);
     }
+
+    public UserRole getAdminRole() {
+        return findByName("ADMIN");
+    }
 }
