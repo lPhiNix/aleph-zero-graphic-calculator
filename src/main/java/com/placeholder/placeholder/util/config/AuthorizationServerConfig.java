@@ -31,22 +31,19 @@ import java.util.UUID;
 public class AuthorizationServerConfig {
 
     @Bean
-    public RegisteredClientRepository registeredClientRepository() {
-        RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
-                .clientId("react-client")
-                .clientName("React Frontend App")
-                .clientAuthenticationMethod(ClientAuthenticationMethod.NONE) // public client
+    public RegisteredClientRepository registeredClientRepository(OAuth2ClientProperties clientProps) {
+        RegisteredClient.Builder builder = RegisteredClient.withId(UUID.randomUUID().toString())
+                .clientId(clientProps.getId())
+                .clientName(clientProps.getName())
+                .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .redirectUri("http://localhost:8080/oauth2/callback")
-                .scope(OidcScopes.OPENID)
-                .scope("read")
-                .build();
+                .redirectUri(clientProps.getRedirectUri());
 
-        return new InMemoryRegisteredClientRepository(registeredClient);
+        clientProps.getScopes().forEach(builder::scope);
+
+        return new InMemoryRegisteredClientRepository(builder.build());
     }
-
-
 
 
     @Bean
