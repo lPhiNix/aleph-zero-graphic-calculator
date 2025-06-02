@@ -22,7 +22,7 @@ public class AuthService {
     @Transactional
     public void registerUser(RegistrationFormDto request) {
         String encoded = passwordEncoder.encode(request.password());
-        UserRole role = userRoleService.getDefaultRole(); // add cache.
+        UserRole role = userRoleService.getDefaultRole();
 
         User user = new User();
         user.setEmail(request.email());

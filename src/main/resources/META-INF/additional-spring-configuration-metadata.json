@@ -14,5 +14,10 @@
       "name": "jwt.expiration",
       "type": "java.lang.String",
       "description": "Default expiration time for the generated token (in ms). If missing the default is 1h (3600000 ms)."
+    },
+    {
+      "name": "squip.frontend.url",
+      "type": "java.lang.String",
+      "description": "URL of the Squip frontend application. This is used to generate the correct"
     }
   ] }
