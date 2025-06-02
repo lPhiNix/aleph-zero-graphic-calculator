@@ -42,8 +42,9 @@ public class SecurityConfig {
         OAuth2AuthorizationServerConfigurer authServer = OAuth2AuthorizationServerConfigurer.authorizationServer();
 
 
-        http.
-                securityMatcher(authServer.getEndpointsMatcher())
+        http
+                .cors(Customizer.withDefaults())
+                .securityMatcher(authServer.getEndpointsMatcher())
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .with(authServer, configurer -> {
                     configurer
@@ -53,7 +54,8 @@ public class SecurityConfig {
                         .defaultAuthenticationEntryPointFor(
                                 new LoginUrlAuthenticationEntryPoint("/login"),
                                 new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
-                        ));
+                        )
+                );
 
         return http.build(); // Default CORS
     }
