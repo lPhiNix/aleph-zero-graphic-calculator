@@ -72,6 +72,10 @@ public class SecurityConfig {
                         .successHandler(new SavedRequestAwareAuthenticationSuccessHandler()) // redirect to the original URL after successful login
                         .failureUrl("/login?error=true")            // on failure, redirect to /login?error
                         .permitAll()
+                )
+                .logout(logout -> logout.
+                        logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout=true")
                 );
 
         return http.build();
