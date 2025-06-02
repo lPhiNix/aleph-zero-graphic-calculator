@@ -10,9 +10,6 @@ public class SecurityConstants {
     @Bean
     public Set<String> allowedEndpoints() {
         return Set.of(
-                "/login",
-                "/register",
-                "/recover",
                 "/api/public/**"
         );
     }

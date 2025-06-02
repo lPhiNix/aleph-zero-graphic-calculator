@@ -28,4 +28,6 @@ public class SquipUserDetailService implements UserDetailsService {
                 .password(user.getPassword())
                 .build();
     }
+
+
 }

@@ -63,9 +63,8 @@ public class SecurityConfig {
     @Order(Ordered.HIGHEST_PRECEDENCE+1) // Order = 1
     public SecurityFilterChain formLoginSecurityFilterChain(HttpSecurity http) throws Exception {
         http
-                // Let Spring Security handle /login and /login_process
-                .securityMatcher("/login", "/login_process", "/css/**", "/js/**", "/images/**")
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .securityMatcher("/login", "/register",  "/login_process", "/css/**", "/js/**", "/images/**")
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .formLogin(form -> form
                         .loginPage("/login")                   // GET /login -> show your login form
                         .loginProcessingUrl("/login_process") // POST /login_process -> processed by Spring Security
