@@ -3,6 +3,8 @@ package com.placeholder.placeholder.api.auth;
 import com.placeholder.placeholder.api.auth.dto.RegistrationFormDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
 import org.springframework.ui.Model;
@@ -14,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping()
 @RequiredArgsConstructor
 public class FormController {
+    private final Logger log = LoggerFactory.getLogger(FormController.class);
     private final AuthService authService;
 
     @GetMapping("/login")
@@ -44,6 +47,7 @@ public class FormController {
     @PostMapping("/register")
     public String registerUser(@ModelAttribute("user") @Valid RegistrationFormDto form, BindingResult result, Model model, RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
+            log.warn("Registration form has errors: {}", result.getAllErrors());
             model.addAttribute("errors", result.getAllErrors());
             return "register";
         }

@@ -10,6 +10,8 @@ public class SecurityConstants {
     @Bean
     public Set<String> allowedEndpoints() {
         return Set.of(
+                "/favicon.ico",
+                "/favicons/**",
                 "/api/public/**"
         );
     }
