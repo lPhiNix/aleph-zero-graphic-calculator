@@ -1,5 +1,5 @@
 import { AuthInput } from '../AuthInput.tsx';
-import styles from '../../../styles/dialog.module.css';
+import styles from '../../../styles/modules/dialog.module.css';
 import { useState } from 'react';
 import * as React from "react";
 

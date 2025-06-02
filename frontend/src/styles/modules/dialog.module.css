@@ -44,7 +44,7 @@
 .right {
     flex: 1.5;
     background-color: var(--app-secondary-color);
-    background-image: url('../assets/react.svg');
+    background-image: url('../../assets/react.svg');
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;

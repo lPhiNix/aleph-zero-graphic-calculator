@@ -1,0 +1,15 @@
+/* src/styles/header.module.css */
+.header {
+    height: 60px;
+    background: var(--primary-color);
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+    font-size: 1.5rem;
+    margin: 0;
+}
