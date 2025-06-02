@@ -3,14 +3,32 @@
     height: 100vh;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(150deg, var(--color-white), var(--color-gray-light));
+    background: var(--background-color);
+}
+
+.toast {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+    padding: 15px 30px;
+    border-radius: 5px;
+    font-weight: 600;
+    text-align: center;
+    max-width: 400px;
+    box-shadow: 0 2px 6px rgba(21, 87, 36, 0.3);
+    z-index: 10;
+    opacity: 0.95;
 }
 
 .loginBox {
     display: flex;
     width: 800px;
     height: 500px;
-    background: linear-gradient(150deg, var(--color-blue-dark-1), var(--color-blue-dark-2));
+    background: var(--app-color);
     border-radius: 20px;
     overflow: hidden;
     box-shadow: 0 10px 25px var(--color-shadow);
@@ -19,14 +37,13 @@
 .left {
     flex: 1;
     padding: 40px;
-    color: var(--color-white);
     display: flex;
     flex-direction: column;
 }
 
 .right {
     flex: 1.5;
-    background-color: var(--color-blue-main);
+    background-color: var(--app-secondary-color);
     background-image: url('../assets/react.svg');
     background-size: contain;
     background-position: center;
@@ -38,7 +55,7 @@
     line-height: 1.3;
     margin-bottom: 10px;
     text-align: center;
-    background: linear-gradient(150deg, var(--color-white), var(--color-gray-light));
+    background: var(--title-text-color);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -57,7 +74,7 @@
     background: none;
     border: none;
     border-bottom: 2px solid var(--color-gray-medium);
-    color: var(--color-white);
+    color: var(--text-color);
     font-size: 1rem;
 }
 
@@ -78,25 +95,26 @@
     width: 75%;
     padding: 10px;
     margin-top: 10px;
-    background-color: var(--color-blue-button);
+    background-color: var(--color-button);
     border: none;
     border-radius: 20px;
-    color: var(--color-white);
+    color: var(--color-text-button);
     font-size: 1rem;
     cursor: pointer;
     transition: background 0.3s ease;
 }
 
 .button:hover {
-    background-color: var(--color-blue-button-hover);
+    background-color: var(--color-button-hover);
 }
 
 .link {
-    color: var(--color-gray-muted-link);
+    color: var(--link-text-color);
     text-decoration: none;
 }
 
 .link:hover {
+    color: var(--link-text-hover-color);
     text-decoration: underline;
 }
 

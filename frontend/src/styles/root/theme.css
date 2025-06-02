@@ -1,0 +1,14 @@
+:root {
+    --background-color: var(--color-white);
+    --app-color: var(--primary-color);
+    --app-secondary-color: var(--secondary-color);
+
+    --title-text-color: var(--highlight-color);
+    --text-color: var(--color-white);
+    --link-text-color: var(--color-white);
+    --link-text-hover-color: var(--highlight-secondary-color);
+
+    --color-text-button: var(--color-black);
+    --color-button: var(--highlight-color);
+    --color-button-hover: var(--highlight-secondary-color);
+}

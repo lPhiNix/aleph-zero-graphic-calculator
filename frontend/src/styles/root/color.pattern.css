@@ -1,15 +1,17 @@
 :root {
     --color-white: #ffffff;
+    --color-black: #000000;
+
+    --primary-color: #141414;
+    --secondary-color: #2D2D2D;
+    --placeholder-color: #818181;
+    --highlight-color: #00D8FF;
+    --highlight-secondary-color: #00A8D2;
+    --text-color: #dddddd;
+
     --color-gray-light: #7A7A7A;
     --color-gray-medium: #666666;
     --color-gray-muted: #aaaaaa;
-    --color-gray-muted-link: #aaaaff;
-
-    --color-blue-dark-1: #0b0c45;
-    --color-blue-dark-2: #011173;
-    --color-blue-main: #4433cc;
-    --color-blue-button: #5c4dde;
-    --color-blue-button-hover: #4433cc;
 
     --color-red: #df544b;
     --color-red-soft: #fbb8b0;
