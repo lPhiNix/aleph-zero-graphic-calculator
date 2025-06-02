@@ -22,4 +22,8 @@ public class FormController {
         return "login";
     }
 
+    @GetMapping("/register")
+    public String register(Model model) {
+        return "register";
+    }
 }

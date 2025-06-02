@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Login</title>
+    <title>Register</title>
     <link rel="stylesheet" th:href="@{/styles/style.css}" />
 </head>
 <body>
 <div class="container">
     <div class="loginBox">
         <div class="left">
-            <h1 class="title">Sign In</h1>
-            <form th:action="@{/login_process}" method="post" class="form">
+            <h1 class="title">Sign Up</h1>
+            <form th:action="@{/register}" method="post" class="form">
                 <p class="registerText">
-                    Please enter your login credentials<br/>
-                    or <a th:href="@{/register}" class="link">click here</a> to register.
+                    Create a new account or <a th:href="@{/login}" class="link">click here</a> to login.
                 </p>
 
                 <div class="formMain">
@@ -22,8 +21,15 @@
                                name="username"
                                placeholder="Username"
                                required
-                               autofocus
                                th:value="${param.username}" />
+                    </div>
+                    <div class="inputGroup">
+                        <input class="input"
+                               type="email"
+                               name="email"
+                               placeholder="Email"
+                               required
+                               th:value="${param.email}" />
                     </div>
                     <div class="inputGroup">
                         <input class="input"
@@ -32,19 +38,17 @@
                                placeholder="Password"
                                required />
                     </div>
-                </div>
-
-                <div class="formOptions">
-                    <label class="checkbox">
-                        <input type="checkbox" name="rememberMe"
-                               th:checked="${param.rememberMe != null}" />
-                        Remember me
-                    </label>
-                    <a th:href="@{/auth/forgot-password}" class="link">Forgot Password?</a>
+                    <div class="inputGroup">
+                        <input class="input"
+                               type="password"
+                               name="confirmPassword"
+                               placeholder="Confirm Password"
+                               required />
+                    </div>
                 </div>
 
                 <div class="formMain">
-                    <button type="submit" class="button">Sign In</button>
+                    <button type="submit" class="button">Sign Up</button>
                 </div>
 
                 <div th:if="${error}" class="registerText" th:text="${error}"></div>
