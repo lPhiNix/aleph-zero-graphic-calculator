@@ -1,6 +1,9 @@
 package com.placeholder.placeholder.api.auth;
 
 import com.placeholder.placeholder.api.auth.dto.RegistrationFormDto;
+import com.placeholder.placeholder.api.util.common.messages.ApiResponseUtils;
+import com.placeholder.placeholder.api.util.common.messages.dto.error.ErrorCategory;
+import com.placeholder.placeholder.api.util.common.messages.dto.error.details.ValidationErrorDetail;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -11,6 +14,8 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 @Controller
 @RequestMapping()
@@ -48,7 +53,12 @@ public class FormController {
     public String registerUser(@ModelAttribute("user") @Valid RegistrationFormDto form, BindingResult result, Model model, RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             log.warn("Registration form has errors: {}", result.getAllErrors());
-            model.addAttribute("errors", result.getAllErrors());
+            List<ValidationErrorDetail> errorDetails = ApiResponseUtils.getErrorDetails(result, ErrorCategory.VALIDATION);
+
+            for (ValidationErrorDetail errorDetail : errorDetails) {
+                model.addAttribute("error", errorDetail.message());
+            }
+
             return "register";
         }
 

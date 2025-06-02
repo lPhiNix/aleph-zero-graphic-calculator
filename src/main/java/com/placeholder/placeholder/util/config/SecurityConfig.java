@@ -22,6 +22,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
@@ -35,7 +36,6 @@ import java.util.Set;
 public class SecurityConfig {
 
     // Oauth2 Auth Server Config
-    // WARNING: MANUAL REVISION NEEDED, AVERAGE CHATGPT GARBAGE VOMIT TRASH CODE.
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
@@ -61,14 +61,14 @@ public class SecurityConfig {
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE+1) // Order = 1
-    public SecurityFilterChain formLoginSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain formLoginSecurityFilterChain(HttpSecurity http, AuthenticationSuccessHandler successHandler) throws Exception {
         http
                 .securityMatcher("/login", "/register",  "/login_process", "/css/**", "/js/**", "/images/**")
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .formLogin(form -> form
                         .loginPage("/login")                   // GET /login -> show your login form
                         .loginProcessingUrl("/login_process") // POST /login_process -> processed by Spring Security
-                        .successHandler(new SavedRequestAwareAuthenticationSuccessHandler()) // redirect to the original URL after successful login
+                        .successHandler(successHandler)
                         .failureUrl("/login?error=true")            // on failure, redirect to /login?error
                         .permitAll()
                 )
