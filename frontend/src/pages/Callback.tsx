@@ -49,13 +49,13 @@ const Callback: React.FC = () => {
                 return res.json();
             })
             .then((data) => {
-                // Guarda el token donde prefieras
-                localStorage.setItem("access_token", data.access_token);
+                //
+                sessionStorage.setItem("access_token", data.access_token);
                 navigate("/");
             })
             .catch((err) => {
                 console.error(err);
-                navigate("/?msg=Error al obtener el token: " + err.message);
+                navigate("/?msg=Error getting token: " + err.message);
             });
     }, [location, navigate]);
 

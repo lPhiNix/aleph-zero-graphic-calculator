@@ -1,6 +1,7 @@
 package com.placeholder.placeholder.api.auth;
 
 import com.placeholder.placeholder.api.auth.dto.RegistrationFormDto;
+import com.placeholder.placeholder.api.auth.service.AuthService;
 import com.placeholder.placeholder.api.util.common.messages.ApiResponseUtils;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.ErrorCategory;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.details.ValidationErrorDetail;

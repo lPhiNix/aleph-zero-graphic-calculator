@@ -1,4 +1,4 @@
-package com.placeholder.placeholder.api.auth;
+package com.placeholder.placeholder.api.auth.service;
 
 import com.placeholder.placeholder.api.auth.dto.RegistrationFormDto;
 import com.placeholder.placeholder.api.user.service.UserRoleService;

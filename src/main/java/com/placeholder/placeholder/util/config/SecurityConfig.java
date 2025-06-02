@@ -63,14 +63,13 @@ public class SecurityConfig {
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE+1) // Order = 1
-    public SecurityFilterChain formLoginSecurityFilterChain(HttpSecurity http, AuthenticationSuccessHandler successHandler) throws Exception {
+    public SecurityFilterChain formLoginSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .securityMatcher("/login", "/register",  "/login_process", "/css/**", "/js/**", "/images/**")
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .formLogin(form -> form
                         .loginPage("/login")                   // GET /login -> show your login form
                         .loginProcessingUrl("/login_process") // POST /login_process -> processed by Spring Security
-                        .successHandler(successHandler)
                         .failureUrl("/login?error=true")            // on failure, redirect to /login?error
                         .permitAll()
                 )
