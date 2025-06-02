@@ -27,6 +27,16 @@ import java.util.UUID;
 @EnableWebSecurity
 public class AuthorizationServerConfig {
 
+    /**
+     * Configures the registered client repository for the OAuth2 Authorization Server.
+     * <p>
+     * This bean defines a single registered client with the specified client ID, name,
+     * authentication methods, authorization grant types, and redirect URIs.
+     * </p>
+     *
+     * @param clientProps the properties for the OAuth2 client
+     * @return the configured {@link RegisteredClientRepository}
+     */
     @Bean
     public RegisteredClientRepository registeredClientRepository(OAuth2ClientProperties clientProps) {
         RegisteredClient.Builder builder = RegisteredClient.withId(UUID.randomUUID().toString())
@@ -43,6 +53,15 @@ public class AuthorizationServerConfig {
     }
 
 
+    /**
+     * Configures the RSA key pair used for signing JWT tokens in the OAuth2 Authorization Server.
+     * <p>
+     * This bean generates a new RSA key pair with a key size of 2048 bits.
+     * The private key is used to sign JWT tokens, while the public key is used to verify them.
+     * </p>
+     *
+     * @return the generated {@link KeyPair}
+     */
     @Bean
     public KeyPair keyPair() {
         try {
@@ -54,6 +73,16 @@ public class AuthorizationServerConfig {
         }
     }
 
+    /**
+     * Configures the JWK source for the OAuth2 Authorization Server.
+     * <p>
+     * This bean provides the public and private keys used for signing and verifying JWT tokens.
+     * It creates an RSA key pair and wraps it in a JWK set.
+     * </p>
+     *
+     * @param keyPair the RSA key pair to be used
+     * @return the configured {@link JWKSource}
+     */
     @Bean
     public JWKSource<SecurityContext> jwkSource(KeyPair keyPair) {
         RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
@@ -67,11 +96,30 @@ public class AuthorizationServerConfig {
         return new ImmutableJWKSet<>(jwkSet);
     }
 
+    /**
+     * Configures the JWT decoder for the OAuth2 Authorization Server.
+     * <p>
+     * This bean is used to decode JWT tokens issued by the authorization server.
+     * It uses the {@link JWKSource} to retrieve the public keys for signature verification.
+     * </p>
+     *
+     * @param jwkSource the JWK source containing the public keys
+     * @return the configured {@link JwtDecoder}
+     */
     @Bean
     public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
         return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
     }
 
+    /**
+     * Configures the authorization server settings.
+     * <p>
+     * This bean is used to customize the settings of the OAuth2 Authorization Server,
+     * such as token endpoint, authorization endpoint, and more.
+     * </p>
+     *
+     * @return the configured {@link AuthorizationServerSettings}
+     */
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
         return AuthorizationServerSettings.builder().build();

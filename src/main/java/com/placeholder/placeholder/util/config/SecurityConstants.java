@@ -1,4 +1,4 @@
-package com.placeholder.placeholder.util;
+package com.placeholder.placeholder.util.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,8 +10,6 @@ public class SecurityConstants {
     @Bean
     public Set<String> allowedEndpoints() {
         return Set.of(
-                "/favicon.ico",
-                "/favicons/**",
                 "/api/public/**"
         );
     }
@@ -19,6 +17,8 @@ public class SecurityConstants {
     @Bean
     Set<String> allowedStaticEndpoints() {
         return Set.of(
+                "/favicon.ico",
+                "/favicons/**",
                 "/styles/**",
                 "/scripts/**"
         );

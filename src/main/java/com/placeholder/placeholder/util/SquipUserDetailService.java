@@ -18,6 +18,13 @@ import org.springframework.stereotype.Service;
 public class SquipUserDetailService implements UserDetailsService {
     private final UserService userService;
 
+    /**
+     * Loads user details by identifier (username Or email).
+     *
+     * @param username the identifier of the user to load
+     * @return UserDetails containing user information
+     * @throws EntityNotFoundException if the user is not found
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws EntityNotFoundException {
         com.placeholder.placeholder.db.models.User user = userService.findUserByIdentifier(username);
@@ -25,9 +32,8 @@ public class SquipUserDetailService implements UserDetailsService {
 
         return User.withUsername(user.getUsername())
                 .roles(role.getName())
-                .password(user.getPassword())
+                .password(user.getPassword()) // is encoded.
                 .build();
     }
-
 
 }

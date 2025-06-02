@@ -18,6 +18,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
+/**
+ * Controller for handling user registration and login forms.
+ * <p>
+ * This controller provides endpoints for displaying the login and registration forms,
+ * processing user registration, and handling validation errors.
+ */
 @Controller
 @RequestMapping()
 @RequiredArgsConstructor
@@ -25,6 +31,13 @@ public class FormController {
     private final Logger log = LoggerFactory.getLogger(FormController.class);
     private final AuthService authService;
 
+    /**
+     * Displays the login form.
+     *
+     * @param error  an optional error message to display if login fails
+     * @param model  the model to add attributes for the view
+     * @return the view name to render
+     */
     @GetMapping("/login")
     public String login(
             @RequestParam(value = "error", required = false) String error,
@@ -36,6 +49,12 @@ public class FormController {
         return "login";
     }
 
+    /**
+     * Displays the registration form.
+     *
+     * @param model  the model to add attributes for the view
+     * @return the view name to render
+     */
     @GetMapping("/register")
     public String register(Model model) {
         return "register";

@@ -5,6 +5,16 @@ import com.placeholder.placeholder.api.util.common.messages.dto.content.MessageC
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
+/**
+ * DTO for user registration form.
+ * <p>
+ * This record encapsulates the data required for user registration, including username, email,
+ * password, and confirmation of the password. It also applies validation constraints to ensure
+ * that the fields are not blank and that the email is in a valid format.
+ * <p>
+ * The custom validation annotation {@link ValidRegisterForm} is used to enforce additional
+ * business rules, such as ensuring that the username and email are unique.
+ */
 @ValidRegisterForm // Custom validation annotation to check for unique username and email
 public record RegistrationFormDto(
 
