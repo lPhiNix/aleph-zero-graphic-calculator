@@ -30,6 +30,7 @@ import java.util.Set;
 
 /**
  * Security configuration class for defining security filter chains and authentication mechanisms.
+ * TODO: refactor this monstro.
  */
 @Configuration
 @EnableWebSecurity
