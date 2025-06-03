@@ -1,226 +1,341 @@
-// src/components/Graph/GraphCanvas.tsx
-import React, { useRef, useEffect, useState } from 'react';
+// src/components/App/GraphCanvas.tsx
+
+import React, {useEffect, useRef, useState, useCallback, JSX} from 'react';
 import styles from '../../styles/modules/graphCanvas.module.css';
 
+/** Props interface for GraphCanvas component */
 interface GraphCanvasProps {
-    expressions: string[];
+    expressions: string[]; // Currently unused, reserved for future analytical graphing
 }
 
-export default function GraphCanvas({ expressions }: GraphCanvasProps) {
+/**
+ * Interactive graphing canvas component with zoom/pan functionality
+ * @param {GraphCanvasProps} props - Component properties
+ * @returns {JSX.Element} Canvas element
+ */
+export default function GraphCanvas({ expressions }: GraphCanvasProps): JSX.Element {
+    // Reference to the canvas DOM element
     const canvasRef = useRef<HTMLCanvasElement>(null);
+
+    // Current translation offset (world space)
     const [offset, setOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+
+    // Current zoom scale (pixels per world unit)
     const [scale, setScale] = useState<number>(40);
+
+    // Last mouse position for drag tracking
     const lastMouse = useRef<{ x: number; y: number } | null>(null);
 
-    const worldToCanvas = (x: number, y: number, width: number, height: number) => {
-        return {
-            cx: width / 2 + (x + offset.x) * scale,
-            cy: height / 2 - (y + offset.y) * scale,
-        };
-    };
+    // -------------------- Coordinate Transformations --------------------
 
-    const getStepFromScale = (scale: number) => {
-        if (scale < 10) return 50;
-        if (scale < 20) return 20;
-        if (scale < 40) return 10;
-        if (scale < 80) return 5;
-        if (scale < 160) return 2;
-        return 1;
-    };
+    /**
+     * Converts world coordinates to canvas pixel coordinates
+     * @param {number} x - World X coordinate
+     * @param {number} y - World Y coordinate
+     * @param {number} width - Canvas width
+     * @param {number} height - Canvas height
+     * @returns {Object} Canvas coordinates {cx, cy}
+     */
+    const worldToCanvas = useCallback(
+        (x: number, y: number, width: number, height: number) => {
+            return {
+                cx: width / 2 + (x + offset.x) * scale, // Center X + scaled offset
+                cy: height / 2 - (y + offset.y) * scale // Center Y (inverted)
+            };
+        },
+        [offset, scale]
+    );
 
-    const canvasToWorld = (cx: number, cy: number, width: number, height: number) => {
-        return {
-            x: (cx - width / 2) / scale - offset.x,
-            y: (height / 2 - cy) / scale - offset.y,
-        };
-    };
+    /**
+     * Converts canvas pixel coordinates to world coordinates
+     * @param {number} cx - Canvas X pixel
+     * @param {number} cy - Canvas Y pixel
+     * @param {number} width - Canvas width
+     * @param {number} height - Canvas height
+     * @returns {Object} World coordinates {x, y}
+     */
+    const canvasToWorld = useCallback(
+        (cx: number, cy: number, width: number, height: number) => {
+            return {
+                x: (cx - width / 2) / scale - offset.x, // Inverse scaling + offset
+                y: (height / 2 - cy) / scale - offset.y // Inverse scaling + offset (inverted)
+            };
+        },
+        [offset, scale]
+    );
 
-    const draw = () => {
+    // -------------------- Grid Calculation --------------------
+
+    /**
+     * Calculates optimal grid step based on current zoom level
+     * @param {number} scaleValue - Current pixels per world unit
+     * @returns {number} Optimal grid step in world units
+     */
+    const getStepFromScale = useCallback((scaleValue: number) => {
+        const desiredPxBetween = 80; // Target pixels between grid lines
+        const raw = desiredPxBetween / scaleValue; // Raw world unit step
+
+        // Calculate logarithmic scale
+        const exponent = Math.floor(Math.log10(raw));
+        const base = Math.pow(10, exponent);
+        const mantissa = raw / base;
+
+        // Round to nearest nice increment (1, 2, 5, 10)
+        let nice: number;
+        if (mantissa <= 1) {
+            nice = base;
+        } else if (mantissa <= 2) {
+            nice = 2 * base;
+        } else if (mantissa <= 5) {
+            nice = 5 * base;
+        } else {
+            nice = 10 * base;
+        }
+
+        return nice;
+    }, []);
+
+    // -------------------- Drawing Operations --------------------
+
+    /**
+     * Draws coordinate grid with major/minor lines
+     * @param {CanvasRenderingContext2D} ctx - Canvas context
+     * @param {number} width - Canvas width
+     * @param {number} height - Canvas height
+     */
+    const drawGrid = useCallback(
+        (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+            const step = getStepFromScale(scale); // Major grid step
+            const minorStep = step / 5; // Minor grid step
+
+            // Get visible world boundaries
+            const leftWorld = canvasToWorld(0, 0, width, height).x;
+            const rightWorld = canvasToWorld(width, 0, width, height).x;
+            const bottomWorld = canvasToWorld(0, height, width, height).y;
+            const topWorld = canvasToWorld(0, 0, width, height).y;
+
+            // Draw minor grid lines
+            ctx.beginPath();
+            ctx.strokeStyle = '#e0e0e0'; // Light gray
+            ctx.lineWidth = 1;
+
+            // Vertical minor lines
+            let startXMinor = Math.floor(leftWorld / minorStep) * minorStep;
+            for (let x = startXMinor; x <= rightWorld; x += minorStep) {
+                const { cx } = worldToCanvas(x, 0, width, height);
+                ctx.moveTo(cx, 0);
+                ctx.lineTo(cx, height);
+            }
+
+            // Horizontal minor lines
+            let startYMinor = Math.floor(bottomWorld / minorStep) * minorStep;
+            for (let y = startYMinor; y <= topWorld; y += minorStep) {
+                const { cy } = worldToCanvas(0, y, width, height);
+                ctx.moveTo(0, cy);
+                ctx.lineTo(width, cy);
+            }
+            ctx.stroke();
+            ctx.closePath();
+
+            // Draw major grid lines and labels
+            ctx.beginPath();
+            ctx.strokeStyle = '#cccccc'; // Medium gray
+            ctx.lineWidth = 1.5;
+            ctx.fillStyle = '#333'; // Dark text
+            ctx.font = '12px sans-serif';
+
+            // Vertical major lines
+            let startXMajor = Math.floor(leftWorld / step) * step;
+            const { cy: y0 } = worldToCanvas(0, 0, width, height); // Origin Y
+            for (let x = startXMajor; x <= rightWorld; x += step) {
+                const { cx } = worldToCanvas(x, 0, width, height);
+                ctx.moveTo(cx, 0);
+                ctx.lineTo(cx, height);
+
+                // Label non-zero lines
+                if (Math.abs(x) > 1e-6) {
+                    ctx.fillText(x.toString(), cx + 2, y0 - 4);
+                }
+            }
+
+            // Horizontal major lines
+            let startYMajor = Math.floor(bottomWorld / step) * step;
+            const { cx: x0 } = worldToCanvas(0, 0, width, height); // Origin X
+            for (let y = startYMajor; y <= topWorld; y += step) {
+                const { cy } = worldToCanvas(0, y, width, height);
+                ctx.moveTo(0, cy);
+                ctx.lineTo(width, cy);
+
+                // Label non-zero lines
+                if (Math.abs(y) > 1e-6) {
+                    ctx.fillText(y.toString(), x0 + 4, cy - 2);
+                }
+            }
+            ctx.stroke();
+            ctx.closePath();
+        },
+        [canvasToWorld, getStepFromScale, scale, worldToCanvas]
+    );
+
+    /**
+     * Draws X and Y axes
+     * @param {CanvasRenderingContext2D} ctx - Canvas context
+     * @param {number} width - Canvas width
+     * @param {number} height - Canvas height
+     */
+    const drawAxes = useCallback(
+        (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+            ctx.beginPath();
+            ctx.strokeStyle = '#444444'; // Dark gray
+            ctx.lineWidth = 2;
+
+            // Draw Y axis
+            const { cx: x0 } = worldToCanvas(0, 0, width, height);
+            ctx.moveTo(x0, 0);
+            ctx.lineTo(x0, height);
+
+            // Draw X axis
+            const { cy: y0 } = worldToCanvas(0, 0, width, height);
+            ctx.moveTo(0, y0);
+            ctx.lineTo(width, y0);
+
+            ctx.stroke();
+            ctx.closePath();
+        },
+        [worldToCanvas]
+    );
+
+    /**
+     * Main drawing function (clears and redraws entire canvas)
+     */
+    const draw = useCallback(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
         const { width, height } = canvas;
+
+        // Clear canvas
         ctx.clearRect(0, 0, width, height);
 
+        // Draw white background
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, width, height);
 
-        ctx.beginPath();
-        ctx.strokeStyle = '#e0e0e0';
-        ctx.lineWidth = 1;
+        // Draw coordinate system
+        drawAxes(ctx, width, height);
+        drawGrid(ctx, width, height);
 
-        const leftWorld = canvasToWorld(0, 0, width, height).x;
-        const rightWorld = canvasToWorld(width, 0, width, height).x;
-        const bottomWorld = canvasToWorld(0, height, width, height).y;
-        const topWorld = canvasToWorld(0, 0, width, height).y;
+        // (Future) Draw analytical expressions here using `expressions` prop
+    }, [drawAxes, drawGrid, expressions]);
 
-        const minX = Math.floor(leftWorld) - 1;
-        const maxX = Math.ceil(rightWorld) + 1;
-        const minY = Math.floor(bottomWorld) - 1;
-        const maxY = Math.ceil(topWorld) + 1;
-
-        for (let i = minX; i <= maxX; i++) {
-            const { cx } = worldToCanvas(i, 0, width, height);
-            ctx.moveTo(cx, 0);
-            ctx.lineTo(cx, height);
-        }
-
-        for (let j = minY; j <= maxY; j++) {
-            const { cy } = worldToCanvas(0, j, width, height);
-            ctx.moveTo(0, cy);
-            ctx.lineTo(width, cy);
-        }
-
-        ctx.stroke();
-        ctx.closePath();
-
-        ctx.beginPath();
-        ctx.strokeStyle = '#444444';
-        ctx.lineWidth = 2;
-
-        {
-            const { cx: x0 } = worldToCanvas(0, 0, width, height);
-            ctx.moveTo(x0, 0);
-            ctx.lineTo(x0, height);
-        }
-
-        {
-            const { cy: y0 } = worldToCanvas(0, 0, width, height);
-            ctx.moveTo(0, y0);
-            ctx.lineTo(width, y0);
-        }
-
-        ctx.stroke();
-        ctx.closePath();
-
-        drawGridNumbersAndEnhancedLines(ctx, width, height);
-    };
-
-    const drawGridNumbersAndEnhancedLines = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-        const step = getStepFromScale(scale);
-
-        const leftWorld = canvasToWorld(0, 0, width, height).x;
-        const rightWorld = canvasToWorld(width, 0, width, height).x;
-        const bottomWorld = canvasToWorld(0, height, width, height).y;
-        const topWorld = canvasToWorld(0, 0, width, height).y;
-
-        ctx.beginPath();
-        for (let x = Math.floor(leftWorld / step) * step; x <= rightWorld; x += step) {
-            const { cx } = worldToCanvas(x, 0, width, height);
-            ctx.strokeStyle = '#cccccc';
-            ctx.lineWidth = 1.5;
-            ctx.moveTo(cx, 0);
-            ctx.lineTo(cx, height);
-
-            const { cy: y0 } = worldToCanvas(0, 0, width, height);
-            ctx.fillStyle = '#333';
-            ctx.font = '12px sans-serif';
-            ctx.fillText(x.toString(), cx + 2, y0 - 4);
-        }
-
-        for (let y = Math.floor(bottomWorld / step) * step; y <= topWorld; y += step) {
-            const { cy } = worldToCanvas(0, y, width, height);
-            ctx.strokeStyle = '#cccccc';
-            ctx.lineWidth = 1.5;
-            ctx.moveTo(0, cy);
-            ctx.lineTo(width, cy);
-
-            const { cx: x0 } = worldToCanvas(0, 0, width, height);
-            ctx.fillStyle = '#333';
-            ctx.font = '12px sans-serif';
-            ctx.fillText(y.toString(), x0 + 4, cy - 2);
-        }
-        ctx.stroke();
-        ctx.closePath();
-    };
+    // -------------------- Canvas Resizing --------------------
 
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
-        const resizeObserver = new ResizeObserver(() => {
+        /** Resizes canvas to fill parent container */
+        const resizeCanvas = () => {
             const parent = canvas.parentElement;
             if (!parent) return;
+
+            // Match canvas dimensions to container
             canvas.width = parent.clientWidth;
             canvas.height = parent.clientHeight;
-            draw();
-        });
-        resizeObserver.observe(canvas.parentElement!);
-        draw();
 
-        // 🔒 Previene scroll de página al hacer zoom con la rueda o touchpad
-        const handleWheelManual = (e: WheelEvent) => {
+            // Redraw content
+            draw();
+        };
+
+        // Set up resize observer
+        const resizeObserver = new ResizeObserver(resizeCanvas);
+        resizeObserver.observe(canvas.parentElement!);
+
+        // Initial resize
+        resizeCanvas();
+
+        // Cleanup observer
+        return () => resizeObserver.disconnect();
+    }, [draw]);
+
+    // -------------------- Event Handlers --------------------
+
+    /** Handles zoom via mouse wheel */
+    const handleWheel = useCallback(
+        (e: React.WheelEvent) => {
             e.preventDefault();
+            const canvas = canvasRef.current;
+            if (!canvas) return;
+
+            // Get mouse position relative to canvas
             const rect = canvas.getBoundingClientRect();
             const cx = e.clientX - rect.left;
             const cy = e.clientY - rect.top;
 
-            const { x: worldXBefore, y: worldYBefore } = canvasToWorld(cx, cy, canvas.width, canvas.height);
+            // Get current world position under cursor
+            const { x: worldXBefore, y: worldYBefore } = canvasToWorld(
+                cx,
+                cy,
+                canvas.width,
+                canvas.height
+            );
 
+            // Calculate zoom factor
             const zoomIntensity = 0.1;
-            const newScale = scale * (e.deltaY < 0 ? (1 + zoomIntensity) : (1 - zoomIntensity));
-            const clampedScale = Math.max(0.5, Math.min(newScale, 10000));
-            setScale(clampedScale);
+            const factor = e.deltaY < 0 ? 1 + zoomIntensity : 1 - zoomIntensity;
+            const newScale = scale * factor;
 
-            const { x: worldXAfter, y: worldYAfter } = canvasToWorld(cx, cy, canvas.width, canvas.height);
-            setOffset(prev => ({
-                x: prev.x + (worldXBefore - worldXAfter),
-                y: prev.y + (worldYBefore - worldYAfter),
+            // Calculate new world position under cursor
+            const worldXAfter = (cx - canvas.width / 2) / newScale - offset.x;
+            const worldYAfter = (canvas.height / 2 - cy) / newScale - offset.y;
+
+            // Adjust offset to maintain cursor position
+            setOffset((prev) => ({
+                x: prev.x - (worldXBefore - worldXAfter),
+                y: prev.y - (worldYBefore - worldYAfter)
             }));
-        };
+            setScale(newScale);
+        },
+        [canvasToWorld, offset, scale]
+    );
 
-        canvas.addEventListener('wheel', handleWheelManual, { passive: false });
-
-        return () => {
-            resizeObserver.disconnect();
-            canvas.removeEventListener('wheel', handleWheelManual);
-        };
-    }, [offset, scale, expressions]);
-
-
-    const handleWheel = (e: React.WheelEvent) => {
+    /** Initiates panning on mouse down */
+    const handleMouseDown = useCallback((e: React.MouseEvent) => {
         e.preventDefault();
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const { left, top, width, height } = canvas.getBoundingClientRect();
-        const cx = e.clientX - left;
-        const cy = e.clientY - top;
-        const { x: worldXBefore, y: worldYBefore } = canvasToWorld(cx, cy, width, height);
-
-        const zoomIntensity = 0.1;
-        const newScale = scale * (e.deltaY < 0 ? (1 + zoomIntensity) : (1 - zoomIntensity));
-        setScale(Math.max(10, Math.min(newScale, 500)));
-
-        const { x: worldXAfter, y: worldYAfter } = canvasToWorld(cx, cy, width, height);
-        setOffset(prev => ({
-            x: prev.x + (worldXBefore - worldXAfter),
-            y: prev.y + (worldYBefore - worldYAfter),
-        }));
-    };
-
-    const handleMouseDown = (e: React.MouseEvent) => {
-        e.preventDefault();
+        // Store initial mouse position
         lastMouse.current = { x: e.clientX, y: e.clientY };
-    };
+    }, []);
 
-    const handleMouseMove = (e: React.MouseEvent) => {
-        if (!lastMouse.current) return;
-        e.preventDefault();
-        const dx = e.clientX - lastMouse.current.x;
-        const dy = e.clientY - lastMouse.current.y;
-        lastMouse.current = { x: e.clientX, y: e.clientY };
+    /** Handles panning during mouse move */
+    const handleMouseMove = useCallback(
+        (e: React.MouseEvent) => {
+            if (!lastMouse.current) return;
+            e.preventDefault();
 
-        setOffset(prev => ({
-            x: prev.x + dx / scale,
-            y: prev.y - dy / scale,
-        }));
-    };
+            // Calculate mouse movement delta
+            const dx = e.clientX - lastMouse.current.x;
+            const dy = e.clientY - lastMouse.current.y;
 
-    const handleMouseUp = () => {
-        lastMouse.current = null;
-    };
+            // Update stored position
+            lastMouse.current = { x: e.clientX, y: e.clientY };
+
+            // Adjust offset based on movement
+            setOffset((prev) => ({
+                x: prev.x + dx / scale, // Convert pixels to world units
+                y: prev.y - dy / scale  // Invert Y direction
+            }));
+        },
+        [scale]
+    );
+
+    /** Ends panning operation */
+    const handleMouseUp = useCallback(() => {
+        lastMouse.current = null; // Clear drag tracking
+    }, []);
+
+    // -------------------- Render --------------------
 
     return (
         <canvas
@@ -230,7 +345,7 @@ export default function GraphCanvas({ expressions }: GraphCanvasProps) {
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
+            onMouseLeave={handleMouseUp} // Cancel drag on exit
         />
     );
 }
