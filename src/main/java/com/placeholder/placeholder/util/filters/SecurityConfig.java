@@ -5,6 +5,7 @@ import com.placeholder.placeholder.util.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
@@ -32,6 +33,7 @@ import java.util.Set;
  * Security configuration class for defining security filter chains and authentication mechanisms.
  * TODO: refactor this monstro.
  */
+@Profile("default")
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -97,10 +99,10 @@ public class SecurityConfig {
     /**
      * Configures the security filter chain for the resource server.
      *
-     * @param http the {@link HttpSecurity} to configure
-     * @param allowedEndpoints a set of endpoints that are publicly accessible
-     * @param allowedStaticEndpoints a set of static resource endpoints that are publicly accessible
-     * @param accessDeniedHandler a custom handler for access denied exceptions
+     * @param http                     the {@link HttpSecurity} to configure
+     * @param allowedEndpoints         a set of endpoints that are publicly accessible
+     * @param allowedStaticEndpoints   a set of static resource endpoints that are publicly accessible
+     * @param accessDeniedHandler      a custom handler for access denied exceptions
      * @param authenticationEntryPoint a custom entry point for authentication exceptions
      * @return the configured {@link SecurityFilterChain}
      * @throws Exception if an error occurs during configuration
@@ -139,7 +141,7 @@ public class SecurityConfig {
      * Configures the authentication manager with a DAO-based authentication provider.
      *
      * @param userDetailsService the {@link UserDetailsService} to use for retrieving user details
-     * @param passwordEncoder the {@link PasswordEncoder} to use for password encoding
+     * @param passwordEncoder    the {@link PasswordEncoder} to use for password encoding
      * @return the configured {@link AuthenticationManager}
      */
     @Bean
@@ -149,15 +151,5 @@ public class SecurityConfig {
         provider.setUserDetailsService(userDetailsService); // Set the user details service
         provider.setPasswordEncoder(passwordEncoder); // Set the password encoder
         return new ProviderManager(provider);
-    }
-
-    /**
-     * Configures the password encoder to use BCrypt hashing.
-     *
-     * @return the configured {@link PasswordEncoder}
-     */
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }
