@@ -130,7 +130,7 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
      */
     @Override
     public String formatResult(String expression) {
-        return parseToLateX(expression);
+        return expression;
     }
 
     /**
