@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Header from '../components/App/Header';
 import ExpressionList from '../components/App/ExpressionList';
-import GraphCanvas from '../components/App/GraphCanvas';
+import GraphCanvas from '../components/App/Graph/GraphCanvas.tsx';
 import styles from '../styles/modules/graphCanvas.module.css';
 
 export default function GraphPage() {
