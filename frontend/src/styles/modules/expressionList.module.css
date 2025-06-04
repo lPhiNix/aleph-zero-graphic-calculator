@@ -1,3 +1,4 @@
+/* expressionList.module.css */
 .listContainer {
     display: flex;
     flex-direction: column;
@@ -9,13 +10,13 @@
     display: flex;
     align-items: center;
     margin-bottom: 0.5rem;
-    position: relative; /* para cualquier ajuste futuro, aunque ahora no es crítico */
+    position: relative;
 }
 
-/* El input ocupa todo el ancho menos el botón */
+/* El input ocupa todo el ancho menos los botones */
 .exprInput {
     flex: 1;
-    padding: 0.5rem 2rem 0.5rem 0.5rem; /* espacio a la derecha para que la '×' no quede encima */
+    padding: 0.5rem 2rem 0.5rem 0.5rem; /* espacio a la derecha para que los botones no queden encima */
     font-size: 1rem;
     border: 1px solid var(--color-gray-medium);
     border-radius: 4px;
@@ -29,7 +30,7 @@
     box-shadow: 0 0 0 2px rgba(0, 216, 255, 0.2);
 }
 
-/* 1) Ocultar el botón por defecto */
+/* Botón para limpiar fila (×) */
 .deleteButton {
     display: none;
     position: absolute;
@@ -38,8 +39,6 @@
     transform: translateY(-50%);
     width: 1.5rem;
     height: 1.5rem;
-
-    /* resto de estilos (sin display) */
     align-items: center;
     justify-content: center;
     background: transparent;
@@ -50,11 +49,20 @@
     padding: 0;
 }
 
-/* 2) Mostrar solo cuando el input esté enfocado (focus-within en el wrapper) */
+/* Mostrar cuando el input esté enfocado */
 .inputWrapper:focus-within .deleteButton {
-    display: flex; /* u “block”, según necesites; en tu caso “flex” para centrar el icono */
+    display: flex;
 }
 
+/* No ocultar la “×” si el renglón está en hover y el input está enfocado */
+.inputWrapper:hover:focus-within .deleteButton {
+    display: flex;
+}
+
+/* Ocultar la “×” sólo cuando el renglón está en hover y NO está enfocado */
+.inputWrapper:hover:not(:focus-within) .deleteButton {
+    display: none;
+}
 
 /* Ajuste para centrar ÓPTICAMENTE la “×” */
 .deleteIcon {
@@ -62,20 +70,46 @@
     transform: translateY(-2px);
 }
 
-/* Estilo de enfoque (focus) para el botón: */
-.deleteButton:focus {
-    outline: none;
-    border: 2px solid var(--color-red);
-    outline-offset: 2px;
-}
-
-/* Mostrar sólo mientras el input esté enfocado */
-.inputWrapper:focus-within .deleteButton {
-    display: flex; /* o "inline-flex" si prefieres */
-}
-
-
-/* Efecto hover opcional */
+/* Efecto hover opcional para limpiar fila */
 .deleteButton:hover {
+    color: var(--color-red);
+}
+
+/* Botón para borrar fila (🗑️) */
+.deleteRowButton {
+    display: none;
+    position: absolute;
+    top: 50%;
+    right: 0.5rem; /* misma posición que la “×” */
+    transform: translateY(-50%);
+    width: 1.5rem;
+    height: 1.5rem;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    font-size: 1rem;
+    color: var(--color-gray-dark);
+    cursor: pointer;
+    padding: 0;
+}
+
+/* Mostrar cubo sólo al hover del renglón y cuando NO está enfocado */
+.inputWrapper:hover:not(:focus-within) .deleteRowButton {
+    display: flex;
+}
+
+/* No mostrar cubo cuando el input está enfocado */
+.inputWrapper:focus-within .deleteRowButton {
+    display: none;
+}
+
+.trashIcon {
+    display: inline-block;
+    transform: translateY(-2px);
+}
+
+/* Efecto hover para borrar fila */
+.deleteRowButton:hover {
     color: var(--color-red);
 }
