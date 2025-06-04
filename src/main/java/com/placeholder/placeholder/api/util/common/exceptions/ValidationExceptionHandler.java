@@ -33,7 +33,6 @@ import java.util.List;
 @Order(1)
 @RequiredArgsConstructor
 public class ValidationExceptionHandler {
-    private final ApiResponseFactory apiResponseFactory;
     private final ApiMessageFactory messageFactory;
 
 
@@ -107,10 +106,10 @@ public class ValidationExceptionHandler {
             MissingServletRequestParameterException ex
     ) {
         log.warn("Missing required request parameter: {}", ex.getParameterName(), ex);
-        List<ValidationErrorDetail> detail = List.of(new ValidationErrorDetail(ErrorCategory.VALIDATION, ex.getParameterName(), ex.getMessage(), null));
+        ValidationErrorDetail detail = new ValidationErrorDetail(ErrorCategory.VALIDATION, ex.getParameterName(), ex.getMessage(), "null");
         return messageFactory.error().validation(String.format("The required request parameter '%s' is missing.", ex.getParameterName()))
                 .title("Missing request parameter")
-                .details(detail)
+                .detail(detail)
                 .build();
     }
 }
