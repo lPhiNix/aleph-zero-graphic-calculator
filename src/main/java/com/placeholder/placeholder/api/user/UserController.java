@@ -24,7 +24,7 @@ public class UserController {
     private final UserService userService;
     private final ApiResponseFactory apiResponseFactory;
 
-
+/*
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<SimpleResponse>> register(@RequestBody @Valid UserCreationRequest userCreationRequest) {
         logger.info("Registering user: {}", userCreationRequest.username());
@@ -33,4 +33,6 @@ public class UserController {
         SimpleResponse response = new SimpleResponse("User successfuly created");
         return apiResponseFactory.ok(response);
     }
+
+ */
 }

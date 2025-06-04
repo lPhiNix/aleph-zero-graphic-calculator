@@ -21,7 +21,7 @@ public class UserService {
     private final UserPreferenceRepository userPreferenceRepository;
     private final UserMapper userMapper;
 
-    private final PasswordEncoder passwordEncoder;
+    /*
 
     public User findUserByUsername(String username) {
         return userRepository.findUserByUsername(username)
@@ -43,4 +43,6 @@ public class UserService {
 
         return userMapper.toDto(user);
     }
+
+     */
 }
