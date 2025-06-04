@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" th:href="@{/styles/style.css}" />
+</head>
+<body>
+
+<div class="container">
+    <div th:if="${successMessage}" class="toast">
+        <p th:text="${successMessage}"></p>
+    </div>
+    <div class="loginBox">
+        <div class="left">
+            <h1 class="title">Sign In</h1>
+            <form th:action="@{/login_process}" method="post" class="form">
+                <p class="registerText">
+                    Please enter your login credentials<br/>
+                    or <a th:href="@{/register}" class="link">click here</a> to register.
+                </p>
+
+                <div class="formMain">
+                    <div class="inputGroup">
+                        <input class="input"
+                               type="text"
+                               name="username"
+                               placeholder="Username or email"
+                               required
+                               autofocus
+                               th:value="${param.username}" />
+                    </div>
+                    <div class="inputGroup">
+                        <input class="input"
+                               type="password"
+                               name="password"
+                               placeholder="Password"
+                               required />
+                    </div>
+                </div>
+
+                <div class="formOptions">
+                    <label class="checkbox">
+                        <input type="checkbox" name="rememberMe"
+                               th:checked="${param.rememberMe != null}" />
+                        Remember me
+                    </label>
+                    <a th:href="@{/auth/forgot-password}" class="link">Forgot Password?</a>
+                </div>
+
+                <div class="formMain">
+                    <button type="submit" class="button">Sign In</button>
+                </div>
+
+                <div th:if="${param.error}" class="registerText" style="color: #ff4d4d; font-weight: 600;">
+                    Invalid username or password.
+                </div>
+
+                <div th:if="${param.logout}" class="registerText" style="color: #28a745; font-weight: 600;">
+                    You have been logged out successfully.
+                </div>
+
+            </form>
+        </div>
+        <div class="right"></div>
+    </div>
+</div>
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        const toast = document.querySelector('.toast');
+        if (toast) {
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 10000);
+        }
+    });
+</script>
+</body>
+</html>

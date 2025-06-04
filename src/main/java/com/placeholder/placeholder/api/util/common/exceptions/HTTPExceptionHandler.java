@@ -1,6 +1,6 @@
 package com.placeholder.placeholder.api.util.common.exceptions;
 
-import com.placeholder.placeholder.util.enums.AppCode;
+import com.placeholder.placeholder.util.config.enums.AppCode;
 import com.placeholder.placeholder.api.util.common.messages.ApiResponseFactory;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.ErrorCategory;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.details.ErrorDetail;
