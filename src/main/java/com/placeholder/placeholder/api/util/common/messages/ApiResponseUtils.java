@@ -1,14 +1,13 @@
 package com.placeholder.placeholder.api.util.common.messages;
 
 import com.placeholder.placeholder.api.util.common.messages.dto.error.ErrorCategory;
+import com.placeholder.placeholder.api.util.common.messages.dto.error.details.ErrorDetail;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.details.ValidationErrorDetail;
 import jakarta.validation.ConstraintViolation;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.validation.BindingResult;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.validation.BindingResult;
@@ -91,7 +90,16 @@ public class ApiResponseUtils {
                         violation.getMessage(),                 // Validation error message
                         violation.getInvalidValue()            // The value that failed validation
                 ))
-                .sorted(Comparator.comparing(ValidationErrorDetail::category)) // Ensure consistent ordering by category
                 .collect(Collectors.toList());
+    }
+
+    public static List<ErrorDetail> getErrorDetails(Collection<OAuth2Error> errors, ErrorCategory category) {
+        return errors.stream()
+                .map(error -> new ErrorDetail(
+                        category,
+                        error.getErrorCode(),
+                        error.getDescription()
+                ))
+                .toList();
     }
 }

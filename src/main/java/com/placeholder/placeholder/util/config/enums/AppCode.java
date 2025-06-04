@@ -1,4 +1,4 @@
-package com.placeholder.placeholder.util.enums;
+package com.placeholder.placeholder.util.config.enums;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

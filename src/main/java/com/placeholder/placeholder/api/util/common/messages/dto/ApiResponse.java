@@ -1,11 +1,9 @@
 package com.placeholder.placeholder.api.util.common.messages.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.placeholder.placeholder.util.enums.AppCode;
+import com.placeholder.placeholder.util.config.enums.AppCode;
 import com.placeholder.placeholder.api.util.common.messages.dto.content.MessageContent;
 import jakarta.validation.constraints.NotNull;
-
-import java.time.LocalDateTime;
 
 /**
  * Standard DTO model for sending API responses with metadata
