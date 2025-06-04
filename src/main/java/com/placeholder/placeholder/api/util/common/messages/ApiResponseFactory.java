@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
  * </p>
  */
 @Component
+@Deprecated(since = "Use ApiMessageFactory instead for building ApiResponse objects. This class will be removed in a future release.")
 public class ApiResponseFactory {
 
     private final ObjectFactory<HttpServletRequest> requestFactory;
