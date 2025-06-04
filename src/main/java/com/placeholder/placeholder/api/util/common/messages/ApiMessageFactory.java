@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
  * Provides methods to create builders for API responses and error responses,
  * allowing for a fluent API style of constructing messages.
  * </p>
+ * This class is thread-safe and can be used in a Spring context to inject dependencies.
  */
 @Component
 public class ApiMessageFactory {

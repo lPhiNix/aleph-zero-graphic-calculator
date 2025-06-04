@@ -6,7 +6,6 @@ import com.placeholder.placeholder.util.config.enums.AppCode;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -40,7 +39,7 @@ public class ErrorResponseBuilder {
      * @param errorTitle the title describing the error
      * @return this builder instance for chaining
      */
-    public ErrorResponseBuilder errorTitle(String errorTitle) {
+    public ErrorResponseBuilder title(String errorTitle) {
         this.errorTitle = errorTitle;
         return this;
     }
@@ -51,7 +50,7 @@ public class ErrorResponseBuilder {
      * @param errorSummary a brief explanation of the error
      * @return this builder instance for chaining
      */
-    public ErrorResponseBuilder errorSummary(String errorSummary) {
+    public ErrorResponseBuilder summary(String errorSummary) {
         this.errorSummary = errorSummary;
         return this;
     }
@@ -62,7 +61,7 @@ public class ErrorResponseBuilder {
      * @param detail the {@link ApiErrorDetail} to add
      * @return this builder instance for chaining
      */
-    public ErrorResponseBuilder addErrorDetail(ApiErrorDetail detail) {
+    public ErrorResponseBuilder detail(ApiErrorDetail detail) {
         this.errorDetails.add(detail);
         return this;
     }
@@ -73,7 +72,7 @@ public class ErrorResponseBuilder {
      * @param details a list of {@link ApiErrorDetail} objects
      * @return this builder instance for chaining
      */
-    public ErrorResponseBuilder errorDetails(List<? extends ApiErrorDetail> details) {
+    public ErrorResponseBuilder details(List<? extends ApiErrorDetail> details) {
         this.errorDetails.clear();
         this.errorDetails.addAll(details);
         return this;
@@ -152,7 +151,7 @@ public class ErrorResponseBuilder {
      * @param summary a brief explanation of the validation error
      * @return this builder instance for chaining
      */
-    public ErrorResponseBuilder validationError(String summary) {
+    public ErrorResponseBuilder validation(String summary) {
         this.code = AppCode.VALIDATION_ERROR;
         this.errorTitle = AppCode.VALIDATION_ERROR.getSimpleMessage();
         this.errorSummary = summary;
@@ -165,7 +164,7 @@ public class ErrorResponseBuilder {
      * @param summary a brief explanation of the error
      * @return this builder instance for chaining
      */
-    public ErrorResponseBuilder internalError(String summary) {
+    public ErrorResponseBuilder internal(String summary) {
         this.code = AppCode.INTERNAL_ERROR;
         this.errorTitle = AppCode.INTERNAL_ERROR.getSimpleMessage();
         this.errorSummary = summary;

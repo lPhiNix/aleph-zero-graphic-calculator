@@ -1,11 +1,12 @@
 package com.placeholder.placeholder.api.util.common.exceptions;
 
+import com.placeholder.placeholder.api.util.common.messages.ApiMessageFactory;
 import com.placeholder.placeholder.util.config.enums.AppCode;
 import com.placeholder.placeholder.api.util.common.messages.ApiResponseFactory;
-import com.placeholder.placeholder.api.util.common.messages.dto.error.ErrorCategory;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.details.ValidationErrorDetail;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.ErrorResponse;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Exception handler for persistence-related exceptions.
@@ -31,18 +31,12 @@ import java.util.Objects;
  */
 @ControllerAdvice
 @Order(2)
+@RequiredArgsConstructor
 public class PersistenceExceptionHandler {
     private final Logger logger = LoggerFactory.getLogger(PersistenceExceptionHandler.class);
     private final ApiResponseFactory responseFactory;
+    private final ApiMessageFactory messageFactory;
 
-    /**
-     * Constructor for {@code PersistenceExceptionHandler}.
-     *
-     * @param responseFactory The factory used to generate consistent and structured error responses.
-     */
-    public PersistenceExceptionHandler(ApiResponseFactory responseFactory) {
-        this.responseFactory = responseFactory;
-    }
 
     /**
      * Handles violations of database integrity constraints.
@@ -59,22 +53,12 @@ public class PersistenceExceptionHandler {
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
             DataIntegrityViolationException ex
     ) {
-        String rootMessage = Objects.requireNonNull(ex.getRootCause()).getMessage();
-        String message = "Database integrity violation: " + rootMessage;
-
-        ValidationErrorDetail detail = new ValidationErrorDetail(
-                ErrorCategory.BUSINESS,
-                "Database Constraint",
-                message,
-                ex.getRootCause()
-        );
-
-        return responseFactory.error(
-                AppCode.CONFLICT,
-                message,
-                ex.getMessage(),
-                List.of(detail)
-        );
+        logger.error("Data integrity violation: {}", ex.getMessage(), ex);
+        return messageFactory.error()
+                .code(AppCode.CONFLICT)
+                .title("Database Integrity Constraint Violation")
+                .summary("A database integrity constraint was violated (e.g., duplicate key, null value, or foreign key")
+                .build();
     }
 
     /**
@@ -92,21 +76,10 @@ public class PersistenceExceptionHandler {
             EntityNotFoundException ex
     ) {
         logger.warn("Entity not found: {}", ex.getMessage(), ex);
-        String message = "Entity not found: " + ex.getMessage();
-
-        ValidationErrorDetail detail = new ValidationErrorDetail(
-                ErrorCategory.NOT_FOUND,
-                "Entity",
-                message,
-                null
-        );
-
-        return responseFactory.error(
-                AppCode.NOT_FOUND,
-                message,
-                ex.getMessage(),
-                List.of(detail)
-        );
+        return messageFactory.error()
+                .code(AppCode.NOT_FOUND)
+                .summary("The requested resource was not found.")
+                .build();
     }
 
     /**
@@ -124,20 +97,11 @@ public class PersistenceExceptionHandler {
     public ResponseEntity<ErrorResponse> handleOptimisticLockingFailure(
             OptimisticLockingFailureException ex
     ) {
-        String message = "Optimistic locking failure: concurrent update conflict";
-
-        ValidationErrorDetail detail = new ValidationErrorDetail(
-                ErrorCategory.CONFLICT,
-                "Optimistic Locking",
-                message,
-                null
-        );
-
-        return responseFactory.error(
-                AppCode.CONFLICT,
-                message,
-                ex.getMessage(),
-                List.of(detail)
-        );
+        logger.warn("Optimistic locking failure: {}", ex.getMessage(), ex);
+        return messageFactory.error()
+                .code(AppCode.CONFLICT)
+                .title("Concurrent update conflict")
+                .summary("An optimistic locking failure occurred, indicating a concurrent modification conflict.")
+                .build();
     }
 }

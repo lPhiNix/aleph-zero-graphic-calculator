@@ -132,7 +132,7 @@ public enum AppCode {
      * <p>
      * Maps to HTTP 409 Conflict.
      */
-    DUPLICATE_ENTITY(HttpStatus.CONFLICT, "Duplicate entity"),
+    INTEGRITY_VIOLATION(HttpStatus.CONFLICT, "Database integrity violation"),
 
     // --- Server errors ---
 
