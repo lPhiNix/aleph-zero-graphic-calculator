@@ -165,6 +165,15 @@ export default function GraphCanvas({ expressions }: GraphCanvasProps): JSX.Elem
             const top = canvasToWorld(0, 0, cw, ch).y; // World y at top edge
             const bottom = canvasToWorld(0, ch, cw, ch).y; // World y at bottom edge
 
+            // Compute pixel position of the axes
+            const zeroPos = worldToCanvas(0, 0, cw, ch);
+            const zeroX = zeroPos.cx; // Pixel X position of Y-axis
+            const zeroY = zeroPos.cy; // Pixel Y position of X-axis
+
+            // Determine if axes are on-screen
+            const axisVisibleX = zeroY >= 0 && zeroY <= ch; // X-axis visible vertically
+            const axisVisibleY = zeroX >= 0 && zeroX <= cw; // Y-axis visible horizontally
+
             // ─── Draw minor grid lines ─────────────────────────────────────────
             ctx.beginPath(); // Begin path for minor grid
             ctx.strokeStyle = '#e0e0e0'; // Light gray color for minor lines
@@ -200,7 +209,6 @@ export default function GraphCanvas({ expressions }: GraphCanvasProps): JSX.Elem
 
             const iMinX = Math.ceil(left / gridStepWorld); // First integer grid index ≥ left bound
             const iMaxX = Math.floor(right / gridStepWorld); // Last integer grid index ≤ right bound
-            const zeroY = worldToCanvas(0, 0, cw, ch).cy; // Pixel y-coordinate of world y=0 for label positioning
 
             // Draw vertical major lines and numeric labels
             for (let i = iMinX; i <= iMaxX; i++) {
@@ -208,16 +216,31 @@ export default function GraphCanvas({ expressions }: GraphCanvasProps): JSX.Elem
                 const { cx } = worldToCanvas(xVal, 0, cw, ch); // Convert to pixel x
                 ctx.moveTo(cx, 0); // Start at top
                 ctx.lineTo(cx, ch); // Draw to bottom
-                if (i !== 0) {
-                    const label = formatLabel(xVal); // Format numeric label for xVal
-                    const vOffset = Math.abs(xVal) < gridStepWorld ? 16 : 4; // Decide if label needs extra offset near origin
-                    ctx.fillText(label, cx + 2, zeroY - vOffset); // Draw label near axis
+
+                // Label positioning
+                const label = formatLabel(xVal);
+                const vOffset = Math.abs(xVal) < gridStepWorld ? 16 : 4; // Extra offset near origin
+                let labelY: number;
+
+                if (axisVisibleX) {
+                    // If X-axis is visible, draw label near axis
+                    labelY = zeroY - vOffset;
+                } else if (zeroY < 0) {
+                    // X-axis above view → place labels near top
+                    labelY = 12; // small padding from top
+                } else {
+                    // X-axis below view → place labels near bottom
+                    labelY = ch - 4; // small padding from bottom
+                }
+
+                // Only skip labeling at i===0 when axis is visible; if axis isn't visible, label zero as well
+                if (i !== 0 || !axisVisibleX) {
+                    ctx.fillText(label, cx + 2, labelY);
                 }
             }
 
-            const iMinY = Math.ceil(bottom / gridStepWorld); // First integer grid index ≥ bottom
+            const iMinY = Math.ceil(bottom / gridStepWorld); // First integer grid index ≥ bottom bound
             const iMaxY = Math.floor(top / gridStepWorld); // Last integer grid index ≤ top bound
-            const zeroX = worldToCanvas(0, 0, cw, ch).cx; // Pixel x-coordinate of world x=0 for label positioning
 
             // Draw horizontal major lines and numeric labels
             for (let j = iMinY; j <= iMaxY; j++) {
@@ -225,10 +248,26 @@ export default function GraphCanvas({ expressions }: GraphCanvasProps): JSX.Elem
                 const { cy } = worldToCanvas(0, yVal, cw, ch); // Convert to pixel y
                 ctx.moveTo(0, cy); // Start at left
                 ctx.lineTo(cw, cy); // Draw to right
-                if (j !== 0) {
-                    const label = formatLabel(yVal); // Format numeric label for yVal
-                    const hOffset = Math.abs(yVal) < gridStepWorld ? 16 : 4; // Extra offset near origin if needed
-                    ctx.fillText(label, zeroX + hOffset, cy - 2); // Draw label next to axis
+
+                // Label positioning
+                const label = formatLabel(yVal);
+                const hOffset = Math.abs(yVal) < gridStepWorld ? 16 : 4; // Extra offset near origin
+                let labelX: number;
+
+                if (axisVisibleY) {
+                    // If Y-axis is visible, draw label near axis
+                    labelX = zeroX + hOffset;
+                } else if (zeroX < 0) {
+                    // Y-axis left of view → place labels near left edge
+                    labelX = 4; // small padding from left
+                } else {
+                    // Y-axis right of view → place labels near right edge
+                    labelX = cw - (label.length * 7) - 4; // adjust to keep inside view (approximate width)
+                }
+
+                // Only skip labeling at j===0 when axis is visible; if axis isn't visible, label zero as well
+                if (j !== 0 || !axisVisibleY) {
+                    ctx.fillText(label, labelX, cy - 2);
                 }
             }
 
@@ -236,10 +275,11 @@ export default function GraphCanvas({ expressions }: GraphCanvasProps): JSX.Elem
             ctx.closePath(); // Close major grid path
 
             // ─── Draw "0" at origin ────────────────────────────────────────────
-            ctx.fillStyle = '#333'; // Ensure fill color still dark for "0"
-            ctx.font = '12px sans-serif'; // Ensure font remains consistent
-            const origin = worldToCanvas(0, 0, cw, ch); // Compute pixel coordinates for world origin
-            ctx.fillText('0', origin.cx + 4, origin.cy - 4); // Draw "0" label slightly offset from origin
+            if (axisVisibleX && axisVisibleY) {
+                ctx.fillStyle = '#333'; // Ensure fill color still dark for "0"
+                ctx.font = '12px sans-serif'; // Ensure font remains consistent
+                ctx.fillText('0', zeroX + 4, zeroY - 4); // Draw "0" label slightly offset from origin
+            }
         },
         [canvasToWorld, scale, worldToCanvas] // Redraw grid whenever transformations or scale change
     );

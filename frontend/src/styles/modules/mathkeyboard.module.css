@@ -1,0 +1,53 @@
+/* ─── Contenedor general del teclado ─────────────────────────────────── */
+.keyboardContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    background-color: #1e1e1e; /* fondo oscuro */
+    color: #ffffff;
+}
+
+/* ─── Barra superior (toolbar) ──────────────────────────────────────── */
+.toolbar {
+    background-color: #2d2d2d;   /* color un poco más claro que el fondo */
+    padding: 0.5rem;
+    border-bottom: 1px solid #444; /* línea divisoria con el grid */
+}
+
+/* Botón desplegable “Funciones ▾” */
+.dropdownButton {
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+/* ─── Grid de teclas: siempre 5 columnas ────────────────────────────── */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1px;               /* separación finita entre teclas */
+    background-color: #444; /* color de “espacios” entre botones */
+}
+
+/* ─── Cada botón (tecla) en el grid ───────────────────────────────── */
+.keyButton {
+    background-color: #2d2d2d; /* botón ligeramente más claro que el fondo */
+    border: none;
+    color: #ffffff;
+    font-size: 0.9rem;
+    padding: 0.75rem 0;
+    cursor: pointer;
+    text-align: center;
+}
+
+/* Efecto hover para destacar la tecla */
+.keyButton:hover {
+    background-color: #3e3e3e;
+}
+
+/* ─── Tecla de “dos columnas” (ej.: Enter) ─────────────────────────── */
+.wideKey {
+    grid-column: span 2;
+}
