@@ -234,6 +234,19 @@ public class ApiResponseFactory {
         return ResponseEntity.status(code.getStatus()).body(error);
     }
 
+    /**
+     * Constructs a generic error response with a given APP code and title.
+     *
+     * <p>Use this method when you want to return a simple error response without additional details.</p>
+     *
+     * @param code  The {@link AppCode} representing the specific application error and HTTP status.
+     * @param summary A short description describing the error.
+     * @return A {@link ResponseEntity} representing the error response with the appropriate HTTP status.
+     */
+    public ResponseEntity<ErrorResponse> error(AppCode code, String summary) {
+        return error(code, code.getSimpleMessage(), summary);
+    }
+
 // == ERRORS: CONCRETE ==
 
     /**

@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
     /**
      * The default error message used when a more specific message is not available.
      */
-    public static final String DEFAULT_ERROR_MESSAGE = "An unexpected error occurred";
+    public static final String GENERIC_ERROR_MESSAGE = "An unexpected error occurred";
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
 
@@ -60,12 +60,11 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllExceptions(Exception ex) {
+        logger.error("Unhandled exception caught: {}", ex.getMessage(), ex);
+        AppCode code = AppCode.INTERNAL_ERROR;
         return responseFactory.error(
                 AppCode.INTERNAL_ERROR,
-                "Runtime error",
-                List.of(new ErrorDetail(ErrorCategory.INTERNAL,
-                        (ex.getCause() != null) ? ex.getCause().getMessage() : DEFAULT_ERROR_MESSAGE,
-                        DEFAULT_ERROR_MESSAGE))
+                GENERIC_ERROR_MESSAGE
         );
     }
 
@@ -80,10 +79,7 @@ public class GlobalExceptionHandler {
         logger.error("RuntimeException caught: {}", ex.getMessage(), ex);
         return responseFactory.error(
                 AppCode.INTERNAL_ERROR,
-                "Runtime error",
-                List.of(new ErrorDetail(ErrorCategory.INTERNAL,
-                        (ex.getCause() != null) ? ex.getCause().getMessage() : DEFAULT_ERROR_MESSAGE,
-                        DEFAULT_ERROR_MESSAGE))
+                "An unexpected runtime error occurred during request processing"
         );
     }
 
@@ -95,13 +91,10 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
-        logger.warn("IllegalArgumentException caught: {}", ex.getMessage(), ex);
+        logger.error("IllegalArgumentException caught: {}", ex.getMessage(), ex);
         return responseFactory.error(
                 AppCode.BAD_REQUEST,
-                "Invalid argument",
-                List.of(new ErrorDetail(ErrorCategory.INTERNAL,
-                        (ex.getCause() != null) ? ex.getCause().getMessage() : DEFAULT_ERROR_MESSAGE,
-                        DEFAULT_ERROR_MESSAGE))
+                "The request contains one or more invalid arguments. Please verify your input."
         );
     }
 
@@ -114,13 +107,11 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ErrorResponse> handleIllegalStateException(IllegalStateException ex) {
-        logger.warn("IllegalStateException caught: {}", ex.getMessage(), ex);
+        logger.error("IllegalStateException caught: {}", ex.getMessage(), ex);
         return responseFactory.error(
                 AppCode.CONFLICT,
                 "Illegal state",
-                List.of(new ErrorDetail(ErrorCategory.INTERNAL,
-                        (ex.getCause() != null) ? ex.getCause().getMessage() : DEFAULT_ERROR_MESSAGE,
-                        DEFAULT_ERROR_MESSAGE))
+                "The application encountered an invalid state while processing the request."
         );
     }
 
@@ -164,16 +155,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
         logger.warn("HttpMessageNotReadableException caught: {}", ex.getMessage(), ex);
-        ErrorDetail detail = new ErrorDetail(
-                ErrorCategory.VALIDATION,
-                "Request body error",
-                "Message body is not readable"
-        );
-
         return responseFactory.error(
                 AppCode.BAD_REQUEST,
-                "Malformed request body",
-                List.of(detail)
+                "Message body not readable, request may be malformed"
         );
     }
 }

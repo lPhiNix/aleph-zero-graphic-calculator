@@ -5,6 +5,8 @@ import com.placeholder.placeholder.api.util.common.messages.ApiResponseFactory;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.ErrorCategory;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.details.ErrorDetail;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.ErrorResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -29,6 +31,7 @@ import java.util.List;
 @ControllerAdvice
 @Order(3)
 public class HTTPExceptionHandler {
+    private static final Logger logger = LoggerFactory.getLogger(HTTPExceptionHandler.class);
 
     private final ApiResponseFactory responseFactory;
 
@@ -52,10 +55,10 @@ public class HTTPExceptionHandler {
     public ResponseEntity<ErrorResponse> handleMethodNotSupported(
             HttpRequestMethodNotSupportedException ex
     ) {
+        logger.warn("Unsupported HTTP method: {}", ex.getMethod(), ex);
         return responseFactory.error(
                 AppCode.METHOD_NOT_ALLOWED,
-                "HTTP Method is not supported",
-                ex.getMethod() + " is not allowed to perform this request"
+                String.format("The HTTP method '%s' is not supported for this endpoint.", ex.getMethod())
         );
     }
 
@@ -70,6 +73,8 @@ public class HTTPExceptionHandler {
     public ResponseEntity<ErrorResponse> handleUnsupportedMediaType(
             HttpMediaTypeNotSupportedException ex
     ) {
+        logger.warn("Unsupported media type: {}", ex.getContentType(), ex);
+
         String message = "Unsupported media type: " + ex.getContentType();
         ErrorDetail detail = new ErrorDetail(
                 ErrorCategory.INTERNAL,
@@ -79,8 +84,7 @@ public class HTTPExceptionHandler {
 
         return responseFactory.error(
                 AppCode.UNSUPPORTED_MEDIA_TYPE,
-                message,
-                ex.getMessage(),
+                "One or more media types are not supported",
                 List.of(detail)
         );
     }
