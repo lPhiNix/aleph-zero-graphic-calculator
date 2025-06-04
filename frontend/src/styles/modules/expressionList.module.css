@@ -1,21 +1,21 @@
-/* src/styles/expressionList.module.css */
-
 .listContainer {
     display: flex;
     flex-direction: column;
-    width: 100%;
-    /* Altura completa del padre, con scroll interno si excede */
-    height: 100%;
+    flex: 1;
     overflow-y: auto;
 }
 
 .inputWrapper {
+    display: flex;
+    align-items: center;
     margin-bottom: 0.5rem;
+    position: relative; /* para cualquier ajuste futuro, aunque ahora no es crítico */
 }
 
+/* El input ocupa todo el ancho menos el botón */
 .exprInput {
-    width: 100%;
-    padding: 0.5rem;
+    flex: 1;
+    padding: 0.5rem 2rem 0.5rem 0.5rem; /* espacio a la derecha para que la '×' no quede encima */
     font-size: 1rem;
     border: 1px solid var(--color-gray-medium);
     border-radius: 4px;
@@ -27,4 +27,55 @@
     outline: none;
     border-color: var(--highlight-color);
     box-shadow: 0 0 0 2px rgba(0, 216, 255, 0.2);
+}
+
+/* 1) Ocultar el botón por defecto */
+.deleteButton {
+    display: none;
+    position: absolute;
+    top: 50%;
+    right: 0.5rem;
+    transform: translateY(-50%);
+    width: 1.5rem;
+    height: 1.5rem;
+
+    /* resto de estilos (sin display) */
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    font-size: 1rem;
+    color: var(--app-color);
+    cursor: pointer;
+    padding: 0;
+}
+
+/* 2) Mostrar solo cuando el input esté enfocado (focus-within en el wrapper) */
+.inputWrapper:focus-within .deleteButton {
+    display: flex; /* u “block”, según necesites; en tu caso “flex” para centrar el icono */
+}
+
+
+/* Ajuste para centrar ÓPTICAMENTE la “×” */
+.deleteIcon {
+    display: inline-block;
+    transform: translateY(-2px);
+}
+
+/* Estilo de enfoque (focus) para el botón: */
+.deleteButton:focus {
+    outline: none;
+    border: 2px solid var(--color-red);
+    outline-offset: 2px;
+}
+
+/* Mostrar sólo mientras el input esté enfocado */
+.inputWrapper:focus-within .deleteButton {
+    display: flex; /* o "inline-flex" si prefieres */
+}
+
+
+/* Efecto hover opcional */
+.deleteButton:hover {
+    color: var(--color-red);
 }
