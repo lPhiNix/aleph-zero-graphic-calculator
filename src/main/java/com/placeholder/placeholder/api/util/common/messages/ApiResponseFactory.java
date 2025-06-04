@@ -1,11 +1,8 @@
 package com.placeholder.placeholder.api.util.common.messages;
 
 import com.placeholder.placeholder.api.util.common.messages.dto.ApiResponse;
-import com.placeholder.placeholder.api.util.common.messages.dto.content.MessageContent;
-import com.placeholder.placeholder.api.util.common.messages.dto.content.responses.EmptyContentResponse;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.ErrorResponse;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.details.ApiErrorDetail;
-import com.placeholder.placeholder.api.util.common.messages.dto.error.details.ErrorDetail;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.details.ValidationErrorDetail;
 import com.placeholder.placeholder.util.config.enums.AppCode;
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,16 +49,14 @@ public class ApiResponseFactory {
      *
      * @param code          The {@link AppCode} representing the status of the response (e.g., OK, ERROR).
      * @param message       A message to be included in the response body.
-     * @param content       Content of the response, which can be any class
-     *                      implementing {@link MessageContent}.
+     * @param content       Content of the response.
      * @param <T>           The type of the message content.
      * @return A {@link ResponseEntity} containing the constructed {@link ApiResponse}.
      */
-    private <T extends MessageContent> ResponseEntity<ApiResponse<T>> build(AppCode code, String message, T content) {
+    private <T> ResponseEntity<ApiResponse<T>> build(AppCode code, String message, T content) {
         ApiResponse<T> response = new ApiResponse<>(
                 code,
                 message,
-                requestFactory.getObject().getRequestURI(), // Gets the request URI lazily.
                 content
         );
         return ResponseEntity.status(code.getStatus()).body(response);
@@ -105,11 +100,11 @@ public class ApiResponseFactory {
      * contains the result of the operation.</p>
      *
      * @param content The data to be included in the successful response, which can be any response DTO.
-     * @param <T>     The type of the message content. It must extend {@link MessageContent}.
+     * @param <T>     The type of the message content.
      * @return A {@link ResponseEntity} representing a successful response (HTTP 200 OK)
      *         with the provided content.
      */
-    public <T extends MessageContent> ResponseEntity<ApiResponse<T>> ok(T content) {
+    public <T> ResponseEntity<ApiResponse<T>> ok(T content) {
         return build(AppCode.OK, AppCode.OK.getSimpleMessage(), content);
     }
 
@@ -122,14 +117,14 @@ public class ApiResponseFactory {
      *
      * @param content  The data to be included in the successful response.
      * @param location The URI where the newly created resource can be accessed.
-     * @param <T>      The type of the message content. It must extend {@link MessageContent}.
+     * @param <T>      The type of the message content.
      * @return A {@link ResponseEntity} representing a successful response (HTTP 201 Created)
      *         with the content and the location header.
      */
-    public <T extends MessageContent> ResponseEntity<ApiResponse<T>> created(T content, URI location) {
+    public <T> ResponseEntity<ApiResponse<T>> created(T content, URI location) {
         AppCode code = AppCode.CREATED;
         return ResponseEntity.created(location)
-                .body(new ApiResponse<>(code, code.getSimpleMessage(), requestFactory.getObject().getRequestURI(), content));
+                .body(new ApiResponse<>(code, code.getSimpleMessage(), content));
     }
 
     /**
@@ -140,11 +135,11 @@ public class ApiResponseFactory {
      *
      * @param content The data to be included in the response body, which may represent
      *                the current status or partial result of the operation.
-     * @param <T>     The type of the message content. It must extend {@link MessageContent}.
+     * @param <T>     The type of the message content.
      * @return A {@link ResponseEntity} representing a successful response (HTTP 202 Accepted)
      *         with the provided content.
      */
-    public <T extends MessageContent> ResponseEntity<ApiResponse<T>> accepted(T content) {
+    public <T> ResponseEntity<ApiResponse<T>> accepted(T content) {
         return build(AppCode.ACCEPTED, AppCode.ACCEPTED.getSimpleMessage(), content);
     }
 
@@ -157,8 +152,8 @@ public class ApiResponseFactory {
      * @return A {@link ResponseEntity} representing a successful response (HTTP 202 Accepted)
      *         without content.
      */
-    public ResponseEntity<ApiResponse<EmptyContentResponse>> accepted() {
-        return build(AppCode.ACCEPTED, AppCode.ACCEPTED.getSimpleMessage(), new EmptyContentResponse());
+    public ResponseEntity<ApiResponse<Void>> accepted() {
+        return build(AppCode.ACCEPTED, AppCode.ACCEPTED.getSimpleMessage(), null);
     }
 
     /**
@@ -169,11 +164,11 @@ public class ApiResponseFactory {
      * in the response body.</p>
      *
      * @param content The data to be included in the response body, if necessary.
-     * @param <T>     The type of the message content. It must extend {@link MessageContent}.
+     * @param <T>     The type of the message content.
      * @return A {@link ResponseEntity} representing a successful response (HTTP 204 No Content)
      *         with the provided content.
      */
-    public <T extends MessageContent> ResponseEntity<ApiResponse<T>> noContent(T content) {
+    public <T> ResponseEntity<ApiResponse<T>> noContent(T content) {
         return build(AppCode.NO_CONTENT, AppCode.NO_CONTENT.getSimpleMessage(), content);
     }
 
@@ -186,11 +181,9 @@ public class ApiResponseFactory {
      *
      * @return A {@link ResponseEntity} representing a successful response (HTTP 204 No Content)
      */
-    public ResponseEntity<ApiResponse<EmptyContentResponse>> noContent() {
-        return build(AppCode.NO_CONTENT, AppCode.NO_CONTENT.getSimpleMessage(), new EmptyContentResponse());
+    public ResponseEntity<ApiResponse<Void>> noContent() {
+        return build(AppCode.NO_CONTENT, AppCode.NO_CONTENT.getSimpleMessage(), null);
     }
-
-
 
     // == ERRORS: GENERIC ==
 
@@ -260,17 +253,24 @@ public class ApiResponseFactory {
         return ResponseEntity.status(code.getStatus()).body(error);
     }
 
-    public ResponseEntity<ErrorResponse> authenticationError(String message, List<ErrorDetail> details) {
-        AppCode code = AppCode.UNAUTHORIZED;
-        return error(code, message, details);
-    }
-
+    /**
+     * Constructs a forbidden error response (HTTP 403 FORBIDDEN).
+     * <p>Use this method when the user does not have sufficient permissions to perform the requested operation.</p>
+     *
+     * @return A {@link ResponseEntity} representing a forbidden error response with HTTP status 403.
+     */
     public ResponseEntity<ErrorResponse> forbidden() {
         AppCode code = AppCode.FORBIDDEN;
         String message = "Not enough permissions to perform this request";
         return error(code, code.getSimpleMessage(), message);
     }
 
+    /**
+     * Constructs an unauthorized error response (HTTP 401 UNAUTHORIZED).
+     * <p>Use this method when the user is not authenticated or the authentication credentials are invalid.</p>
+     *
+     * @return A {@link ResponseEntity} representing an unauthorized error response with HTTP status 401.
+     */
     public ResponseEntity<ErrorResponse> unauthorized() {
         AppCode code = AppCode.UNAUTHORIZED;
         String message = "Not authorized to access this resource";

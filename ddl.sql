@@ -12,6 +12,11 @@ CREATE TABLE IF NOT EXISTS user_role
     description VARCHAR(50)
 );
 
+INSERT INTO user_role (name, description)
+VALUES (
+    ('ADMIN', 'Administrator with full access rights'),
+    ('USER', 'Regular user with limited access rights'));
+
 -- User table
 CREATE TABLE IF NOT EXISTS user
 (

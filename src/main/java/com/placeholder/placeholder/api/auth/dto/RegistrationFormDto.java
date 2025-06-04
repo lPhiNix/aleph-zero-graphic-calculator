@@ -1,9 +1,10 @@
 package com.placeholder.placeholder.api.auth.dto;
 
 import com.placeholder.placeholder.api.auth.validation.ValidRegisterForm;
-import com.placeholder.placeholder.api.util.common.messages.dto.content.MessageContent;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+
+import java.io.Serializable;
 
 /**
  * DTO for user registration form.
@@ -30,5 +31,5 @@ public record RegistrationFormDto(
 
         @NotBlank(message = "Confirm Password is required")
         String confirmPassword
-) implements MessageContent {
+) implements Serializable {
 }
