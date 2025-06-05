@@ -14,11 +14,28 @@ interface ViewWindow {
     top: number;
 }
 
+/**
+ * Para cada expresión, almacenamos un array de intervalos “cacheados”:
+ *   {
+ *     from: number;
+ *     to: number;
+ *     points: Array<{ x: number; y: number }>
+ *   }
+ * Luego, siempre que cambie la viewWindow, calculamos qué sub-intervalos FALTAN
+ * a partir de la unión de los que ya tenemos. Solo pedimos esos.
+ */
+type IntervalData = {
+    from: number;
+    to: number;
+    points: Array<{ x: number; y: number }>;
+};
+
 export default function Calculator() {
     // 1. Estado de las expresiones actuales
     const [expressions, setExpressions] = useState<string[]>(['']);
 
     // 2. Estado de resultados: un objeto por cada línea de expresión
+    //    (solo para evaluation/calculation/errors; drawingPoints lo sacamos de la caché)
     const [results, setResults] = useState<ExpressionResult[]>(
         () => expressions.map(() => ({}))
     );
@@ -34,85 +51,182 @@ export default function Calculator() {
     // Ref para detectar el primer render y evitar doble llamada
     const isFirstRender = useRef(true);
 
+    // Ref para almacenar, por cada índice de expresión, los intervalos cacheados
+    const cacheRef = useRef<Record<number, IntervalData[]>>({});
+
     // Sincronizar la longitud de `results` con la de `expressions`
     useEffect(() => {
         setResults((prev) => {
             const updated = [...prev];
-            // Si hay más expresiones, agregamos objetos vacíos
             while (updated.length < expressions.length) {
                 updated.push({});
             }
-            // Si hay menos, recortamos
             updated.length = expressions.length;
             return updated;
         });
+        // A su vez, si se ha agregado una expresión nueva, inicializamos su caché vacía
+        setTimeout(() => {
+            if (!cacheRef.current) cacheRef.current = {};
+            expressions.forEach((_, idx) => {
+                if (!cacheRef.current[idx]) {
+                    cacheRef.current[idx] = [];
+                }
+            });
+        }, 0);
     }, [expressions.length]);
 
+    /**
+     * Dada un intervalo deseado [from, to] y un array de intervalos ya cacheados,
+     * devuelve un array de sub-intervalos “faltantes” que no están cubiertos aún.
+     */
+    const getMissingIntervals = (
+        desiredFrom: number,
+        desiredTo: number,
+        existing: IntervalData[]
+    ): Array<[number, number]> => {
+        if (desiredFrom >= desiredTo) return [];
+        // Construimos una lista de intervalos inicial: [[desiredFrom, desiredTo]]
+        let toCheck: Array<[number, number]> = [[desiredFrom, desiredTo]];
+
+        existing.forEach(({ from, to }) => {
+            const nextCheck: Array<[number, number]> = [];
+            toCheck.forEach(([a, b]) => {
+                // Si no se solapan, dejamos tal cual
+                if (to <= a || from >= b) {
+                    nextCheck.push([a, b]);
+                } else {
+                    // Hay solapamiento: recortamos
+                    if (a < from) {
+                        nextCheck.push([a, from]);
+                    }
+                    if (b > to) {
+                        nextCheck.push([to, b]);
+                    }
+                }
+            });
+            toCheck = nextCheck;
+        });
+
+        return toCheck; // es el array de sub-intervalos que faltan
+    };
+
     //--------------------------------------------------------------------
-    // Cuando cambie viewWindow (p.ej. zoom o pan) y NO sea el primer render,
-    // volvemos a pedir al backend los nuevos puntos “drawingPoints” para cada expresión no vacía.
+    // Cuando cambie viewWindow (zoom o pan) y NO sea el primer render,
+    // generamos las peticiones PARCIALES (solo para los missing intervals).
     //--------------------------------------------------------------------
     useEffect(() => {
         if (isFirstRender.current) {
-            // En el primer render no forzamos una recarga de gráfico
             isFirstRender.current = false;
             return;
         }
-        // Para cada expresión no vacía, solicitamos dibujo con los nuevos origin/bound
-        (async () => {
-            const { origin, bound } = viewWindow;
-            const strOrigin = origin.toString();
-            const strBound = bound.toString();
-            // Generamos un array de promesas: índice + resultado
-            const promises = expressions.map(async (expr, idx) => {
-                if (expr.trim() === '') {
-                    return { idx, newDrawing: undefined };
-                }
-                try {
-                    // Llamamos al servicio con los nuevos límites
-                    const res = await evaluateSingleExpression(
-                        expr,
-                        '50',
-                        strOrigin,
-                        strBound
-                    );
-                    return { idx, newDrawing: res.drawingPoints || [] };
-                } catch {
-                    return { idx, newDrawing: [] };
-                }
-            });
 
-            const all = await Promise.all(promises);
+        const { origin, bound } = viewWindow;
+        const strDecimals = '50';
 
-            // Actualizamos únicamente el campo drawingPoints en cada resultado
-            setResults((prev) => {
-                const updated = prev.map((r) => ({ ...r })); // Clonamos
-                all.forEach(({ idx, newDrawing }) => {
-                    if (newDrawing !== undefined) {
-                        updated[idx] = {
-                            ...updated[idx],
-                            drawingPoints: newDrawing,
-                        };
-                    } else {
-                        // Si la expresión está vacía, limpiamos dibujo
-                        updated[idx] = {
-                            ...updated[idx],
-                            drawingPoints: undefined,
-                        };
-                    }
+        // Para cada expresión no vacía:
+        expressions.forEach((expr, idx) => {
+            if (expr.trim() === '') {
+                // Si está vacía, limpiamos su caché y resultado
+                cacheRef.current[idx] = [];
+                setResults((prev) => {
+                    const copy = [...prev];
+                    copy[idx] = {};
+                    return copy;
                 });
-                return updated;
+                return;
+            }
+
+            // 1. Obtenemos los intervalos ya cacheados para esta expresión:
+            const existing = cacheRef.current[idx] || [];
+
+            // 2. Detectar sub-intervalos faltantes dentro de [origin, bound]:
+            const missing = getMissingIntervals(origin, bound, existing);
+
+            // 3. Si no falta nada, reconstruimos dibujo a partir de la caché y salimos:
+            if (missing.length === 0) {
+                // Unimos todos los puntos de todos los intervalos que intersectan [origin, bound]
+                const combined: Array<{ x: number; y: number }> = [];
+                existing
+                    .filter((iv) => iv.to > origin && iv.from < bound)
+                    .forEach((iv) => {
+                        // Tomamos solo los puntos dentro de [origin, bound]
+                        iv.points.forEach((pt) => {
+                            if (pt.x >= origin && pt.x <= bound) {
+                                combined.push(pt);
+                            }
+                        });
+                    });
+                // Ordenamos por x
+                combined.sort((a, b) => a.x - b.x);
+
+                // Actualizamos solo el campo drawingPoints en results
+                setResults((prev) => {
+                    const updated = prev.map((r) => ({ ...r }));
+                    updated[idx] = {
+                        ...updated[idx],
+                        drawingPoints: combined,
+                    };
+                    return updated;
+                });
+                return;
+            }
+
+            // 4. Para cada tramo faltante, hacemos 1 fetch y luego agregamos a la caché
+            missing.forEach(async ([f, t]) => {
+                try {
+                    const res = await evaluateSingleExpression(expr, strDecimals, f.toString(), t.toString());
+                    const newPts = res.drawingPoints || [];
+
+                    // 5. Insertamos este nuevo intervalo en la caché (y lo mantenemos ordenado)
+                    cacheRef.current[idx].push({ from: f, to: t, points: newPts });
+                    // Posibilidad de que haya superposición:
+                    //  -> NO la consolidamos aquí (para simplicidad), pero en un futuro se pueden fusionar.
+                    // Ahora reconstruimos todos los puntos para [origin, bound]:
+                    const merged: Array<{ x: number; y: number }> = [];
+                    cacheRef.current[idx]
+                        .filter((iv) => iv.to > origin && iv.from < bound)
+                        .forEach((iv) => {
+                            iv.points.forEach((pt) => {
+                                if (pt.x >= origin && pt.x <= bound) {
+                                    merged.push(pt);
+                                }
+                            });
+                        });
+                    merged.sort((a, b) => a.x - b.x);
+
+                    setResults((prev) => {
+                        const updated = prev.map((r) => ({ ...r }));
+                        updated[idx] = {
+                            ...updated[idx],
+                            drawingPoints: merged,
+                        };
+                        return updated;
+                    });
+                } catch {
+                    // En caso de error en esta sub-petición, dejamos dibujo en vacío
+                    setResults((prev) => {
+                        const updated = prev.map((r) => ({ ...r }));
+                        updated[idx] = {
+                            ...updated[idx],
+                            drawingPoints: [],
+                        };
+                        return updated;
+                    });
+                }
             });
-        })();
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [viewWindow, expressions]);
 
     //--------------------------------------------------------------------
     // Callback que dispara la petición al backend al hacer blur en un input
+    // (para evaluation / calculation)
     //--------------------------------------------------------------------
     const handleExpressionBlur = useCallback(
         async (index: number, expr: string) => {
-            // Si la cadena está vacía, limpiamos el resultado completo
+            // Si la cadena está vacía, limpiamos el resultado completo y la caché
             if (expr.trim() === '') {
+                cacheRef.current[index] = [];
                 setResults((prev) => {
                     const copy = [...prev];
                     copy[index] = {};
@@ -122,24 +236,34 @@ export default function Calculator() {
             }
 
             try {
-                // Usamos el viewWindow actual para origen y límite
+                // Usamos el viewWindow actual para origin y bound
                 const decimals = '50';
                 const origin = viewWindow.origin.toString();
                 const bound = viewWindow.bound.toString();
 
-                const res = await evaluateSingleExpression(
-                    expr,
-                    decimals,
-                    origin,
-                    bound
-                );
+                const res = await evaluateSingleExpression(expr, decimals, origin, bound);
 
+                // 1. Guardamos evaluación/calculation/errors:
                 setResults((prev) => {
                     const updated = [...prev];
                     updated[index] = res;
                     return updated;
                 });
+
+                // 2. Actualizamos la caché: limpiamos la entrada anterior y pedimos TODO el tramo
+                const fromNum = viewWindow.origin;
+                const toNum = viewWindow.bound;
+                const drawingPts = res.drawingPoints || [];
+
+                cacheRef.current[index] = [
+                    {
+                        from: fromNum,
+                        to: toNum,
+                        points: drawingPts,
+                    },
+                ];
             } catch (err) {
+                cacheRef.current[index] = [];
                 setResults((prev) => {
                     const updated = [...prev];
                     updated[index] = { errors: ['Error al evaluar la expresión'] };
@@ -153,14 +277,14 @@ export default function Calculator() {
 
     //--------------------------------------------------------------------
     // Cuando cambie la ventana de visualización (zoom / pan), este callback
-    // será invocado desde GraphCanvas. Sólo actualiza viewWindow.
+    // será invocado desde GraphCanvas. Solo actualiza viewWindow.
     //--------------------------------------------------------------------
     const handleViewChange = useCallback((vw: ViewWindow) => {
         setViewWindow(vw);
     }, []);
 
     //--------------------------------------------------------------------
-    // Método para insertar texto desde el teclado matemático en la última expresión
+    // Métodos para el teclado matemático
     //--------------------------------------------------------------------
     const insertIntoExpression = (value: string) => {
         setExpressions((prev) => {
@@ -182,6 +306,8 @@ export default function Calculator() {
 
     const clearAll = () => {
         setExpressions(['']);
+        // Limpiamos caché completa
+        cacheRef.current = {};
     };
 
     const evaluateExpression = () => {
@@ -195,7 +321,7 @@ export default function Calculator() {
     //--------------------------------------------------------------------
     // Construimos un array de todos los conjuntos de puntos que hayan llegado
     //--------------------------------------------------------------------
-    // Sólo pasamos los “drawingPoints” a GraphCanvas, porque ahí dibujamos
+    // Solo pasamos los “drawingPoints” a GraphCanvas, porque ahí dibujamos
     const allDrawingSets = results
         .map((r) => r.drawingPoints)
         .filter((dp): dp is Array<{ x: number; y: number }> =>

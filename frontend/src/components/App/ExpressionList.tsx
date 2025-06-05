@@ -1,4 +1,3 @@
-// src/components/App/ExpressionList.tsx
 import { useEffect, useRef } from 'react';
 import styles from '../../styles/modules/expressionList.module.css';
 

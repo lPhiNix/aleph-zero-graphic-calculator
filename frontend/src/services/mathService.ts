@@ -1,4 +1,3 @@
-// src/services/mathService.ts
 import axios, { AxiosError } from 'axios';
 import type {
     MathApiResponse,
@@ -17,26 +16,40 @@ interface EvaluationRequest {
 
 /**
  * Convierte la cadena de puntos devuelta por el backend,
- * p. ej. "[{-10.0, 0.544021}, { -9.7, 0.3165}, …]" en
- * Array<{x: number; y: number}>.
+ * pero solo extrae las coordenadas que aparecen dentro de los bloques Line({{…}}).
+ * Por ejemplo, dado:
+ *
+ *   "…RGBColor(…),Line({{0,1},{2,3},…}),RGBColor(…),Line({{5,6},{7,8},…})…"
+ *
+ * Esta función devolverá únicamente los pares:
+ *   [{ x: 0, y: 1 }, { x: 2, y: 3 }, …, { x: 5, y: 6 }, { x: 7, y: 8 }, …]
  */
 function parseDrawingPoints(raw: string): Array<{ x: number; y: number }> {
-    console.log('[parseDrawingPoints] Raw input:', raw);
     const points: Array<{ x: number; y: number }> = [];
-    const re = /\{\s*([\-0-9.eE]+)\s*,\s*([\-0-9.eE]+)\s*\}/g;
-    let match: RegExpExecArray | null;
-    while ((match = re.exec(raw)) !== null) {
-        console.log('[parseDrawingPoints] Match encontrado:', match);
-        const x = parseFloat(match[1]);
-        const y = parseFloat(match[2]);
-        console.log(`[parseDrawingPoints] Parsed x: ${x}, y: ${y}`);
-        if (!isNaN(x) && !isNaN(y)) {
-            points.push({ x, y });
-        } else {
-            console.warn('[parseDrawingPoints] Ignorado punto inválido:', match[0]);
+
+    // 1) Regex para capturar el contenido interno de cada Line({{…}})
+    //    - El grupo 1 (match[1]) contendrá algo como "x1,y1},{x2,y2},…"
+    const lineRe = /Line\s*\(\s*\{\{([\s\S]*?)}}\s*\)/g;
+
+    let lineMatch: RegExpExecArray | null;
+    while ((lineMatch = lineRe.exec(raw)) !== null) {
+        const innerContent = lineMatch[1];
+
+        // 2) Reconstruimos un string que contenga únicamente "{x,y},{x,y},…"
+        const toParse = '{' + innerContent + '}';
+
+        // 3) Regex para capturar cada par { x, y }
+        const pointRe = /\{\s*([\-0-9.eE]+)\s*,\s*([\-0-9.eE]+)\s*\}/g;
+        let match: RegExpExecArray | null;
+        while ((match = pointRe.exec(toParse)) !== null) {
+            const x = parseFloat(match[1]);
+            const y = parseFloat(match[2]);
+            if (!isNaN(x) && !isNaN(y)) {
+                points.push({ x, y });
+            }
         }
     }
-    console.log('[parseDrawingPoints] Puntos resultantes:', points);
+
     return points;
 }
 
@@ -46,15 +59,10 @@ export async function evaluateSingleExpression(
     origin: string,
     bound: string
 ): Promise<ExpressionResult> {
-    console.log('[evaluateSingleExpression] Expresión:', expr);
-    console.log('[evaluateSingleExpression] Parámetros:', { decimals, origin, bound });
-
     const payload: EvaluationRequest = {
         expressions: [{ expression: expr }],
         data: { decimals, origin, bound },
     };
-
-    console.log('[evaluateSingleExpression] Payload preparado:', payload);
 
     try {
         const response = await axios.post<MathApiResponse>(
@@ -65,70 +73,53 @@ export async function evaluateSingleExpression(
             }
         );
 
-        console.log('[evaluateSingleExpression] Respuesta recibida:', response.data);
-
         const apiData = response.data;
 
         if (
             apiData.content.expressionEvaluations.length === 0 ||
             apiData.content.expressionEvaluations[0].evaluations.length === 0
         ) {
-            console.warn('[evaluateSingleExpression] No se devolvieron evaluaciones');
             return { errors: ['No se devolvieron evaluaciones para la expresión'] };
         }
 
         const evalDto: MathExpressionEvaluationDto =
             apiData.content.expressionEvaluations[0];
-        console.log('[evaluateSingleExpression] Evaluación DTO:', evalDto);
 
         const result: ExpressionResult = {};
 
         for (const item of evalDto.evaluations) {
-            console.log('[evaluateSingleExpression] Procesando evaluación:', item);
             switch (item.evaluationType) {
                 case 'EVALUATION':
                     result.evaluation = item.evaluation;
-                    console.log('[evaluateSingleExpression] Resultado de EVALUATION:', item.evaluation);
                     break;
                 case 'CALCULATION':
                     result.calculation = item.evaluation;
-                    console.log('[evaluateSingleExpression] Resultado de CALCULATION:', item.evaluation);
                     break;
                 case 'DRAWING':
+                    // Ahora solo se extraen puntos de Line({{…}})
                     result.drawingPoints = parseDrawingPoints(item.evaluation);
-                    console.log('[evaluateSingleExpression] Resultado de DRAWING:', result.drawingPoints);
                     break;
                 default:
-                    console.warn('[evaluateSingleExpression] Tipo de evaluación desconocido:', item.evaluationType);
                     break;
             }
             if (item.evaluationProblems && item.evaluationProblems.length > 0) {
                 if (!result.errors) result.errors = [];
                 result.errors.push(...item.evaluationProblems);
-                console.warn('[evaluateSingleExpression] Problemas detectados:', item.evaluationProblems);
             }
         }
 
-        console.log('[evaluateSingleExpression] Resultado final:', result);
         return result;
-
     } catch (error) {
-        console.error('[evaluateSingleExpression] Error capturado:', error);
-
         if (axios.isAxiosError(error)) {
             const axiosErr = error as AxiosError;
             if (axiosErr.response && axiosErr.response.data) {
-                console.warn('[evaluateSingleExpression] Error de respuesta del servidor:', axiosErr.response.data);
                 const data = axiosErr.response.data as any;
                 if (Array.isArray(data.errors)) {
                     const messages: string[] = data.errors.map((e: any) => e.message || String(e));
-                    console.warn('[evaluateSingleExpression] Mensajes de error del backend:', messages);
                     return { errors: messages };
                 }
             }
         }
-
-        console.error('[evaluateSingleExpression] Error inesperado');
         return { errors: ['Error inesperado al comunicarse con el servidor'] };
     }
 }

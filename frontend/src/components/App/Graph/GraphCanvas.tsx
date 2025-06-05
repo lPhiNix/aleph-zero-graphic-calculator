@@ -19,7 +19,7 @@ interface GraphCanvasProps {
     onViewChange?: (vw: ViewWindow) => void;
 }
 
-/** (computeGridStep y formatLabel idénticos a antes) */
+/** computeGridStep y formatLabel idénticos a antes */
 function computeGridStep(desiredPxBetween: number, scale: number): number {
     const rawStep = desiredPxBetween / scale;
     const exponent = Math.floor(Math.log10(rawStep));
@@ -55,6 +55,9 @@ export default function GraphCanvas({
 
     const [offset, setOffset] = useState<Offset>({ x: 0, y: 0 });
     const [scale, setScale] = useState<number>(40);
+
+    // Ref para almacenar el ID del timeout de debounce
+    const debounceTimer = useRef<number | null>(null);
 
     const worldToCanvas = useCallback(
         (wx: number, wy: number, cw: number, ch: number) => {
@@ -201,30 +204,53 @@ export default function GraphCanvas({
     );
 
     /**
-     * Dibuja cada conjunto de puntos (drawingSets) como trazado continuo
+     * Dibuja cada conjunto de puntos (drawingSets) como trazado continuo,
+     * pero solo los segmentos que intersectan con la vista actual.
      */
     const drawAllCurves = useCallback(
         (ctx: CanvasRenderingContext2D, cw: number, ch: number) => {
+            // 1. Calculamos límites en coordenadas “mundo” para hacer clipping:
+            const left = canvasToWorld(0, ch / 2, cw, ch).x;
+            const right = canvasToWorld(cw, ch / 2, cw, ch).x;
+            const top = canvasToWorld(cw / 2, 0, cw, ch).y;
+            const bottom = canvasToWorld(cw / 2, ch, cw, ch).y;
+
             drawingSets.forEach((points, idx) => {
                 if (points.length < 2) return;
                 ctx.beginPath();
-                // Asignamos distinto color u opacidad para cada curva:
                 ctx.strokeStyle = `hsl(${(idx * 60) % 360}, 70%, 40%)`;
                 ctx.lineWidth = 2;
 
-                points.forEach((pt, i) => {
-                    const { cx, cy } = worldToCanvas(pt.x, pt.y, cw, ch);
-                    if (i === 0) {
-                        ctx.moveTo(cx, cy);
-                    } else {
-                        ctx.lineTo(cx, cy);
+                // Recorremos cada par de puntos consecutivos:
+                for (let i = 0; i < points.length - 1; i++) {
+                    const p1 = points[i];
+                    const p2 = points[i + 1];
+
+                    // Clipping en “mundo”: si ambos puntos están completamente fuera
+                    // (p1.x,p1.y) y (p2.x,p2.y) en el mismo lado, saltamos.
+                    if (
+                        (p1.x < left && p2.x < left) ||
+                        (p1.x > right && p2.x > right) ||
+                        (p1.y < bottom && p2.y < bottom) ||
+                        (p1.y > top && p2.y > top)
+                    ) {
+                        continue;
                     }
-                });
+
+                    // Si al menos un extremo intersecta la vista, dibujamos:
+                    const c1 = worldToCanvas(p1.x, p1.y, cw, ch);
+                    const c2 = worldToCanvas(p2.x, p2.y, cw, ch);
+                    if (i === 0) {
+                        ctx.moveTo(c1.cx, c1.cy);
+                    }
+                    ctx.lineTo(c2.cx, c2.cy);
+                }
+
                 ctx.stroke();
                 ctx.closePath();
             });
         },
-        [drawingSets, worldToCanvas]
+        [drawingSets, canvasToWorld, worldToCanvas]
     );
 
     const redrawAll = useCallback(() => {
@@ -242,21 +268,36 @@ export default function GraphCanvas({
         drawAllCurves(ctx, cw, ch);
     }, [drawAxes, drawGrid, drawAllCurves]);
 
-    /** Cuando cambian offset/scale, notificamos al padre el nuevo “viewWindow” */
+    /** Cuando cambian offset/scale, notificamos al padre el nuevo “viewWindow” con debounce */
     useEffect(() => {
+        if (!onViewChange) return;
         const canvas = canvasRef.current;
-        if (!canvas || !onViewChange) return;
-        const { width: cw, height: ch } = canvas;
+        if (!canvas) return;
 
-        // Calculamos los límites del mundo visibles
-        const left = canvasToWorld(0, ch / 2, cw, ch).x;
-        const right = canvasToWorld(cw, ch / 2, cw, ch).x;
-        const top = canvasToWorld(cw / 2, 0, cw, ch).y;
-        const bottom = canvasToWorld(cw / 2, ch, cw, ch).y;
+        // Si el usuario sigue interactuando, reiniciamos el timeout
+        if (debounceTimer.current !== null) {
+            clearTimeout(debounceTimer.current);
+        }
 
-        onViewChange({ origin: left, bound: right, bottom, top });
+        debounceTimer.current = window.setTimeout(() => {
+            const { width: cw, height: ch } = canvas;
+            const left = canvasToWorld(0, ch / 2, cw, ch).x;
+            const right = canvasToWorld(cw, ch / 2, cw, ch).x;
+            const top = canvasToWorld(cw / 2, 0, cw, ch).y;
+            const bottom = canvasToWorld(cw / 2, ch, cw, ch).y;
+            onViewChange({ origin: left, bound: right, bottom, top });
+            debounceTimer.current = null;
+        }, 500); // Ahora 500 ms en lugar de 1000 para ser un poco más responsivo
+
+        return () => {
+            if (debounceTimer.current !== null) {
+                clearTimeout(debounceTimer.current);
+                debounceTimer.current = null;
+            }
+        };
     }, [offset, scale, canvasToWorld, onViewChange]);
 
+    /** Observamos cambios de tamaño para redibujar */
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;

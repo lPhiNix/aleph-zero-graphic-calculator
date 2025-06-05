@@ -72,7 +72,8 @@ public class MathExpressionService implements MathEvaluationService {
      * @return the final evaluation response with all expression results
      */
     private MathEvaluationResultResponse evaluateWithTimeout(MathEvaluationRequest request) {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        // Use a fixed-size thread pool to limit concurrent tasks (e.g., max 10 threads)
+        ExecutorService executor = Executors.newFixedThreadPool(10);
 
         try {
             // Submit evaluation task and block until result is available or timeout expires
