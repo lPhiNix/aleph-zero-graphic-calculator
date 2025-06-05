@@ -287,7 +287,7 @@ export default function GraphCanvas({
             const bottom = canvasToWorld(cw / 2, ch, cw, ch).y;
             onViewChange({ origin: left, bound: right, bottom, top });
             debounceTimer.current = null;
-        }, 500); // Ahora 500 ms en lugar de 1000 para ser un poco más responsivo
+        }, 200); // Ahora 500 ms en lugar de 1000 para ser un poco más responsivo
 
         return () => {
             if (debounceTimer.current !== null) {

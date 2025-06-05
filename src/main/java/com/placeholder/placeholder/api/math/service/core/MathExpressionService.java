@@ -11,6 +11,7 @@ import com.placeholder.placeholder.api.math.service.classifier.Classifier;
 import com.placeholder.placeholder.api.math.service.memory.MathAssignmentMemory;
 import com.placeholder.placeholder.api.math.service.strategy.EvaluationStrategyContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.concurrent.*;
  */
 @Service
 public class MathExpressionService implements MathEvaluationService {
+    private final ExecutorService executor;
 
     /** Maximum allowed time (in seconds) for expression evaluation */
     private static final long TIMEOUT_SECONDS = 60;
@@ -43,10 +45,12 @@ public class MathExpressionService implements MathEvaluationService {
      */
     @Autowired
     public MathExpressionService(
+            @Qualifier("mathThreadPool") ExecutorService executor,
             MathAssignmentMemory memory,
             Classifier mathExpressionClassifier,
             EvaluationStrategyContext context
     ) {
+        this.executor = executor;
         this.memory = memory;
         this.mathExpressionClassifier = mathExpressionClassifier;
         this.context = context;
@@ -72,24 +76,14 @@ public class MathExpressionService implements MathEvaluationService {
      * @return the final evaluation response with all expression results
      */
     private MathEvaluationResultResponse evaluateWithTimeout(MathEvaluationRequest request) {
-        // Use a fixed-size thread pool to limit concurrent tasks (e.g., max 10 threads)
-        ExecutorService executor = Executors.newFixedThreadPool(10);
-
         try {
-            // Submit evaluation task and block until result is available or timeout expires
             Future<MathEvaluationResultResponse> future = executor.submit(() -> evaluateExpressions(request));
             return future.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
         } catch (TimeoutException e) {
-            // Cancel ongoing task and stop evaluation logic if time exceeded
-            executor.shutdownNow();
             context.stopCurrentEvaluation();
-            throw new MathEvaluationTimeoutException("La evaluación excedió el tiempo máximo de espera (" + TIMEOUT_SECONDS + "s)");
+            throw new MathEvaluationTimeoutException("Timeout after " + TIMEOUT_SECONDS + " seconds");
         } catch (InterruptedException | ExecutionException e) {
-            // Propagate execution failures as runtime exception
-            throw new RuntimeException("Error al evaluar la expresión matemática", e);
-        } finally {
-            // Ensure executor shutdown even on failure
-            executor.shutdown();
+            throw new RuntimeException("Error evaluating math expressions", e);
         }
     }
 
@@ -101,16 +95,25 @@ public class MathExpressionService implements MathEvaluationService {
      * @return the aggregated evaluation response
      */
     private MathEvaluationResultResponse evaluateExpressions(MathEvaluationRequest request) {
-        List<MathExpressionEvaluationDto> evaluations = request.expressions().stream()
-                // Evaluate each expression individually
-                .map(expr -> evaluateSingleExpression(expr.expression(), request.data()))
+      // create a list of futures for each expression evaluation
+        List<CompletableFuture<MathExpressionEvaluationDto>> futures = request.expressions().stream()
+                .map(expr -> CompletableFuture.supplyAsync(
+                        () -> evaluateSingleExpression(expr.expression(), request.data()),
+                        executor
+                ))
                 .toList();
 
-        // Clear memory after full evaluation cycle
+        // Wait for all futures to complete and collect results
+        List<MathExpressionEvaluationDto> evaluations = futures.stream()
+                .map(CompletableFuture::join) // join blocks until the future completes
+                .toList();
+
+        // clear memory after evaluation
         memory.clear();
 
         return new MathEvaluationResultResponse(evaluations);
     }
+
 
     /**
      * Evaluates a single expression. It first processes and classifies the expression,
