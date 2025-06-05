@@ -60,6 +60,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllExceptions(Exception ex) {
+        logger.error("RuntimeException caught: {}", ex.getMessage(), ex);
         return responseFactory.error(
                 AppCode.INTERNAL_ERROR,
                 "Runtime error",

@@ -171,6 +171,10 @@ class MathEclipseFacadeBenchmarkTest {
     @DisplayName("draw: Sin[x]*Cos[x]")
     @Test void benchmarkDrawTrigCombo() { benchmark(10, () -> mathEclipseFacade.draw("Sin[x]*Cos[x]", "x", "-Pi", "Pi")); }
 
+    @DisplayName("draw: Sin[x]")
+    @Test void benchmarkDrawSinHARD() { benchmark(0.01, () -> mathEclipseFacade.draw("Sin[x]", "x", "-1000000", "1000000")); }
+
+
     // DIFFICULT TO PROCESS (> ~1 seg per ONE iteration)
 
     /** 23754 ms, ~23 seg */

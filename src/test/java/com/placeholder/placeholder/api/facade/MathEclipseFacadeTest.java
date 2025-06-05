@@ -105,7 +105,7 @@ class MathEclipseFacadeTest {
                 "Sin[x]", "-Pi", "Pi"
         ));
         assertTrue(testDraw(
-                "x^2", "-5", "5"
+                "sin(x)", "-500000", "500000"
         ));
         assertTrue(testDraw(
                 "Tan[x]", "-Pi/2", "Pi/2"
@@ -113,7 +113,9 @@ class MathEclipseFacadeTest {
     }
 
     private boolean testDraw(String expression, String origin, String bound) {
-        return rawTestDraw(expression, origin, bound).contains(GRAPHICS_SYMBOL);
+         String draw = rawTestDraw(expression, origin, bound);
+         System.out.println(draw);
+         return draw.contains(GRAPHICS_SYMBOL);
     }
 
     private String rawTestDraw(String expression, String origin, String bound) {

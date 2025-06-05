@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 public class MathCachedEvaluationService {
 
     private final MathLibFacade mathEclipse;
-    private final GraphicPointerExtractorService graphicExtractorService;
 
     /**
      * Constructs a cached evaluation service with the given math facade implementation.
@@ -30,9 +29,8 @@ public class MathCachedEvaluationService {
      * @param mathEclipse the math library facade used for evaluation
      */
     @Autowired
-    public MathCachedEvaluationService(MathLibFacade mathEclipse, GraphicPointerExtractorService graphicExtractorService) {
+    public MathCachedEvaluationService(MathLibFacade mathEclipse) {
         this.mathEclipse = mathEclipse;
-        this.graphicExtractorService = graphicExtractorService;
     }
 
     /**
@@ -69,7 +67,7 @@ public class MathCachedEvaluationService {
      */
     @Cacheable(value = "draw", key = "#expression + '_' + #data.origin() + '_' + #data.bound()")
     public MathExpressionEvaluation draw(String expression, MathDataDto data) {
-        return graphicExtractorService.formatDraw(mathEclipse.draw(expression, "x", data.origin(), data.bound()));
+        return mathEclipse.draw(expression, "x", data.origin(), data.bound());
     }
 
     /**

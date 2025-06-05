@@ -14,7 +14,7 @@ import com.placeholder.placeholder.api.math.validation.symja.annotations.ValidOr
  * @param origin Start of the domain for plotting or evaluation
  * @param bound End of the domain for plotting or evaluation
  */
-@ValidOriginAndBound
+
 public record MathDataDto(
         @ValidDecimals int decimals,
         String origin,

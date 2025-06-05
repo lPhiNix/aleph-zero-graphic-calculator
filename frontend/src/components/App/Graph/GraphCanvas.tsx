@@ -1,5 +1,3 @@
-// src/components/App/Graph/GraphCanvas.tsx
-
 import React, { JSX, useCallback, useEffect, useRef, useState } from 'react';
 import styles from '../../../styles/modules/graphCanvas.module.css';
 
@@ -8,14 +6,20 @@ interface Offset {
     y: number;
 }
 
-interface GraphCanvasProps {
-    expressions: string[];
-    /** Lista de conjuntos de puntos (uno por cada expresión que devolvió DRAWING) */
-    drawingSets: Array<Array<{ x: number; y: number }>>;
+interface ViewWindow {
+    origin: number;
+    bound: number;
+    bottom: number;
+    top: number;
 }
 
-/** (Igual computeGridStep y formatLabel que antes) */
+interface GraphCanvasProps {
+    drawingSets: Array<Array<{ x: number; y: number }>>;
+    /** Callback para notificar al padre el “rango” visible (origin, bound, bottom, top) */
+    onViewChange?: (vw: ViewWindow) => void;
+}
 
+/** (computeGridStep y formatLabel idénticos a antes) */
 function computeGridStep(desiredPxBetween: number, scale: number): number {
     const rawStep = desiredPxBetween / scale;
     const exponent = Math.floor(Math.log10(rawStep));
@@ -44,6 +48,7 @@ function formatLabel(value: number): string {
 
 export default function GraphCanvas({
                                         drawingSets,
+                                        onViewChange,
                                     }: GraphCanvasProps): JSX.Element {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const lastMousePos = useRef<{ x: number; y: number } | null>(null);
@@ -94,10 +99,10 @@ export default function GraphCanvas({
             const gridStepWorld = computeGridStep(80, scale);
             const minorStepWorld = gridStepWorld / 5;
 
-            const left = canvasToWorld(0, 0, cw, ch).x;
-            const right = canvasToWorld(cw, 0, cw, ch).x;
-            const top = canvasToWorld(0, 0, cw, ch).y;
-            const bottom = canvasToWorld(0, ch, cw, ch).y;
+            const left = canvasToWorld(0, ch / 2, cw, ch).x;
+            const right = canvasToWorld(cw, ch / 2, cw, ch).x;
+            const top = canvasToWorld(cw / 2, 0, cw, ch).y;
+            const bottom = canvasToWorld(cw / 2, ch, cw, ch).y;
 
             const zeroPos = worldToCanvas(0, 0, cw, ch);
             const zeroX = zeroPos.cx;
@@ -203,7 +208,7 @@ export default function GraphCanvas({
             drawingSets.forEach((points, idx) => {
                 if (points.length < 2) return;
                 ctx.beginPath();
-                // Asignamos distinto color u opacidad para cada curva (ejemplo aleatorio):
+                // Asignamos distinto color u opacidad para cada curva:
                 ctx.strokeStyle = `hsl(${(idx * 60) % 360}, 70%, 40%)`;
                 ctx.lineWidth = 2;
 
@@ -236,6 +241,21 @@ export default function GraphCanvas({
         drawGrid(ctx, cw, ch);
         drawAllCurves(ctx, cw, ch);
     }, [drawAxes, drawGrid, drawAllCurves]);
+
+    /** Cuando cambian offset/scale, notificamos al padre el nuevo “viewWindow” */
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas || !onViewChange) return;
+        const { width: cw, height: ch } = canvas;
+
+        // Calculamos los límites del mundo visibles
+        const left = canvasToWorld(0, ch / 2, cw, ch).x;
+        const right = canvasToWorld(cw, ch / 2, cw, ch).x;
+        const top = canvasToWorld(cw / 2, 0, cw, ch).y;
+        const bottom = canvasToWorld(cw / 2, ch, cw, ch).y;
+
+        onViewChange({ origin: left, bound: right, bottom, top });
+    }, [offset, scale, canvasToWorld, onViewChange]);
 
     useEffect(() => {
         const canvas = canvasRef.current;

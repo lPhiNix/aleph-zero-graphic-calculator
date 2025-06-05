@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Callback from "./pages/Callback.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
-import GraphPage from "./pages/GraphPage.tsx";
+import Calculator from "./pages/Calculator.tsx";
 
 function App() {
 
@@ -12,7 +12,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/oauth2/callback" element={<Callback />} />
               <Route path={"/"} element={<Dashboard />} />
-              <Route path="/calculator"    element={<GraphPage />} />
+              <Route path="/calculator"    element={<Calculator />} />
               {/* otras rutas */}
           </Routes>
       </Router>
