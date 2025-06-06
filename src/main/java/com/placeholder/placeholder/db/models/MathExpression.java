@@ -1,14 +1,12 @@
 package com.placeholder.placeholder.db.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
-import java.util.Map;
 
 @Getter
 @Setter
@@ -28,13 +26,25 @@ public class MathExpression {
     @Column(name = "expression")
     private String expression;
 
-    @Column(name = "points_snapshot")
-    @JdbcTypeCode(SqlTypes.JSON)
-    private Map<String, Object> pointsSnapshot;
-
     @Column(name = "created_at")
     private Instant createdAt;
 
     @Column(name = "updated_at")
     private Instant updatedAt;
+
+    @Size(max = 36)
+    @Column(name = "snapshot", length = 36)
+    private String snapshot;
+
+    @PrePersist
+    protected void onCreate() {
+        Instant now = Instant.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = Instant.now();
+    }
 }

@@ -1,18 +1,22 @@
 package com.placeholder.placeholder.api.math;
 
 import com.placeholder.placeholder.api.math.dto.request.MathEvaluationRequest;
+import com.placeholder.placeholder.api.math.dto.request.MathExpressionCreationDto;
 import com.placeholder.placeholder.api.math.dto.response.MathEvaluationResultResponse;
+import com.placeholder.placeholder.api.math.service.persistence.MathExpressionPersistenceService;
 import com.placeholder.placeholder.api.math.service.core.MathExpressionService;
 import com.placeholder.placeholder.api.util.common.messages.ApiMessageFactory;
-import com.placeholder.placeholder.api.util.common.messages.ApiResponseFactory;
+import com.placeholder.placeholder.api.util.common.messages.UriHelperBuilder;
 import com.placeholder.placeholder.api.util.common.messages.dto.ApiResponse;
+import com.placeholder.placeholder.db.basicdto.MathExpressionResponseDto;
+import com.placeholder.placeholder.db.mappers.MathExpressionMapper;
+import com.placeholder.placeholder.db.models.MathExpression;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
 
 /**
  * REST controller that exposes endpoints related to mathematical expression processing.
@@ -24,10 +28,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api/v1/math")
 @RequiredArgsConstructor
 public class MathExpressionController {
-
     private final MathExpressionService service;
+    private final MathExpressionPersistenceService persistenceService;
     private final ApiMessageFactory messageFactory;
-
+    private final MathExpressionMapper mathExpressionMapper;
+    private final ApiMessageFactory apiMessageFactory;
 
     /**
      * Evaluates one or more mathematical expressions with optional formatting settings.
@@ -42,4 +47,21 @@ public class MathExpressionController {
         MathEvaluationResultResponse response = service.evaluation(mathExpressionRequest);
         return messageFactory.response(response).ok().build();
     }
+
+    @GetMapping("{id}")
+    public ResponseEntity<ApiResponse<MathExpressionResponseDto>> getById(@PathVariable Integer id) {
+        MathExpression expression = persistenceService.findByIdReadOnly(id);
+        MathExpressionResponseDto dto = mathExpressionMapper.toResponseDtoFromEntity(expression);
+        return apiMessageFactory.response(dto).ok().build();
+    }
+
+    @PostMapping
+    public  ResponseEntity<ApiResponse<Void>> persistNewExpression(
+            @RequestBody @Valid MathExpressionCreationDto request
+    ) {
+        MathExpression expression = persistenceService.createNewExpression(request);
+        URI location = UriHelperBuilder.buildUriFromCurrentRequest(expression.getId());
+        return apiMessageFactory.response().created(location).build();
+    }
+
 }

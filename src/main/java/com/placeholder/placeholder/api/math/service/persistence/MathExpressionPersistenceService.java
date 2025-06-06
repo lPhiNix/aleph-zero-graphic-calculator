@@ -1,5 +1,6 @@
-package com.placeholder.placeholder.api.math.service;
+package com.placeholder.placeholder.api.math.service.persistence;
 
+import com.placeholder.placeholder.api.auth.service.SquipUserDetailService;
 import com.placeholder.placeholder.api.math.dto.request.MathExpressionCreationDto;
 import com.placeholder.placeholder.api.user.service.UserService;
 import com.placeholder.placeholder.api.util.common.service.AbstractCrudService;
@@ -8,42 +9,47 @@ import com.placeholder.placeholder.db.models.MathExpression;
 import com.placeholder.placeholder.db.models.User;
 import com.placeholder.placeholder.db.repositories.MathExpressionRepository;
 
+import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Base64;
 import java.util.UUID;
 
 @Service
 public class MathExpressionPersistenceService extends AbstractCrudService<MathExpression, Integer, MathExpressionRepository> {
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(MathExpressionPersistenceService.class);
+
     private final MathExpressionMapper mathExpressionMapper;
     private final UserService userService;
+    private final SnapshotUtils snapshotUtils;
+    private final SquipUserDetailService squipUserDetailService;
 
-    public MathExpressionPersistenceService(MathExpressionRepository repository, MathExpressionMapper mathExpressionMapper, UserService userService) {
+    public MathExpressionPersistenceService(MathExpressionRepository repository, MathExpressionMapper mathExpressionMapper, UserService userService, SnapshotUtils snapshotUtils, SquipUserDetailService squipUserDetailService) {
         super(repository);
         this.mathExpressionMapper = mathExpressionMapper;
         this.userService = userService;
+        this.snapshotUtils = snapshotUtils;
+        this.squipUserDetailService = squipUserDetailService;
     }
 
+    /**
+     * Creates a new MathExpression entity from the provided request DTO.
+     * It saves the snapshot to a file and returns the created MathExpression.
+     *
+     * @param request The DTO containing the data for creating a new MathExpression.
+     * @return The created MathExpression entity.
+     */
+    @Transactional
     public MathExpression createNewExpression(MathExpressionCreationDto request) {
-        User owner = userService.findUserByIdentifier(request.userIdentifier()); // If user not found, nuclear exception.
+        User owner = squipUserDetailService.getCurrentUser();
 
-        String base64Snapshot = request.snapshot();
-        String base64Data = base64Snapshot.split(",").length > 1
-                ? base64Snapshot.split(",")[1]
-                : base64Snapshot;
+        String imageHash = UUID.randomUUID().toString();
+        logger.info("User {} is creating a new math expression with image hash: {}", owner.getUsername(), imageHash);
 
-        byte[] imageBytes = Base64.getDecoder().decode(base64Data);
-        UUID hash = UUID.randomUUID();
+        MathExpression mathExpression = mathExpressionMapper.toEntityFromCreationDto(request, owner, imageHash);
 
-        Path imagePath = Paths.get("snapshots", hash + ".png"); // o .svg, .jpg, etc.
-        Files.write(imagePath, imageBytes);
-
-// En la entidad solo guardas el hash
-        mathExpression.setSnapshot(hash);
-
-
+        // save the snapshot to a file with the specified hash
+        snapshotUtils.saveSnapshotToFile(request.snapshot(), imageHash);
+        return save(mathExpression);
     }
 }
