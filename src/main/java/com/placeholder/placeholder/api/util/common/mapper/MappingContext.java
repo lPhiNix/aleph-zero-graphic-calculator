@@ -1,8 +1,6 @@
 package com.placeholder.placeholder.util.mapper;
 
 import org.hibernate.proxy.HibernateProxy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.AopUtils;
 
 import java.util.HashMap;
@@ -65,7 +63,7 @@ public record MappingContext(Map<Class<?>, Object> contextData, Map<String, Inte
         }
 
         public MappingContext build() {
-            return new MappingContext(new HashMap<>(contextData), new HashMap<>(contextIdData));
+            return new MappingContext(contextData, contextIdData);
         }
     }
 }

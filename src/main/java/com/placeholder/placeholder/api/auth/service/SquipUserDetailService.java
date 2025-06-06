@@ -1,4 +1,4 @@
-package com.placeholder.placeholder.util;
+package com.placeholder.placeholder.util.service;
 
 import com.placeholder.placeholder.api.user.service.UserService;
 import com.placeholder.placeholder.db.models.UserRole;
