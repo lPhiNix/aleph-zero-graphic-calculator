@@ -1,4 +1,4 @@
-package com.placeholder.placeholder.util.mapper;
+package com.placeholder.placeholder.api.util.common.mapper;
 
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.aop.support.AopUtils;

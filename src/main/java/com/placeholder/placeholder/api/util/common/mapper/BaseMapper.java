@@ -1,4 +1,4 @@
-package com.placeholder.placeholder.util.mapper;
+package com.placeholder.placeholder.api.util.common.mapper;
 
 
 public interface BaseMapper<E, D> {
