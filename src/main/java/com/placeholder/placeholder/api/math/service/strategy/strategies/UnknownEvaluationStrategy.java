@@ -42,7 +42,7 @@ public class UnknownEvaluationStrategy implements EvaluationStrategy {
     @Override
     public List<MathEvaluationDto> compute(String expression, MathDataDto data) {
         MathExpressionEvaluation evaluation = mathEvaluator.evaluate(expression);
-        MathExpressionEvaluation draw = mathEvaluator.draw(evaluation.getExpressionEvaluated(), data);
+        MathExpressionEvaluation draw = mathEvaluator.draw(expression, data);
 
         formatOperations(mathEvaluator.getFacade(), evaluation);
 

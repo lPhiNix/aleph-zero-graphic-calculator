@@ -1,4 +1,7 @@
 /* expressionList.module.css */
+
+/* ───────────────────────────────────────────────────────────────────────────────── */
+/* CONTENEDOR PRINCIPAL (scrollea verticalmente si hay muchas entradas) */
 .listContainer {
     display: flex;
     flex-direction: column;
@@ -6,110 +9,153 @@
     overflow-y: auto;
 }
 
+/* ───────────────────────────────────────────────────────────────────────────────── */
+/* CADA FILA: flex para alinear el “cuadrado f” + el input + los botones */
 .inputWrapper {
     display: flex;
     align-items: center;
     margin-bottom: 0.5rem;
     position: relative;
+
+    /* Fondo base oscuro para el renglón */
+    background-color: #1e1e1e;
+    border-radius: 4px;
+    border: 2px solid transparent;
+    padding: 0.25rem 0.5rem;
+    transition: border-color 0.15s ease;
 }
 
-/* El input ocupa todo el ancho menos los botones */
+/* En cuanto la fila está hovered O focus-within, se aplica el border-color inyectado en línea */
+.rowHighlighted {
+    border-color: var(--color-black);
+}
+
+/* ───────────────────────────────────────────────────────────────────────────────── */
+/* “F-cuadrado”: */
+.functionLabel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid transparent;
+    border-radius: 0.5rem;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+
+    /* El color de fondo se pinta inline según prop `style={{ backgroundColor: functionColor }}` */
+    transition: border-color 0.15s ease;
+}
+
+/* La letra “f” centrada en blanco */
+.fLetter {
+    font-family: 'Segoe UI', sans-serif;
+    font-weight: bold;
+    color: white;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+/* Subíndice con el índice de la función */
+.fSubscript {
+    font-size: 0.65rem;
+    color: white;
+    line-height: 1;
+    position: relative;
+    top: 0.1rem;
+}
+
+/* Si la fila está hovered/focused, pintamos el borde del cuadrado también */
+.rowHighlighted .functionLabel {
+    border-color: currentColor; /* se overridea inline con el mismo functionColor */
+}
+
+/* ───────────────────────────────────────────────────────────────────────────────── */
+/* El <input> propiamente dicho (ocupa todo el ancho restante) */
 .exprInput {
     flex: 1;
-    padding: 0.5rem 2rem 0.5rem 0.5rem; /* espacio a la derecha para que los botones no queden encima */
+    padding: 0.5rem 2.5rem 0.5rem 0.5rem; /* espacio a la derecha para los iconos */
     font-size: 1rem;
-    border: 1px solid var(--color-gray-medium);
-    border-radius: 4px;
-    background: var(--background-color);
-    color: var(--color-black);
-}
-
-.exprInput:focus {
+    color: #e0e0e0;
+    background: transparent;
+    border: none;
     outline: none;
-    border-color: var(--highlight-color);
-    box-shadow: 0 0 0 2px rgba(0, 216, 255, 0.2);
 }
 
-/* Botón para limpiar fila (×) */
-.deleteButton {
-    display: none;
+/* Placeholder en gris claro */
+.exprInput::placeholder {
+    color: #888888;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────────── */
+/* Botón “×” para limpiar (solo cuando el input está enfocado y no vacío) */
+.clearButton {
     position: absolute;
     top: 50%;
     right: 0.5rem;
     transform: translateY(-50%);
     width: 1.5rem;
     height: 1.5rem;
+    display: flex;
     align-items: center;
     justify-content: center;
     background: transparent;
     border: none;
-    font-size: 1rem;
-    color: var(--app-color);
     cursor: pointer;
     padding: 0;
+    font-size: 1rem;
+    color: white;
+    transition: color 0.15s ease;
+}
+/* Al hacer hover en el botón “×”, se vuelve rojo */
+.clearButton:hover {
+    color: #e53935;
 }
 
-/* Mostrar cuando el input esté enfocado */
-.inputWrapper:focus-within .deleteButton {
-    display: flex;
-}
-
-/* No ocultar la “×” si el renglón está en hover y el input está enfocado */
-.inputWrapper:hover:focus-within .deleteButton {
-    display: flex;
-}
-
-/* Ocultar la “×” sólo cuando el renglón está en hover y NO está enfocado */
-.inputWrapper:hover:not(:focus-within) .deleteButton {
-    display: none;
-}
-
-/* Ajuste para centrar ÓPTICAMENTE la “×” */
-.deleteIcon {
-    display: inline-block;
-    transform: translateY(-2px);
-}
-
-/* Efecto hover opcional para limpiar fila */
-.deleteButton:hover {
-    color: var(--color-red);
-}
-
-/* Botón para borrar fila (🗑️) */
-.deleteRowButton {
-    display: none;
+/* ───────────────────────────────────────────────────────────────────────────────── */
+/* LOS TRES ICON-BOTONES (⚡ 🎨 🗑️) */
+/* Contenedor que agrupa los 3 icon-botones */
+.buttonsContainer {
     position: absolute;
-    top: 50%;
-    right: 0.5rem; /* misma posición que la “×” */
-    transform: translateY(-50%);
-    width: 1.5rem;
-    height: 1.5rem;
+    right: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+/* Todos los botones de icono comparten este estilo básico */
+.iconButton {
+    width: 1.75rem;
+    height: 1.75rem;
+    display: flex;
     align-items: center;
     justify-content: center;
-    background: transparent;
+    background-color: transparent;
     border: none;
-    font-size: 1rem;
-    color: var(--color-gray-dark);
     cursor: pointer;
-    padding: 0;
+    border-radius: 0.25rem;
+    transition: background-color 0.15s ease;
+
+    /* Aquí inyectaremos en línea: --button-color: <color de la función>; */
 }
 
-/* Mostrar cubo sólo al hover del renglón y cuando NO está enfocado */
-.inputWrapper:hover:not(:focus-within) .deleteRowButton {
-    display: flex;
+/* El símbolo ⚡ 🎨 🗑️ se pinta siempre en blanco */
+.iconButton span {
+    font-size: 1rem;
+    line-height: 1;
+    color: white;
 }
 
-/* No mostrar cubo cuando el input está enfocado */
-.inputWrapper:focus-within .deleteRowButton {
-    display: none;
+/* Al hacer hover O focus en cualquiera de estos botones:
+   - Pintamos el background con el color de la función (variable inline)
+   - El ícono interno permanece blanco */
+.iconButton:hover,
+.iconButton:focus {
+    background-color: var(--app-color);
+    outline: none;
 }
 
-.trashIcon {
-    display: inline-block;
-    transform: translateY(-2px);
-}
-
-/* Efecto hover para borrar fila */
-.deleteRowButton:hover {
-    color: var(--color-red);
-}
+/* ───────────────────────────────────────────────────────────────────────────────── */
+/* Para forzar que, cuando la fila esté “hovered/focused”, usemos el mismo color
+   que la función para la variable “--highlight-border” de la .rowHighlighted.
+   Eso se inyecta en línea en el <div className="inputWrapper"> */

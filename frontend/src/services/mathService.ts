@@ -85,7 +85,10 @@ export async function evaluateSingleExpression(
         const evalDto: MathExpressionEvaluationDto =
             apiData.content.expressionEvaluations[0];
 
-        const result: ExpressionResult = {};
+        // Creamos el resultado incluyendo el tipo de expresión
+        const result: ExpressionResult = {
+            exprType: evalDto.type,
+        };
 
         for (const item of evalDto.evaluations) {
             switch (item.evaluationType) {
@@ -115,7 +118,9 @@ export async function evaluateSingleExpression(
             if (axiosErr.response && axiosErr.response.data) {
                 const data = axiosErr.response.data as any;
                 if (Array.isArray(data.errors)) {
-                    const messages: string[] = data.errors.map((e: any) => e.message || String(e));
+                    const messages: string[] = data.errors.map(
+                        (e: any) => e.message || String(e)
+                    );
                     return { errors: messages };
                 }
             }

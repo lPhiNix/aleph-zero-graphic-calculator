@@ -43,6 +43,7 @@ public class NumericEvaluationStrategy implements EvaluationStrategy {
     public List<MathEvaluationDto> compute(String expression, MathDataDto data) {
         MathExpressionEvaluation evaluation = mathEvaluator.evaluate(expression);
         MathExpressionEvaluation calculation = mathEvaluator.calculate(expression, data);
+        MathExpressionEvaluation draw = mathEvaluator.draw(expression, data);
 
         formatOperations(mathEvaluator.getFacade(), evaluation, calculation);
 
@@ -54,6 +55,10 @@ public class NumericEvaluationStrategy implements EvaluationStrategy {
                 new MathEvaluationDto(MathEvaluationType.CALCULATION,
                         calculation.getExpressionEvaluated(),
                         calculation.getEvaluationProblems().orElse(null)
+                ),
+                new MathEvaluationDto(MathEvaluationType.DRAWING,
+                        draw.getExpressionEvaluated(),
+                        draw.getEvaluationProblems().orElse(null)
                 )
         );
     }

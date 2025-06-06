@@ -14,16 +14,6 @@ interface ViewWindow {
     top: number;
 }
 
-/**
- * Para cada expresión, almacenamos un array de intervalos “cacheados”:
- *   {
- *     from: number;
- *     to: number;
- *     points: Array<{ x: number; y: number }>
- *   }
- * Luego, siempre que cambie la viewWindow, calculamos qué sub-intervalos FALTAN
- * a partir de la unión de los que ya tenemos. Solo pedimos esos.
- */
 type IntervalData = {
     from: number;
     to: number;
@@ -35,12 +25,17 @@ export default function Calculator() {
     const [expressions, setExpressions] = useState<string[]>(['']);
 
     // 2. Estado de resultados: un objeto por cada línea de expresión
-    //    (solo para evaluation/calculation/errors; drawingPoints lo sacamos de la caché)
-    const [results, setResults] = useState<ExpressionResult[]>(
-        () => expressions.map(() => ({}))
+    const [results, setResults] = useState<ExpressionResult[]>(() =>
+        expressions.map(() => ({}))
     );
 
-    // 3. Estado de la ventana actual de dibujo (origin, bound, bottom, top)
+    // 3. Estado de colores: un color hex por cada expresión
+    const [colors, setColors] = useState<string[]>(['#ff0000']); // inicializamos con un color por defecto
+
+    // 3b. Estado de “disabledFlags”: indica si cada fila está deshabilitada
+    const [disabledFlags, setDisabledFlags] = useState<boolean[]>([false]);
+
+    // 4. Estado de la ventana actual de dibujo
     const [viewWindow, setViewWindow] = useState<ViewWindow>({
         origin: -10,
         bound: 10,
@@ -54,8 +49,9 @@ export default function Calculator() {
     // Ref para almacenar, por cada índice de expresión, los intervalos cacheados
     const cacheRef = useRef<Record<number, IntervalData[]>>({});
 
-    // Sincronizar la longitud de `results` con la de `expressions`
+    // ──────── SINCRONIZAR `results`, `colors` y `disabledFlags` cuando cambie `expressions.length` ────────
     useEffect(() => {
+        // 1) Ajustar longitud de `results`
         setResults((prev) => {
             const updated = [...prev];
             while (updated.length < expressions.length) {
@@ -64,38 +60,52 @@ export default function Calculator() {
             updated.length = expressions.length;
             return updated;
         });
-        // A su vez, si se ha agregado una expresión nueva, inicializamos su caché vacía
-        setTimeout(() => {
-            if (!cacheRef.current) cacheRef.current = {};
-            expressions.forEach((_, idx) => {
-                if (!cacheRef.current[idx]) {
-                    cacheRef.current[idx] = [];
-                }
-            });
-        }, 0);
-    }, [expressions.length]);
 
-    /**
-     * Dada un intervalo deseado [from, to] y un array de intervalos ya cacheados,
-     * devuelve un array de sub-intervalos “faltantes” que no están cubiertos aún.
-     */
+        // 2) Ajustar longitud de `colors`
+        setColors((prev) => {
+            const updated = [...prev];
+            while (updated.length < expressions.length) {
+                updated.push('#000000');
+            }
+            updated.length = expressions.length;
+            return updated;
+        });
+
+        // 3) Ajustar longitud de `disabledFlags`
+        setDisabledFlags((prev) => {
+            const updated = [...prev];
+            while (updated.length < expressions.length) {
+                // por defecto, recién creada, está habilitada → false
+                updated.push(false);
+            }
+            updated.length = expressions.length;
+            return updated;
+        });
+
+        // 4) Inicializar caché para índices nuevos
+        expressions.forEach((_, idx) => {
+            if (!cacheRef.current[idx]) {
+                cacheRef.current[idx] = [];
+            }
+        });
+    }, [expressions]);
+
+    /** Dada la ventana deseada [from, to] y los intervalos `existing`, devuelve qué sub-intervalos faltan */
     const getMissingIntervals = (
         desiredFrom: number,
         desiredTo: number,
         existing: IntervalData[]
     ): Array<[number, number]> => {
         if (desiredFrom >= desiredTo) return [];
-        // Construimos una lista de intervalos inicial: [[desiredFrom, desiredTo]]
+        const sortedExisting = [...existing].sort((a, b) => a.from - b.from);
         let toCheck: Array<[number, number]> = [[desiredFrom, desiredTo]];
 
-        existing.forEach(({ from, to }) => {
+        sortedExisting.forEach(({ from, to }) => {
             const nextCheck: Array<[number, number]> = [];
             toCheck.forEach(([a, b]) => {
-                // Si no se solapan, dejamos tal cual
                 if (to <= a || from >= b) {
                     nextCheck.push([a, b]);
                 } else {
-                    // Hay solapamiento: recortamos
                     if (a < from) {
                         nextCheck.push([a, from]);
                     }
@@ -107,26 +117,37 @@ export default function Calculator() {
             toCheck = nextCheck;
         });
 
-        return toCheck; // es el array de sub-intervalos que faltan
+        return toCheck;
     };
 
-    //--------------------------------------------------------------------
-    // Cuando cambie viewWindow (zoom o pan) y NO sea el primer render,
-    // generamos las peticiones PARCIALES (solo para los missing intervals).
-    //--------------------------------------------------------------------
+    // ──────── FETCH PARCIAL AL CAMBIAR `viewWindow` ────────
     useEffect(() => {
         if (isFirstRender.current) {
             isFirstRender.current = false;
             return;
         }
 
+        let isMounted = true;
         const { origin, bound } = viewWindow;
         const strDecimals = '50';
 
-        // Para cada expresión no vacía:
         expressions.forEach((expr, idx) => {
+            // Si la fila está deshabilitada, omitimos completamente
+            if (disabledFlags[idx]) {
+                if (!isMounted) return;
+                cacheRef.current[idx] = [];
+                setResults((prev) => {
+                    const copy = [...prev];
+                    // No limpiamos exprType: sólo borramos dibujo y errores
+                    copy[idx] = { exprType: prev[idx]?.exprType };
+                    return copy;
+                });
+                return;
+            }
+
+            // Si la expresión está vacía, limpiamos
             if (expr.trim() === '') {
-                // Si está vacía, limpiamos su caché y resultado
+                if (!isMounted) return;
                 cacheRef.current[idx] = [];
                 setResults((prev) => {
                     const copy = [...prev];
@@ -136,95 +157,109 @@ export default function Calculator() {
                 return;
             }
 
-            // 1. Obtenemos los intervalos ya cacheados para esta expresión:
             const existing = cacheRef.current[idx] || [];
-
-            // 2. Detectar sub-intervalos faltantes dentro de [origin, bound]:
             const missing = getMissingIntervals(origin, bound, existing);
 
-            // 3. Si no falta nada, reconstruimos dibujo a partir de la caché y salimos:
+            // Si no hay intervalos faltantes, reconstruimos dibujo desde caché
             if (missing.length === 0) {
-                // Unimos todos los puntos de todos los intervalos que intersectan [origin, bound]
                 const combined: Array<{ x: number; y: number }> = [];
                 existing
                     .filter((iv) => iv.to > origin && iv.from < bound)
-                    .forEach((iv) => {
-                        // Tomamos solo los puntos dentro de [origin, bound]
+                    .forEach((iv) =>
                         iv.points.forEach((pt) => {
                             if (pt.x >= origin && pt.x <= bound) {
                                 combined.push(pt);
                             }
-                        });
-                    });
-                // Ordenamos por x
+                        })
+                    );
                 combined.sort((a, b) => a.x - b.x);
 
-                // Actualizamos solo el campo drawingPoints en results
                 setResults((prev) => {
+                    if (!isMounted) return prev;
                     const updated = prev.map((r) => ({ ...r }));
                     updated[idx] = {
                         ...updated[idx],
                         drawingPoints: combined,
+                        // Mantenemos exprType si ya existía
+                        exprType: updated[idx]?.exprType,
                     };
                     return updated;
                 });
                 return;
             }
 
-            // 4. Para cada tramo faltante, hacemos 1 fetch y luego agregamos a la caché
-            missing.forEach(async ([f, t]) => {
-                try {
-                    const res = await evaluateSingleExpression(expr, strDecimals, f.toString(), t.toString());
-                    const newPts = res.drawingPoints || [];
+            // Para cada sub-intervalo faltante, hacemos fetch asíncrono
+            (async () => {
+                for (const [f, t] of missing) {
+                    try {
+                        const res = await evaluateSingleExpression(
+                            expr,
+                            strDecimals,
+                            f.toString(),
+                            t.toString()
+                        );
+                        if (!isMounted) return;
+                        const newPts = res.drawingPoints || [];
 
-                    // 5. Insertamos este nuevo intervalo en la caché (y lo mantenemos ordenado)
-                    cacheRef.current[idx].push({ from: f, to: t, points: newPts });
-                    // Posibilidad de que haya superposición:
-                    //  -> NO la consolidamos aquí (para simplicidad), pero en un futuro se pueden fusionar.
-                    // Ahora reconstruimos todos los puntos para [origin, bound]:
-                    const merged: Array<{ x: number; y: number }> = [];
-                    cacheRef.current[idx]
-                        .filter((iv) => iv.to > origin && iv.from < bound)
-                        .forEach((iv) => {
-                            iv.points.forEach((pt) => {
-                                if (pt.x >= origin && pt.x <= bound) {
-                                    merged.push(pt);
-                                }
-                            });
+                        // Insertamos este fragmento en caché
+                        cacheRef.current[idx].push({ from: f, to: t, points: newPts });
+
+                        // Reconstruimos merged solo con los puntos que caen en [origin, bound]
+                        const merged: Array<{ x: number; y: number }> = [];
+                        cacheRef.current[idx]
+                            .filter((iv) => iv.to > origin && iv.from < bound)
+                            .forEach((iv) =>
+                                iv.points.forEach((pt) => {
+                                    if (pt.x >= origin && pt.x <= bound) {
+                                        merged.push(pt);
+                                    }
+                                })
+                            );
+                        merged.sort((a, b) => a.x - b.x);
+
+                        setResults((prev) => {
+                            if (!isMounted) return prev;
+                            const updated = prev.map((r) => ({ ...r }));
+                            updated[idx] = {
+                                ...updated[idx],
+                                drawingPoints: merged,
+                                exprType: updated[idx]?.exprType || res.exprType,
+                            };
+                            return updated;
                         });
-                    merged.sort((a, b) => a.x - b.x);
-
-                    setResults((prev) => {
-                        const updated = prev.map((r) => ({ ...r }));
-                        updated[idx] = {
-                            ...updated[idx],
-                            drawingPoints: merged,
-                        };
-                        return updated;
-                    });
-                } catch {
-                    // En caso de error en esta sub-petición, dejamos dibujo en vacío
-                    setResults((prev) => {
-                        const updated = prev.map((r) => ({ ...r }));
-                        updated[idx] = {
-                            ...updated[idx],
-                            drawingPoints: [],
-                        };
-                        return updated;
-                    });
+                    } catch {
+                        if (!isMounted) return;
+                        setResults((prev) => {
+                            const updated = prev.map((r) => ({ ...r }));
+                            updated[idx] = {
+                                ...updated[idx],
+                                errors: [
+                                    ...(updated[idx].errors || []),
+                                    `Error al cargar intervalo [${f}, ${t}]`,
+                                ],
+                                // Mantenemos exprType si ya existía
+                                exprType: updated[idx]?.exprType,
+                            };
+                            return updated;
+                        });
+                    }
                 }
-            });
+            })();
         });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [viewWindow, expressions]);
 
-    //--------------------------------------------------------------------
-    // Callback que dispara la petición al backend al hacer blur en un input
-    // (para evaluation / calculation)
-    //--------------------------------------------------------------------
+        return () => {
+            isMounted = false;
+        };
+    }, [viewWindow, expressions, disabledFlags]);
+
+    // ──────── MANEJO DE “blur” EN CADA EXPRESIÓN ────────
     const handleExpressionBlur = useCallback(
         async (index: number, expr: string) => {
-            // Si la cadena está vacía, limpiamos el resultado completo y la caché
+            // Si la fila está deshabilitada, no evaluamos nada
+            if (disabledFlags[index]) {
+                return;
+            }
+
             if (expr.trim() === '') {
                 cacheRef.current[index] = [];
                 setResults((prev) => {
@@ -236,21 +271,24 @@ export default function Calculator() {
             }
 
             try {
-                // Usamos el viewWindow actual para origin y bound
                 const decimals = '50';
                 const origin = viewWindow.origin.toString();
                 const bound = viewWindow.bound.toString();
 
                 const res = await evaluateSingleExpression(expr, decimals, origin, bound);
 
-                // 1. Guardamos evaluación/calculation/errors:
+                // 1) Guardamos evaluación/calculation/errors en results[index]
                 setResults((prev) => {
                     const updated = [...prev];
-                    updated[index] = res;
+                    updated[index] = {
+                        ...res,
+                        // Si vuelve res.exprType undefined, conservamos el anterior
+                        exprType: res.exprType || prev[index]?.exprType,
+                    };
                     return updated;
                 });
 
-                // 2. Actualizamos la caché: limpiamos la entrada anterior y pedimos TODO el tramo
+                // 2) Reemplazamos la caché de esa línea con el intervalo completo
                 const fromNum = viewWindow.origin;
                 const toNum = viewWindow.bound;
                 const drawingPts = res.drawingPoints || [];
@@ -266,26 +304,47 @@ export default function Calculator() {
                 cacheRef.current[index] = [];
                 setResults((prev) => {
                     const updated = [...prev];
-                    updated[index] = { errors: ['Error al evaluar la expresión'] };
+                    updated[index] = {
+                        errors: ['Error al evaluar la expresión'],
+                        exprType: updated[index]?.exprType,
+                    };
                     return updated;
                 });
                 console.error('[handleExpressionBlur] Error al evaluar:', err);
             }
         },
-        [viewWindow]
+        [viewWindow, disabledFlags]
     );
 
-    //--------------------------------------------------------------------
-    // Cuando cambie la ventana de visualización (zoom / pan), este callback
-    // será invocado desde GraphCanvas. Solo actualiza viewWindow.
-    //--------------------------------------------------------------------
+    // ──────── CALLBACK PARA CAMBIO DE VIEW WINDOW ────────
     const handleViewChange = useCallback((vw: ViewWindow) => {
         setViewWindow(vw);
     }, []);
 
-    //--------------------------------------------------------------------
-    // Métodos para el teclado matemático
-    //--------------------------------------------------------------------
+    // ──────── CALLBACK PARA CAMBIO DE COLOR ────────
+    const handleColorChange = useCallback((index: number, newColor: string) => {
+        setColors((prev) => {
+            const updated = [...prev];
+            updated[index] = newColor;
+            return updated;
+        });
+    }, []);
+
+    // ──────── CALLBACK PARA TOGGLE DISABLED ────────
+    const handleToggleDisabled = useCallback(
+        (index: number) => {
+            setDisabledFlags((prev) => {
+                const updated = [...prev];
+                updated[index] = !updated[index];
+                return updated;
+            });
+            // Ya no limpiamos resultados ni exprType; solo cambiamos el flag.
+            // La fila conservará su exprType en results.
+        },
+        []
+    );
+
+    // ──────── TECLADO MATEMÁTICO ────────
     const insertIntoExpression = (value: string) => {
         setExpressions((prev) => {
             const newArr = [...prev];
@@ -306,31 +365,39 @@ export default function Calculator() {
 
     const clearAll = () => {
         setExpressions(['']);
-        // Limpiamos caché completa
+        setResults([{}]);
         cacheRef.current = {};
+        setColors(['#000000']);
+        setDisabledFlags([false]);
     };
 
     const evaluateExpression = () => {
-        const lastExpr = expressions[expressions.length - 1];
-        if (lastExpr.trim() !== '') {
-            // Trigger blur “manual” si el usuario presiona ↵ en el teclado
-            handleExpressionBlur(expressions.length - 1, lastExpr);
+        const lastIndex = expressions.length - 1;
+        const lastExpr = expressions[lastIndex];
+        if (lastExpr.trim() !== '' && !disabledFlags[lastIndex]) {
+            handleExpressionBlur(lastIndex, lastExpr);
         }
     };
 
-    //--------------------------------------------------------------------
-    // Construimos un array de todos los conjuntos de puntos que hayan llegado
-    //--------------------------------------------------------------------
-    // Solo pasamos los “drawingPoints” a GraphCanvas, porque ahí dibujamos
-    const allDrawingSets = results
-        .map((r) => r.drawingPoints)
-        .filter((dp): dp is Array<{ x: number; y: number }> =>
-            Array.isArray(dp)
-        );
+    // ──────── CONSTRUIMOS `drawingSets` PARA GraphCanvas ────────
+    /**
+     * Ahora cada elemento es { points, color } en el mismo orden que `expressions`.
+     * Si la fila está deshabilitada o no tiene puntos, ponemos points: [].
+     */
+    const allDrawingSets = expressions.map((_, idx) => {
+        if (disabledFlags[idx]) {
+            return {
+                points: [] as Array<{ x: number; y: number }>,
+                color: '#666666', // color de placeholder gris
+            };
+        }
+        return {
+            points: results[idx]?.drawingPoints || [],
+            color: colors[idx] || '#000000',
+        };
+    });
 
-    //--------------------------------------------------------------------
-    // Definición del teclado matemático (igual que antes)
-    //--------------------------------------------------------------------
+    // ──────── DEFINICIÓN DEL TECLADO ────────
     const teclas = [
         { label: '2nd', onClick: () => insertIntoExpression('2nd') },
         { label: 'π', onClick: () => insertIntoExpression('π') },
@@ -371,9 +438,9 @@ export default function Calculator() {
 
     return (
         <div className={styles.pageContainer}>
-            <Header title="Placeholder" />
+            <Header title="Calculadora con Colores" />
             <div className={styles.mainArea}>
-                {/* ─── LADO IZQUIERDO: CANVAS ─────────────────────────────────── */}
+                {/* ─── IZQUIERDA: CANVAS ───────────────────────────────────────────────────── */}
                 <div className={styles.canvasWrapper}>
                     <GraphCanvas
                         drawingSets={allDrawingSets}
@@ -381,17 +448,26 @@ export default function Calculator() {
                     />
                 </div>
 
-                {/* ─── LADO DERECHO: EXPRESSION LIST + TECLADO ───────────────── */}
+                {/* ─── DERECHA: EXPRESSION LIST + RESULTADOS + TECLADO ─────────────────────── */}
                 <div className={styles.expressionsWrapper}>
                     <ExpressionList
                         expressions={expressions}
                         onExpressionsChange={setExpressions}
                         onExpressionBlur={handleExpressionBlur}
+                        colors={colors}
+                        onColorChange={handleColorChange}
+                        disabledFlags={disabledFlags}
+                        onToggleDisabled={handleToggleDisabled}
+                        expressionTypes={results.map((r) => r.exprType)}
                     />
 
-                    {/*  Mostramos debajo de cada input sus resultados (evaluation/calculation/errors) */}
+                    {/* Mostramos debajo de cada input sus resultados (evaluation/calculation/errors) */}
                     <div className={styles.resultsContainer}>
-                        {expressions.map((_expr, idx) => {
+                        {expressions.map((expr, idx) => {
+                            // No mostramos el bloque de resultado si:
+                            //  1) la expresión está vacía
+                            //  2) la fila está deshabilitada
+                            if (expr.trim() === '' || disabledFlags[idx]) return null;
                             const r = results[idx] || {};
                             return (
                                 <div key={idx} className={styles.singleResultBlock}>
@@ -416,7 +492,7 @@ export default function Calculator() {
                         })}
                     </div>
 
-                    {/* ─── TECLADO matemático ───────────────────────────────────── */}
+                    {/* ─── TECLADO matemático ────────────────────────────────────────────────── */}
                     <MathKeyboard keys={teclas} />
                 </div>
             </div>

@@ -1,4 +1,3 @@
-// src/types/math.ts
 export type MathEvaluationType = 'EVALUATION' | 'CALCULATION' | 'DRAWING';
 
 // Cada objeto que viene en el array "evaluations" del backend
@@ -41,4 +40,6 @@ export interface ExpressionResult {
     // Si viene DRAWING, parsearemos a puntos
     drawingPoints?: Array<{ x: number; y: number }>;
     errors?: string[];
+    /** Nuevo campo: el tipo de expresión que devolvió el backend */
+    exprType?: MathExpressionEvaluationDto['type'];
 }

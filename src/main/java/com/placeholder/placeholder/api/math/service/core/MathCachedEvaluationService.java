@@ -78,6 +78,7 @@ public class MathCachedEvaluationService {
      */
     @Cacheable(value = "draw", key = "#expression + '_' + #data.origin() + '_' + #data.bound()")
     public MathExpressionEvaluation draw(String expression, MathDataDto data) {
+        expression = evaluate(expression).getExpressionEvaluated(); // Pre-evaluation for more optimized process
         logger.info("Entering draw() with expression: {}, origin: {}, bound: {}",
                 expression, data.origin(), data.bound());
         String preEvaluatedExpression = evaluate(expression).getExpressionEvaluated();
