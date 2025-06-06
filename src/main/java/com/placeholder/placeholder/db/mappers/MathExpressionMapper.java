@@ -1,6 +1,7 @@
 package com.placeholder.placeholder.db.mappers;
 
 import com.placeholder.placeholder.api.math.dto.request.MathExpressionCreationDto;
+import com.placeholder.placeholder.api.math.service.persistence.SnapshotUtils;
 import com.placeholder.placeholder.db.basicdto.MathExpressionResponseDto;
 import com.placeholder.placeholder.db.models.MathExpression;
 import com.placeholder.placeholder.db.models.User;
@@ -18,10 +19,16 @@ public interface MathExpressionMapper extends BaseMapper<MathExpression, MathExp
     }
 
     @Mapping(target = "points", source = "points", qualifiedByName = "mapPointsIfIncluded")
+    @Mapping(target = "snapshot", source = "snapshot", qualifiedByName = "parseSnapshotToUrl")
     MathExpressionResponseDto toResponseDtoFromEntity(MathExpression entity, @Context boolean includePoints);
 
     @Named("mapPointsIfIncluded")
     default String mapPointIfIncluded (String points, @Context boolean includePoints) {
         return includePoints ? points : null;
+    }
+    
+    @Named("parseSnapshotToUrl")
+    default String parseSnapshotToUrl (String snapshot) {
+        return SnapshotUtils.getSnapshotUrl(snapshot);
     }
 }

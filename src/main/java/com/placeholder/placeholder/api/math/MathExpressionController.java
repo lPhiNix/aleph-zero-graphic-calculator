@@ -34,7 +34,6 @@ public class MathExpressionController {
     private final ApiMessageFactory messageFactory;
     private final MathExpressionMapper mathExpressionMapper;
     private final ApiMessageFactory apiMessageFactory;
-    private final SnapshotUtils snapshotUtils;
 
     /**
      * Evaluates one or more mathematical expressions with optional formatting settings.

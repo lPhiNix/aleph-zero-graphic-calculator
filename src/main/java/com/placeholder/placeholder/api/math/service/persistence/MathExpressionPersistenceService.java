@@ -21,14 +21,12 @@ public class MathExpressionPersistenceService extends AbstractCrudService<MathEx
 
     private final MathExpressionMapper mathExpressionMapper;
     private final UserService userService;
-    private final SnapshotUtils snapshotUtils;
     private final SquipUserDetailService squipUserDetailService;
 
-    public MathExpressionPersistenceService(MathExpressionRepository repository, MathExpressionMapper mathExpressionMapper, UserService userService, SnapshotUtils snapshotUtils, SquipUserDetailService squipUserDetailService) {
+    public MathExpressionPersistenceService(MathExpressionRepository repository, MathExpressionMapper mathExpressionMapper, UserService userService, SquipUserDetailService squipUserDetailService) {
         super(repository);
         this.mathExpressionMapper = mathExpressionMapper;
         this.userService = userService;
-        this.snapshotUtils = snapshotUtils;
         this.squipUserDetailService = squipUserDetailService;
     }
 
@@ -49,7 +47,7 @@ public class MathExpressionPersistenceService extends AbstractCrudService<MathEx
         MathExpression mathExpression = mathExpressionMapper.toEntityFromCreationDto(request, owner, imageHash);
 
         // save the snapshot to a file with the specified hash
-        snapshotUtils.saveSnapshotToFile(request.snapshot(), imageHash);
+        SnapshotUtils.saveSnapshotToFile(request.snapshot(), imageHash);
         return save(mathExpression);
     }
 }

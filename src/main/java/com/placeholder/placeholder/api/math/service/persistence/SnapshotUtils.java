@@ -12,19 +12,18 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
 
-@Component
 @RequiredArgsConstructor
 public class SnapshotUtils {
     private static final Logger logger = LoggerFactory.getLogger(SnapshotUtils.class);
     private static final Path SNAPSHOT_DIR = Paths.get("snapshots");
 
-    private byte[] getSnapshotBytes(String base64Snapshot) {
+    private static byte[] getSnapshotBytes(String base64Snapshot) {
         String[] parts = base64Snapshot.split(",", 2);
         String base64Data = parts.length > 1 ? parts[1] : parts[0];
         return Base64.getDecoder().decode(base64Data);
     }
 
-    public Path saveSnapshotToFile(String base64Snapshot, String hash) {
+    public static Path saveSnapshotToFile(String base64Snapshot, String hash) {
         // Asegurarse de que el directorio existe
         try {
             if (!Files.exists(SNAPSHOT_DIR)) {
@@ -48,7 +47,7 @@ public class SnapshotUtils {
         }
     }
 
-    public String getSnapshotUrl(String hash) {
+    public static String getSnapshotUrl(String hash) {
         return ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/snapshots/")
                 .path(hash + ".jpg")
