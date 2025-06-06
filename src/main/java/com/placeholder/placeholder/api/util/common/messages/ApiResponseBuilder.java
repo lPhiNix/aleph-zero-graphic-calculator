@@ -7,19 +7,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
+import java.net.URI;
 
-/**
- * Builder for constructing {@link ApiResponse} (success) objects.
- * <p>
- * This builder provides a fluent API for setting response code, message, and content,
- * and for building a {@link ResponseEntity} containing the API response.
- * </p>
- */
-@RequiredArgsConstructor
+
 public class ApiResponseBuilder<T> {
     private AppCode code;
     private String message;
-    private final T content; // payload
+    private T content; // payload
+    private URI location;
+
+
+    public ApiResponseBuilder(T content) {
+        this.content = content;
+    }
+
+    public ApiResponseBuilder() {}
 
     /**
      * Sets the application response code for this response.
@@ -58,8 +60,9 @@ public class ApiResponseBuilder<T> {
      *
      * @return this builder instance for chaining
      */
-    public ApiResponseBuilder<T> created() {
+    public ApiResponseBuilder<T> created(URI location) {
         this.code = AppCode.CREATED;
+        this.location = location;
         return this;
     }
 
@@ -96,18 +99,23 @@ public class ApiResponseBuilder<T> {
         if (code == null) {
             throw new IllegalStateException("Response code must be set before building the response");
         }
+
         if (message == null) {
             message = code.getSimpleMessage();
         }
+
+        // if content is null, we return a response without body
+        if (content == null) {
+            ResponseEntity.BodyBuilder builder = ResponseEntity.status(code.getStatus());
+            if (location != null) {
+                builder.header("Location", location.toString());
+            }
+            return builder.build();
+        }
+
+        // if content is not null, we create a response with body
         ApiResponse<T> response = new ApiResponse<>(code, message, content);
-        ResponseEntity<ApiResponse<T>> entity = ResponseEntity.status(code.getStatus()).body(response);
-        reset();
-
-        return entity;
+        return ResponseEntity.status(code.getStatus()).body(response);
     }
 
-    private void reset() {
-        this.code = null;
-        this.message = null;
-    }
 }

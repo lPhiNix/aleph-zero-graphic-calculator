@@ -24,6 +24,15 @@ public class ApiMessageFactory {
     }
 
     /**
+     * Creates a new instance of {@link ApiResponseBuilder} for constructing API responses without content.git
+     *
+     * @return a new {@link ApiResponseBuilder} instance
+     */
+    public  ApiResponseBuilder<Void> response() {
+        return new ApiResponseBuilder<>();
+    }
+
+    /**
      * Creates a new instance of {@link ErrorResponseBuilder} for constructing error responses.
      *
      * @return a new {@link ErrorResponseBuilder} instance
