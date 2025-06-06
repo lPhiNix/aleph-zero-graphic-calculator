@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -47,7 +48,11 @@ public class SnapshotUtils {
         }
     }
 
-    public Path getSnapshotPath(String hash) {
-        return SNAPSHOT_DIR.resolve(hash + ".jpg");
+    public String getSnapshotUrl(String hash) {
+        return ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/snapshots/")
+                .path(hash + ".jpg")
+                .toUriString();
     }
+
 }

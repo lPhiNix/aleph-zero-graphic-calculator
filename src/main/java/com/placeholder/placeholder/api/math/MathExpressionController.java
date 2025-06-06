@@ -5,6 +5,7 @@ import com.placeholder.placeholder.api.math.dto.request.MathExpressionCreationDt
 import com.placeholder.placeholder.api.math.dto.response.MathEvaluationResultResponse;
 import com.placeholder.placeholder.api.math.service.persistence.MathExpressionPersistenceService;
 import com.placeholder.placeholder.api.math.service.core.MathExpressionService;
+import com.placeholder.placeholder.api.math.service.persistence.SnapshotUtils;
 import com.placeholder.placeholder.api.util.common.messages.ApiMessageFactory;
 import com.placeholder.placeholder.api.util.common.messages.UriHelperBuilder;
 import com.placeholder.placeholder.api.util.common.messages.dto.ApiResponse;
@@ -33,6 +34,7 @@ public class MathExpressionController {
     private final ApiMessageFactory messageFactory;
     private final MathExpressionMapper mathExpressionMapper;
     private final ApiMessageFactory apiMessageFactory;
+    private final SnapshotUtils snapshotUtils;
 
     /**
      * Evaluates one or more mathematical expressions with optional formatting settings.
@@ -51,6 +53,8 @@ public class MathExpressionController {
     @GetMapping("{id}")
     public ResponseEntity<ApiResponse<MathExpressionResponseDto>> getById(@PathVariable Integer id) {
         MathExpression expression = persistenceService.findByIdReadOnly(id);
+        expression.setSnapshot(snapshotUtils.getSnapshotUrl(expression.getSnapshot()));
+
         MathExpressionResponseDto dto = mathExpressionMapper.toResponseDtoFromEntity(expression);
         return apiMessageFactory.response(dto).ok().build();
     }
