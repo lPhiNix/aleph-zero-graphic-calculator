@@ -19,7 +19,7 @@ import java.io.Serializable;
 public class ApiResponseBuilder<T> {
     private AppCode code;
     private String message;
-    private final T content;
+    private final T content; // payload
 
     /**
      * Sets the application response code for this response.
@@ -42,17 +42,6 @@ public class ApiResponseBuilder<T> {
         this.message = message;
         return this;
     }
-
-//    /**
-//     * Sets the content (payload) for this response.
-//     *
-//     * @param content the content to include in the response
-//     * @return this builder instance for chaining
-//     */
-//    public ApiResponseBuilder<T> content(T content) {
-//        this.content = content;
-//        return this;
-//    }
 
     /**
      * Configures this builder for an HTTP 200 OK response with the given content.
