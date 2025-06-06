@@ -5,9 +5,12 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import com.placeholder.placeholder.api.user.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -18,6 +21,8 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
+import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -136,4 +141,27 @@ public class AuthorizationServerConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+    @Bean
+    public OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer(UserService userService) {
+        return context -> {
+            if (context.getTokenType().getValue().equals("access_token")) {
+                Authentication principal = context.getPrincipal();
+
+                if (principal.getPrincipal() instanceof UserDetails userDetails) {
+                    // load user details from the database
+                    com.placeholder.placeholder.db.models.User user =
+                            userService.findUserByIdentifier(userDetails.getUsername());
+
+                    if (user != null) {
+                        context.getClaims().subject(user.getPublicId());
+                        context.getClaims().claim("preferred_username", user.getUsername());
+                        context.getClaims().claim("email", user.getEmail());
+                        context.getClaims().claim("role", user.getRole().getName());
+                    }
+                }
+            }
+        };
+    }
+
 }

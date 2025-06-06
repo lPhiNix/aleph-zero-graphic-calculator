@@ -1,4 +1,4 @@
-package com.placeholder.placeholder.util;
+package com.placeholder.placeholder.util.exceptions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.placeholder.placeholder.api.util.common.messages.ApiResponseFactory;
