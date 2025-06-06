@@ -2,6 +2,7 @@ package com.placeholder.placeholder.api.util.common.messages;
 
 import org.springframework.stereotype.Component;
 
+
 /**
  * Factory class for creating API message builders.
  * <p>
@@ -18,8 +19,8 @@ public class ApiMessageFactory {
      * @param <T> the type of content in the API response
      * @return a new {@link ApiResponseBuilder} instance
      */
-    public <T> ApiResponseBuilder<T> response(){
-        return new ApiResponseBuilder<>();
+    public  <T> ApiResponseBuilder<T> response(T content) {
+        return new ApiResponseBuilder<>(content);
     }
 
     /**

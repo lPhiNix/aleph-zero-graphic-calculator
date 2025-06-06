@@ -3,9 +3,11 @@ package com.placeholder.placeholder.api.math;
 import com.placeholder.placeholder.api.math.dto.request.MathEvaluationRequest;
 import com.placeholder.placeholder.api.math.dto.response.MathEvaluationResultResponse;
 import com.placeholder.placeholder.api.math.service.core.MathExpressionService;
+import com.placeholder.placeholder.api.util.common.messages.ApiMessageFactory;
 import com.placeholder.placeholder.api.util.common.messages.ApiResponseFactory;
 import com.placeholder.placeholder.api.util.common.messages.dto.ApiResponse;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,21 +22,12 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("api/v1/math")
+@RequiredArgsConstructor
 public class MathExpressionController {
 
     private final MathExpressionService service;
-    private final ApiResponseFactory apiResponseFactory;
+    private final ApiMessageFactory messageFactory;
 
-    /**
-     * Constructor for {@link MathExpressionController}.
-     *
-     * @param service            The service responsible for evaluating mathematical expressions
-     * @param apiResponseFactory A factory for creating standardized API responses
-     */
-    public MathExpressionController(MathExpressionService service, ApiResponseFactory apiResponseFactory) {
-        this.service = service;
-        this.apiResponseFactory = apiResponseFactory;
-    }
 
     /**
      * Evaluates one or more mathematical expressions with optional formatting settings.
@@ -47,6 +40,6 @@ public class MathExpressionController {
             @RequestBody @Valid MathEvaluationRequest mathExpressionRequest
     ) {
         MathEvaluationResultResponse response = service.evaluation(mathExpressionRequest);
-        return apiResponseFactory.ok(response);
+        return messageFactory.response(response).ok().build();
     }
 }

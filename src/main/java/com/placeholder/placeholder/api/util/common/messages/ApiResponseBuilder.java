@@ -2,8 +2,11 @@ package com.placeholder.placeholder.api.util.common.messages;
 
 import com.placeholder.placeholder.api.util.common.messages.dto.ApiResponse;
 import com.placeholder.placeholder.util.config.enums.AppCode;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+
+import java.io.Serializable;
 
 /**
  * Builder for constructing {@link ApiResponse} (success) objects.
@@ -12,10 +15,11 @@ import org.springframework.stereotype.Component;
  * and for building a {@link ResponseEntity} containing the API response.
  * </p>
  */
+@RequiredArgsConstructor
 public class ApiResponseBuilder<T> {
     private AppCode code;
     private String message;
-    private T content;
+    private final T content;
 
     /**
      * Sets the application response code for this response.
@@ -39,50 +43,44 @@ public class ApiResponseBuilder<T> {
         return this;
     }
 
-    /**
-     * Sets the content (payload) for this response.
-     *
-     * @param content the content to include in the response
-     * @return this builder instance for chaining
-     */
-    public ApiResponseBuilder<T> content(T content) {
-        this.content = content;
-        return this;
-    }
+//    /**
+//     * Sets the content (payload) for this response.
+//     *
+//     * @param content the content to include in the response
+//     * @return this builder instance for chaining
+//     */
+//    public ApiResponseBuilder<T> content(T content) {
+//        this.content = content;
+//        return this;
+//    }
 
     /**
      * Configures this builder for an HTTP 200 OK response with the given content.
      *
-     * @param content the content to include in the response
      * @return this builder instance for chaining
      */
-    public ApiResponseBuilder<T> ok(T content) {
+    public ApiResponseBuilder<T> ok() {
         this.code = AppCode.OK;
-        this.content = content;
         return this;
     }
 
     /**
      * Configures this builder for an HTTP 201 Created response with the given content.
      *
-     * @param content the content to include in the response
      * @return this builder instance for chaining
      */
-    public ApiResponseBuilder<T> created(T content) {
+    public ApiResponseBuilder<T> created() {
         this.code = AppCode.CREATED;
-        this.content = content;
         return this;
     }
 
     /**
      * Configures this builder for an HTTP 202 Accepted response with the given content.
      *
-     * @param content the content to include in the response
      * @return this builder instance for chaining
      */
-    public ApiResponseBuilder<T> accepted(T content) {
+    public ApiResponseBuilder<T> accepted() {
         this.code = AppCode.ACCEPTED;
-        this.content = content;
         return this;
     }
 
@@ -93,7 +91,6 @@ public class ApiResponseBuilder<T> {
      */
     public ApiResponseBuilder<T> noContent() {
         this.code = AppCode.NO_CONTENT;
-        this.content = null;
         return this;
     }
 
@@ -123,6 +120,5 @@ public class ApiResponseBuilder<T> {
     private void reset() {
         this.code = null;
         this.message = null;
-        this.content = null;
     }
 }
