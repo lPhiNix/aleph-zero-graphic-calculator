@@ -10,6 +10,8 @@ import com.placeholder.placeholder.api.math.exception.MathEvaluationTimeoutExcep
 import com.placeholder.placeholder.api.math.service.classifier.Classifier;
 import com.placeholder.placeholder.api.math.service.memory.MathAssignmentMemory;
 import com.placeholder.placeholder.api.math.service.strategy.EvaluationStrategyContext;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,8 @@ import java.util.concurrent.*;
  */
 @Service
 public class MathExpressionService implements MathEvaluationService {
+    private static final Logger logger = LogManager.getLogger(MathExpressionService.class);
+
     private final ExecutorService executor;
 
     /** Maximum allowed time (in seconds) for expression evaluation */
@@ -39,9 +43,10 @@ public class MathExpressionService implements MathEvaluationService {
     /**
      * Constructs a new {@code MathExpressionService} with the required dependencies.
      *
-     * @param memory the memory used for storing assignments and definitions
+     * @param executor                 the thread pool executor for asynchronous tasks
+     * @param memory                   the memory used for storing assignments and definitions
      * @param mathExpressionClassifier the classifier for determining expression type
-     * @param context the strategy context to delegate expression evaluation
+     * @param context                  the strategy context to delegate expression evaluation
      */
     @Autowired
     public MathExpressionService(
@@ -54,6 +59,7 @@ public class MathExpressionService implements MathEvaluationService {
         this.memory = memory;
         this.mathExpressionClassifier = mathExpressionClassifier;
         this.context = context;
+        logger.info("MathExpressionService initialized with executor, memory, classifier, and strategy context");
     }
 
     /**
@@ -65,6 +71,7 @@ public class MathExpressionService implements MathEvaluationService {
      */
     @Override
     public MathEvaluationResultResponse evaluation(MathEvaluationRequest request) {
+        logger.info("Entering evaluation() with {} expressions", request.expressions().size());
         return evaluateWithTimeout(request);
     }
 
@@ -76,14 +83,27 @@ public class MathExpressionService implements MathEvaluationService {
      * @return the final evaluation response with all expression results
      */
     private MathEvaluationResultResponse evaluateWithTimeout(MathEvaluationRequest request) {
+        logger.debug("Submitting evaluation task to executor");
+        Future<MathEvaluationResultResponse> future = null;
         try {
-            Future<MathEvaluationResultResponse> future = executor.submit(() -> evaluateExpressions(request));
-            return future.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            future = executor.submit(() -> evaluateExpressions(request));
+            logger.debug("Task submitted, waiting up to {} seconds", TIMEOUT_SECONDS);
+            MathEvaluationResultResponse result = future.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            logger.info("Evaluation completed within timeout");
+            return result;
         } catch (TimeoutException e) {
+            logger.error("Evaluation timed out after {} seconds, cancelling task", TIMEOUT_SECONDS);
             context.stopCurrentEvaluation();
+            future.cancel(true);
+            logger.debug("Future task cancelled due to timeout");
             throw new MathEvaluationTimeoutException("Timeout after " + TIMEOUT_SECONDS + " seconds");
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException("Error evaluating math expressions", e);
+        } catch (InterruptedException e) {
+            logger.error("Evaluation was interrupted: {}", e.getMessage(), e);
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Evaluation interrupted", e);
+        } catch (ExecutionException e) {
+            logger.error("Exception during evaluation execution: {}", e.getCause().getMessage(), e.getCause());
+            throw new RuntimeException("Error evaluating math expressions", e.getCause());
         }
     }
 
@@ -95,7 +115,10 @@ public class MathExpressionService implements MathEvaluationService {
      * @return the aggregated evaluation response
      */
     private MathEvaluationResultResponse evaluateExpressions(MathEvaluationRequest request) {
-      // create a list of futures for each expression evaluation
+        logger.info("Starting evaluateExpressions() for {} expressions", request.expressions().size());
+
+        // create a list of futures for each expression evaluation
+        logger.debug("Creating CompletableFutures for each expression");
         List<CompletableFuture<MathExpressionEvaluationDto>> futures = request.expressions().stream()
                 .map(expr -> CompletableFuture.supplyAsync(
                         () -> evaluateSingleExpression(expr.expression(), request.data()),
@@ -104,34 +127,44 @@ public class MathExpressionService implements MathEvaluationService {
                 .toList();
 
         // Wait for all futures to complete and collect results
+        logger.debug("Waiting for all CompletableFutures to complete");
         List<MathExpressionEvaluationDto> evaluations = futures.stream()
                 .map(CompletableFuture::join) // join blocks until the future completes
                 .toList();
 
+        logger.info("All expressions evaluated; clearing memory");
+
         // clear memory after evaluation
         memory.clear();
+        context.stopCurrentEvaluation();
 
-        return new MathEvaluationResultResponse(evaluations);
+        MathEvaluationResultResponse response = new MathEvaluationResultResponse(evaluations);
+        logger.debug("Created MathEvaluationResultResponse with {} evaluation results", evaluations.size());
+        return response;
     }
-
 
     /**
      * Evaluates a single expression. It first processes and classifies the expression,
      * then selects and executes the appropriate evaluation strategy.
      *
      * @param rawExpression the raw mathematical expression as a string
-     * @param data the input data context used in evaluation
+     * @param data          the input data context used in evaluation
      * @return the result of the evaluation including the original expression, its type, and outputs
      */
     private MathExpressionEvaluationDto evaluateSingleExpression(String rawExpression, MathDataDto data) {
+        logger.debug("Evaluating single expression: '{}'", rawExpression);
+
         // Apply memory processing (e.g., variable substitution or definitions)
         String processed = memory.process(rawExpression);
+        logger.debug("Processed expression from '{}' to '{}'", rawExpression, processed);
 
         // Determine the type of expression (e.g., assignment, equation, function)
         MathExpressionType type = mathExpressionClassifier.classify(processed);
+        logger.debug("Classified expression '{}' as type {}", processed, type);
 
         // Compute the result using the selected evaluation strategy
         List<MathEvaluationDto> results = context.getStrategy(type).compute(processed, data);
+        logger.debug("Computed results for expression '{}': {}", processed, results);
 
         return new MathExpressionEvaluationDto(rawExpression, type, results);
     }

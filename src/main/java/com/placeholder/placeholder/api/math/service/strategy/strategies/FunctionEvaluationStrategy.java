@@ -46,8 +46,6 @@ public class FunctionEvaluationStrategy implements EvaluationStrategy {
         MathExpressionEvaluation evaluation = mathEvaluator.evaluate(expression);
         MathExpressionEvaluation draw = mathEvaluator.draw(evaluation.getExpressionEvaluated(), data);
 
-        System.out.println(draw.getExpressionEvaluated());
-
         formatOperations(mathEvaluator.getFacade(), evaluation);
 
         return List.of(
