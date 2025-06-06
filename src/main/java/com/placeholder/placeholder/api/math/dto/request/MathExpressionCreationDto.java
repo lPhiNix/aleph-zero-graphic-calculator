@@ -10,6 +10,7 @@ import java.io.Serializable;
  */
 public record MathExpressionCreationDto(
         @NotBlank String expression,
+        @NotBlank String points,
         @NotBlank String snapshot
 )
         implements Serializable {

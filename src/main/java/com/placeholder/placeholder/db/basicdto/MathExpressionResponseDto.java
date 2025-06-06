@@ -9,6 +9,7 @@ import java.time.Instant;
 public record MathExpressionResponseDto(
         Integer id,
         String expression,
+        String points,
         Instant createdAt,
         Instant updatedAt,
         String snapshot

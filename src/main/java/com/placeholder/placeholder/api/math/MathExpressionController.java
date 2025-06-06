@@ -50,16 +50,18 @@ public class MathExpressionController {
         return messageFactory.response(response).ok().build();
     }
 
-    @GetMapping("{id}")
-    public ResponseEntity<ApiResponse<MathExpressionResponseDto>> getById(@PathVariable Integer id) {
-        MathExpression expression = persistenceService.findByIdReadOnly(id);
-        expression.setSnapshot(snapshotUtils.getSnapshotUrl(expression.getSnapshot()));
+    @GetMapping("expression/{id}")
+    public ResponseEntity<ApiResponse<MathExpressionResponseDto>> getById(
+            @PathVariable Integer id,
+            @RequestParam(required = false, defaultValue = "false") boolean includePoints) {
 
-        MathExpressionResponseDto dto = mathExpressionMapper.toResponseDtoFromEntity(expression);
+        MathExpression expression = persistenceService.findByIdReadOnly(id);
+        MathExpressionResponseDto dto = mathExpressionMapper.toResponseDtoFromEntity(expression, includePoints);
+
         return apiMessageFactory.response(dto).ok().build();
     }
 
-    @PostMapping
+    @PostMapping("/expression")
     public  ResponseEntity<ApiResponse<Void>> persistNewExpression(
             @RequestBody @Valid MathExpressionCreationDto request
     ) {

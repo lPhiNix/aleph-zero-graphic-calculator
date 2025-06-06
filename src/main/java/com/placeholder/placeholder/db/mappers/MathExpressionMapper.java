@@ -16,4 +16,12 @@ public interface MathExpressionMapper extends BaseMapper<MathExpression, MathExp
         entity.setUser(context);
         entity.setSnapshot(imageHash);
     }
+
+    @Mapping(target = "points", source = "points", qualifiedByName = "mapPointsIfIncluded")
+    MathExpressionResponseDto toResponseDtoFromEntity(MathExpression entity, @Context boolean includePoints);
+
+    @Named("mapPointsIfIncluded")
+    default String mapPointIfIncluded (String points, @Context boolean includePoints) {
+        return includePoints ? points : null;
+    }
 }

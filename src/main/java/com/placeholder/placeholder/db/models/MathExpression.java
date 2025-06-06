@@ -36,6 +36,10 @@ public class MathExpression {
     @Column(name = "snapshot", length = 36)
     private String snapshot;
 
+    @Lob
+    @Column(name = "points")
+    private String points;
+
     @PrePersist
     protected void onCreate() {
         Instant now = Instant.now();

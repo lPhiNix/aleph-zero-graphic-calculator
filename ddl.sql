@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS math_expression
     id              INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
     user_id         INTEGER             NOT NULL,
     expression      VARCHAR(255),
+    points          LONGTEXT, -- Points in the expression
     snapshot        VARCHAR(36), -- UUid for snapshot
     created_at      TIMESTAMP,
     updated_at      TIMESTAMP,
