@@ -1,10 +1,14 @@
+// src/pages/Calculator.tsx
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Header from '../components/App/Header';
 import ExpressionList from '../components/App/ExpressionList';
 import GraphCanvas from '../components/App/Graph/GraphCanvas';
 import MathKeyboard from '../components/App/MathKeyboard';
 import styles from '../styles/modules/graphCanvas.module.css';
-import { evaluateSingleExpression } from '../services/mathService';
+import {
+    evaluateSingleExpression,
+    evaluateBatchExpressions,
+} from '../services/mathService';
 import type { ExpressionResult } from '../types/math';
 
 interface ViewWindow {
@@ -30,7 +34,7 @@ export default function Calculator() {
     );
 
     // 3. Estado de colores: un color hex por cada expresión
-    const [colors, setColors] = useState<string[]>(['#ff0000']); // inicializamos con un color por defecto
+    const [colors, setColors] = useState<string[]>(['#ff0000']);
 
     // 3b. Estado de “disabledFlags”: indica si cada fila está deshabilitada
     const [disabledFlags, setDisabledFlags] = useState<boolean[]>([false]);
@@ -49,196 +53,131 @@ export default function Calculator() {
     // Ref para almacenar, por cada índice de expresión, los intervalos cacheados
     const cacheRef = useRef<Record<number, IntervalData[]>>({});
 
-    // ──────── SINCRONIZAR `results`, `colors` y `disabledFlags` cuando cambie `expressions.length` ────────
+    // Sincronizar arrays cuando cambie el número de expresiones
     useEffect(() => {
-        // 1) Ajustar longitud de `results`
-        setResults((prev) => {
-            const updated = [...prev];
-            while (updated.length < expressions.length) {
-                updated.push({});
-            }
-            updated.length = expressions.length;
-            return updated;
+        setResults(prev => {
+            const upd = [...prev];
+            while (upd.length < expressions.length) upd.push({});
+            upd.length = expressions.length;
+            return upd;
         });
-
-        // 2) Ajustar longitud de `colors`
-        setColors((prev) => {
-            const updated = [...prev];
-            while (updated.length < expressions.length) {
-                updated.push('#000000');
-            }
-            updated.length = expressions.length;
-            return updated;
+        setColors(prev => {
+            const upd = [...prev];
+            while (upd.length < expressions.length) upd.push('#000000');
+            upd.length = expressions.length;
+            return upd;
         });
-
-        // 3) Ajustar longitud de `disabledFlags`
-        setDisabledFlags((prev) => {
-            const updated = [...prev];
-            while (updated.length < expressions.length) {
-                // por defecto, recién creada, está habilitada → false
-                updated.push(false);
-            }
-            updated.length = expressions.length;
-            return updated;
+        setDisabledFlags(prev => {
+            const upd = [...prev];
+            while (upd.length < expressions.length) upd.push(false);
+            upd.length = expressions.length;
+            return upd;
         });
-
-        // 4) Inicializar caché para índices nuevos
-        expressions.forEach((_, idx) => {
-            if (!cacheRef.current[idx]) {
-                cacheRef.current[idx] = [];
-            }
+        expressions.forEach((_, i) => {
+            if (!cacheRef.current[i]) cacheRef.current[i] = [];
         });
     }, [expressions]);
 
-    /** Dada la ventana deseada [from, to] y los intervalos `existing`, devuelve qué sub-intervalos faltan */
-    const getMissingIntervals = (
-        desiredFrom: number,
-        desiredTo: number,
-        existing: IntervalData[]
-    ): Array<[number, number]> => {
-        if (desiredFrom >= desiredTo) return [];
-        const sortedExisting = [...existing].sort((a, b) => a.from - b.from);
-        let toCheck: Array<[number, number]> = [[desiredFrom, desiredTo]];
+    // Util para missing intervals (igual que antes)
+    const getMissingIntervals = useCallback(
+        (from: number, to: number, existing: IntervalData[]) => {
+            if (from >= to) return [];
+            let intervals: Array<[number, number]> = [[from, to]];
+            existing
+                .sort((a, b) => a.from - b.from)
+                .forEach(({ from: f, to: t }) => {
+                    const next: Array<[number, number]> = [];
+                    intervals.forEach(([a, b]) => {
+                        if (t <= a || f >= b) next.push([a, b]);
+                        else {
+                            if (a < f) next.push([a, f]);
+                            if (b > t) next.push([t, b]);
+                        }
+                    });
+                    intervals = next;
+                });
+            return intervals;
+        },
+        []
+    );
 
-        sortedExisting.forEach(({ from, to }) => {
-            const nextCheck: Array<[number, number]> = [];
-            toCheck.forEach(([a, b]) => {
-                if (to <= a || from >= b) {
-                    nextCheck.push([a, b]);
-                } else {
-                    if (a < from) {
-                        nextCheck.push([a, from]);
-                    }
-                    if (b > to) {
-                        nextCheck.push([to, b]);
-                    }
-                }
-            });
-            toCheck = nextCheck;
-        });
-
-        return toCheck;
-    };
-
-    // ──────── FETCH PARCIAL AL CAMBIAR `viewWindow` ────────
+    // Fetch parcial al cambiar viewWindow (sin cambios en batching)
     useEffect(() => {
         if (isFirstRender.current) {
             isFirstRender.current = false;
             return;
         }
-
-        let isMounted = true;
+        let mounted = true;
         const { origin, bound } = viewWindow;
-        const strDecimals = '50';
+        const dec = '50';
 
         expressions.forEach((expr, idx) => {
-            // Si la fila está deshabilitada, omitimos completamente
-            if (disabledFlags[idx]) {
-                if (!isMounted) return;
+            if (disabledFlags[idx] || expr.trim() === '') {
+                if (!mounted) return;
                 cacheRef.current[idx] = [];
-                setResults((prev) => {
+                setResults(prev => {
                     const copy = [...prev];
-                    // Conservamos exprType pero borramos dibujo y errores
                     copy[idx] = { exprType: prev[idx]?.exprType };
                     return copy;
                 });
                 return;
             }
-
-            // Si la expresión está vacía, limpiamos
-            if (expr.trim() === '') {
-                if (!isMounted) return;
-                cacheRef.current[idx] = [];
-                setResults((prev) => {
-                    const copy = [...prev];
-                    copy[idx] = {};
-                    return copy;
-                });
-                return;
-            }
-
             const existing = cacheRef.current[idx] || [];
             const missing = getMissingIntervals(origin, bound, existing);
-
-            // Si no hay intervalos faltantes, reconstruimos dibujo desde caché
             if (missing.length === 0) {
-                const combined: Array<{ x: number; y: number }> = [];
+                const pts: Array<{ x: number; y: number }> = [];
                 existing
-                    .filter((iv) => iv.to > origin && iv.from < bound)
-                    .forEach((iv) =>
-                        iv.points.forEach((pt) => {
-                            if (pt.x >= origin && pt.x <= bound) {
-                                combined.push(pt);
-                            }
+                    .filter(iv => iv.to > origin && iv.from < bound)
+                    .forEach(iv =>
+                        iv.points.forEach(pt => {
+                            if (pt.x >= origin && pt.x <= bound) pts.push(pt);
                         })
                     );
-                combined.sort((a, b) => a.x - b.x);
-
-                setResults((prev) => {
-                    if (!isMounted) return prev;
-                    const updated = prev.map((r) => ({ ...r }));
-                    updated[idx] = {
-                        ...updated[idx],
-                        drawingPoints: combined,
-                        exprType: updated[idx]?.exprType,
-                    };
-                    return updated;
+                pts.sort((a, b) => a.x - b.x);
+                setResults(prev => {
+                    if (!mounted) return prev;
+                    const u = prev.map(r => ({ ...r }));
+                    u[idx] = { ...u[idx], drawingPoints: pts, exprType: u[idx]?.exprType };
+                    return u;
                 });
                 return;
             }
-
-            // Para cada sub-intervalo faltante, hacemos fetch asíncrono
             (async () => {
                 for (const [f, t] of missing) {
                     try {
                         const res = await evaluateSingleExpression(
                             expr,
-                            strDecimals,
+                            dec,
                             f.toString(),
                             t.toString()
                         );
-                        if (!isMounted) return;
-                        const newPts = res.drawingPoints || [];
-
-                        // Insertamos este fragmento en caché
-                        cacheRef.current[idx].push({ from: f, to: t, points: newPts });
-
-                        // Reconstruimos merged solo con los puntos que caen en [origin, bound]
+                        if (!mounted) return;
+                        cacheRef.current[idx].push({ from: f, to: t, points: res.drawingPoints || [] });
                         const merged: Array<{ x: number; y: number }> = [];
                         cacheRef.current[idx]
-                            .filter((iv) => iv.to > origin && iv.from < bound)
-                            .forEach((iv) =>
-                                iv.points.forEach((pt) => {
-                                    if (pt.x >= origin && pt.x <= bound) {
-                                        merged.push(pt);
-                                    }
+                            .filter(iv => iv.to > origin && iv.from < bound)
+                            .forEach(iv =>
+                                iv.points.forEach(pt => {
+                                    if (pt.x >= origin && pt.x <= bound) merged.push(pt);
                                 })
                             );
                         merged.sort((a, b) => a.x - b.x);
-
-                        setResults((prev) => {
-                            if (!isMounted) return prev;
-                            const updated = prev.map((r) => ({ ...r }));
-                            updated[idx] = {
-                                ...updated[idx],
-                                drawingPoints: merged,
-                                exprType: updated[idx]?.exprType || res.exprType,
-                            };
-                            return updated;
+                        setResults(prev => {
+                            if (!mounted) return prev;
+                            const u = prev.map(r => ({ ...r }));
+                            u[idx] = { ...u[idx], drawingPoints: merged, exprType: u[idx]?.exprType };
+                            return u;
                         });
                     } catch {
-                        if (!isMounted) return;
-                        setResults((prev) => {
-                            const updated = prev.map((r) => ({ ...r }));
-                            updated[idx] = {
-                                ...updated[idx],
-                                errors: [
-                                    ...(updated[idx].errors || []),
-                                    `Error al cargar intervalo [${f}, ${t}]`,
-                                ],
-                                exprType: updated[idx]?.exprType,
+                        if (!mounted) return;
+                        setResults(prev => {
+                            const u = prev.map(r => ({ ...r }));
+                            u[idx] = {
+                                ...u[idx],
+                                errors: [...(u[idx].errors || []), `Error intervalo [${f},${t}]`],
+                                exprType: u[idx]?.exprType,
                             };
-                            return updated;
+                            return u;
                         });
                     }
                 }
@@ -246,119 +185,103 @@ export default function Calculator() {
         });
 
         return () => {
-            isMounted = false;
+            mounted = false;
         };
-    }, [viewWindow, expressions, disabledFlags]);
+    }, [viewWindow, expressions, disabledFlags, getMissingIntervals]);
 
-    // ──────── MANEJO DE “blur” EN CADA EXPRESIÓN ────────
+    // Nuevo handle: evalúa lote que incluye asignaciones anteriores + expr actual
     const handleExpressionBlur = useCallback(
         async (index: number, expr: string) => {
-            // Si la fila está deshabilitada, no evaluamos nada
-            if (disabledFlags[index]) {
-                return;
-            }
+            if (disabledFlags[index] || expr.trim() === '') return;
 
-            if (expr.trim() === '') {
-                cacheRef.current[index] = [];
-                setResults((prev) => {
-                    const copy = [...prev];
-                    copy[index] = {};
-                    return copy;
-                });
-                return;
-            }
+            // Encontrar todas las asignaciones anteriores a `index`
+            const batchIndices = expressions
+                .slice(0, index + 1)
+                .map((e, i) => ({ expr: e, i }))
+                .filter(({i }) => results[i]?.exprType === 'ASSIGNMENT')
+                .map(({ i }) => i);
+
+            // siempre incluimos la expresión actual
+            batchIndices.push(index);
+
+            // construir array de expresiones por posición
+            const batchExprs = batchIndices.map(i => expressions[i]);
+
+            const dec = '50';
+            const origin = viewWindow.origin.toString();
+            const bound = viewWindow.bound.toString();
 
             try {
-                const decimals = '50';
-                const origin = viewWindow.origin.toString();
-                const bound = viewWindow.bound.toString();
-
-                const res = await evaluateSingleExpression(expr, decimals, origin, bound);
-
-                // 1) Guardamos evaluación/calculation/errors en results[index]
-                setResults((prev) => {
-                    const updated = [...prev];
-                    updated[index] = {
-                        ...res,
-                        // Si res.exprType viene undefined, conservamos el anterior
-                        exprType: res.exprType || prev[index]?.exprType,
-                    };
-                    return updated;
+                const batchResults = await evaluateBatchExpressions(
+                    batchExprs,
+                    dec,
+                    origin,
+                    bound
+                );
+                // actualizar cada índice
+                setResults(prev => {
+                    const u = [...prev];
+                    batchIndices.forEach((origIdx, idxInBatch) => {
+                        const res = batchResults[idxInBatch];
+                        u[origIdx] = {
+                            ...res,
+                            // conservar exprType si manque
+                            exprType: res.exprType || prev[origIdx]?.exprType,
+                        };
+                        // recargar caché sólo para dibujo del actual
+                        if (origIdx === index) {
+                            cacheRef.current[origIdx] = [
+                                {
+                                    from: viewWindow.origin,
+                                    to: viewWindow.bound,
+                                    points: res.drawingPoints || [],
+                                },
+                            ];
+                        }
+                    });
+                    return u;
                 });
-
-                // 2) Reemplazamos la caché de esa línea con el intervalo completo
-                const fromNum = viewWindow.origin;
-                const toNum = viewWindow.bound;
-                const drawingPts = res.drawingPoints || [];
-
-                cacheRef.current[index] = [
-                    {
-                        from: fromNum,
-                        to: toNum,
-                        points: drawingPts,
-                    },
-                ];
             } catch (err) {
-                cacheRef.current[index] = [];
-                setResults((prev) => {
-                    const updated = [...prev];
-                    updated[index] = {
-                        errors: ['Error al evaluar la expresión'],
-                        exprType: updated[index]?.exprType,
-                    };
-                    return updated;
-                });
-                console.error('[handleExpressionBlur] Error al evaluar:', err);
+                console.error('Error batch evaluation:', err);
             }
         },
-        [viewWindow, disabledFlags]
+        [expressions, results, disabledFlags, viewWindow]
     );
 
-    // ──────── CALLBACK PARA CAMBIO DE VIEW WINDOW ────────
     const handleViewChange = useCallback((vw: ViewWindow) => {
         setViewWindow(vw);
     }, []);
 
-    // ──────── CALLBACK PARA CAMBIO DE COLOR ────────
-    const handleColorChange = useCallback((index: number, newColor: string) => {
-        setColors((prev) => {
-            const updated = [...prev];
-            updated[index] = newColor;
-            return updated;
+    const handleColorChange = useCallback((i: number, color: string) => {
+        setColors(prev => {
+            const u = [...prev];
+            u[i] = color;
+            return u;
         });
     }, []);
 
-    // ──────── CALLBACK PARA TOGGLE DISABLED ────────
-    const handleToggleDisabled = useCallback(
-        (index: number) => {
-            setDisabledFlags((prev) => {
-                const updated = [...prev];
-                updated[index] = !updated[index];
-                return updated;
-            });
-            // No se limpia exprType ni evaluation: se conserva el tipo
-        },
-        []
-    );
-
-    // ──────── TECLADO MATEMÁTICO ────────
-    const insertIntoExpression = (value: string) => {
-        setExpressions((prev) => {
-            const newArr = [...prev];
-            const lastIndex = newArr.length - 1;
-            newArr[lastIndex] = newArr[lastIndex] + value;
-            return newArr;
+    const handleToggleDisabled = useCallback((i: number) => {
+        setDisabledFlags(prev => {
+            const u = [...prev];
+            u[i] = !u[i];
+            return u;
         });
-    };
+    }, []);
 
-    const backspace = () => {
-        setExpressions((prev) => {
-            const newArr = [...prev];
-            const lastIndex = newArr.length - 1;
-            newArr[lastIndex] = newArr[lastIndex].slice(0, -1);
-            return newArr;
+    const insertIntoExpression = (v: string) =>
+        setExpressions(prev => {
+            const u = [...prev];
+            u[u.length - 1] += v;
+            return u;
         });
-    };
+
+    const backspace = () =>
+        setExpressions(prev => {
+            const u = [...prev];
+            const li = u.length - 1;
+            u[li] = u[li].slice(0, -1);
+            return u;
+        });
 
     const clearAll = () => {
         setExpressions(['']);
@@ -369,30 +292,17 @@ export default function Calculator() {
     };
 
     const evaluateExpression = () => {
-        const lastIndex = expressions.length - 1;
-        const lastExpr = expressions[lastIndex];
-        if (lastExpr.trim() !== '' && !disabledFlags[lastIndex]) {
-            handleExpressionBlur(lastIndex, lastExpr);
+        const li = expressions.length - 1;
+        if (expressions[li].trim() !== '' && !disabledFlags[li]) {
+            handleExpressionBlur(li, expressions[li]);
         }
     };
 
-    // ──────── CONSTRUIMOS `drawingSets` PARA GraphCanvas ────────
-    /**
-     * Ahora cada elemento es { points, color } en el mismo orden que `expressions`.
-     * Si la fila está deshabilitada o no tiene puntos, ponemos points: [].
-     */
-    const allDrawingSets = expressions.map((_, idx) => {
-        if (disabledFlags[idx]) {
-            return {
-                points: [] as Array<{ x: number; y: number }>,
-                color: '#666666', // color de placeholder gris
-            };
-        }
-        return {
-            points: results[idx]?.drawingPoints || [],
-            color: colors[idx] || '#000000',
-        };
-    });
+    const allDrawingSets = expressions.map((_, i) =>
+        disabledFlags[i]
+            ? { points: [], color: '#666666' }
+            : { points: results[i]?.drawingPoints || [], color: colors[i] }
+    );
 
     // ──────── DEFINICIÓN DEL TECLADO ────────
     const teclas = [
