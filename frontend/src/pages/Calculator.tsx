@@ -138,7 +138,7 @@ export default function Calculator() {
                 cacheRef.current[idx] = [];
                 setResults((prev) => {
                     const copy = [...prev];
-                    // No limpiamos exprType: sólo borramos dibujo y errores
+                    // Conservamos exprType pero borramos dibujo y errores
                     copy[idx] = { exprType: prev[idx]?.exprType };
                     return copy;
                 });
@@ -180,7 +180,6 @@ export default function Calculator() {
                     updated[idx] = {
                         ...updated[idx],
                         drawingPoints: combined,
-                        // Mantenemos exprType si ya existía
                         exprType: updated[idx]?.exprType,
                     };
                     return updated;
@@ -237,7 +236,6 @@ export default function Calculator() {
                                     ...(updated[idx].errors || []),
                                     `Error al cargar intervalo [${f}, ${t}]`,
                                 ],
-                                // Mantenemos exprType si ya existía
                                 exprType: updated[idx]?.exprType,
                             };
                             return updated;
@@ -282,7 +280,7 @@ export default function Calculator() {
                     const updated = [...prev];
                     updated[index] = {
                         ...res,
-                        // Si vuelve res.exprType undefined, conservamos el anterior
+                        // Si res.exprType viene undefined, conservamos el anterior
                         exprType: res.exprType || prev[index]?.exprType,
                     };
                     return updated;
@@ -338,8 +336,7 @@ export default function Calculator() {
                 updated[index] = !updated[index];
                 return updated;
             });
-            // Ya no limpiamos resultados ni exprType; solo cambiamos el flag.
-            // La fila conservará su exprType en results.
+            // No se limpia exprType ni evaluation: se conserva el tipo
         },
         []
     );
@@ -448,7 +445,7 @@ export default function Calculator() {
                     />
                 </div>
 
-                {/* ─── DERECHA: EXPRESSION LIST + RESULTADOS + TECLADO ─────────────────────── */}
+                {/* ─── DERECHA: EXPRESSION LIST + TECLADO ─────────────────────────────────── */}
                 <div className={styles.expressionsWrapper}>
                     <ExpressionList
                         expressions={expressions}
@@ -459,38 +456,8 @@ export default function Calculator() {
                         disabledFlags={disabledFlags}
                         onToggleDisabled={handleToggleDisabled}
                         expressionTypes={results.map((r) => r.exprType)}
+                        results={results}
                     />
-
-                    {/* Mostramos debajo de cada input sus resultados (evaluation/calculation/errors) */}
-                    <div className={styles.resultsContainer}>
-                        {expressions.map((expr, idx) => {
-                            // No mostramos el bloque de resultado si:
-                            //  1) la expresión está vacía
-                            //  2) la fila está deshabilitada
-                            if (expr.trim() === '' || disabledFlags[idx]) return null;
-                            const r = results[idx] || {};
-                            return (
-                                <div key={idx} className={styles.singleResultBlock}>
-                                    {r.evaluation && (
-                                        <div className={styles.resultLine}>
-                                            <strong>Evaluación:</strong> {r.evaluation}
-                                        </div>
-                                    )}
-                                    {r.calculation && (
-                                        <div className={styles.resultLine}>
-                                            <strong>Cálculo:</strong> {r.calculation}
-                                        </div>
-                                    )}
-                                    {r.errors &&
-                                        r.errors.map((err, i) => (
-                                            <div key={i} className={styles.errorLine}>
-                                                ⚠ {err}
-                                            </div>
-                                        ))}
-                                </div>
-                            );
-                        })}
-                    </div>
 
                     {/* ─── TECLADO matemático ────────────────────────────────────────────────── */}
                     <MathKeyboard keys={teclas} />

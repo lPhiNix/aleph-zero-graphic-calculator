@@ -75,13 +75,6 @@ export async function evaluateSingleExpression(
 
         const apiData = response.data;
 
-        if (
-            apiData.content.expressionEvaluations.length === 0 ||
-            apiData.content.expressionEvaluations[0].evaluations.length === 0
-        ) {
-            return { errors: ['No se devolvieron evaluaciones para la expresión'] };
-        }
-
         const evalDto: MathExpressionEvaluationDto =
             apiData.content.expressionEvaluations[0];
 
