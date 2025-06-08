@@ -24,11 +24,6 @@ public class UserHistory {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "math_expression_id", nullable = false)
-    private MathExpression mathExpression;
-
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
 

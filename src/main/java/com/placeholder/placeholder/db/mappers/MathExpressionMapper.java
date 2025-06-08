@@ -12,14 +12,8 @@ import org.mapstruct.*;
 public interface MathExpressionMapper extends BaseMapper<MathExpression, MathExpressionResponseDto> {
     MathExpression toEntityFromCreationDto(MathExpressionCreationDto creationDto, @Context User context, @Context String imageHash);
 
-    @AfterMapping
-    default void afterMapping(@MappingTarget MathExpression entity, MathExpressionCreationDto creationDto, @Context User context, @Context String imageHash) {
-        entity.setUser(context);
-        entity.setSnapshot(imageHash);
-    }
 
     @Mapping(target = "points", source = "points", qualifiedByName = "mapPointsIfIncluded")
-    @Mapping(target = "snapshot", source = "snapshot", qualifiedByName = "parseSnapshotToUrl")
     MathExpressionResponseDto toResponseDtoFromEntity(MathExpression entity, @Context boolean includePoints);
 
     @Named("mapPointsIfIncluded")

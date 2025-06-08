@@ -11,9 +11,9 @@ CREATE TABLE IF NOT EXISTS user_role
 );
 
 INSERT INTO user_role (name, description)
-VALUES (
+VALUES
     ('ADMIN', 'Administrator with full access rights'),
-    ('USER', 'Regular user with limited access rights'));
+    ('USER', 'Regular user with limited access rights');
 
 -- User table
 CREATE TABLE IF NOT EXISTS user
@@ -53,17 +53,25 @@ CREATE TABLE IF NOT EXISTS math_expression
 
 CREATE TABLE IF NOT EXISTS user_history
 (
-    id                 INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    user_id            INTEGER             NOT NULL,
-    math_expression_id INTEGER             NOT NULL,
-    created_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    snapshot           VARCHAR(36), -- UUid for snapshot
+    id         INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    user_id    INTEGER             NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    snapshot   VARCHAR(36), -- UUID for image snapshot
 
-    -- FK
-    CONSTRAINT user_history_user_fk FOREIGN KEY (user_id) REFERENCES user (id),
-    CONSTRAINT user_history_expression_fk FOREIGN KEY (math_expression_id) REFERENCES math_expression (id)
+    CONSTRAINT user_history_user_fk FOREIGN KEY (user_id) REFERENCES user (id)
 );
+
+CREATE TABLE IF NOT EXISTS history_expression
+(
+    id                 INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    user_history_id    INTEGER             NOT NULL,
+    math_expression_id INTEGER             NOT NULL,
+
+    CONSTRAINT history_expr_history_fk FOREIGN KEY (user_history_id) REFERENCES user_history (id),
+    CONSTRAINT history_expr_expr_fk FOREIGN KEY (math_expression_id) REFERENCES math_expression (id)
+);
+
 
 -- Table to store share links (for future versions)
 CREATE TABLE IF NOT EXISTS share_link
