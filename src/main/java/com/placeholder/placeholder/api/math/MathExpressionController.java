@@ -23,6 +23,7 @@ import java.net.URI;
  * REST controller that exposes endpoints related to mathematical expression processing.
  * <p>
  * Handles operations such as evaluation of mathematical expressions using a service layer.
+ *
  * </p>
  */
 @RestController
@@ -49,6 +50,12 @@ public class MathExpressionController {
         return messageFactory.response(response).ok().build();
     }
 
+    /**
+     * Retrieves a mathematical expression by its ID.
+     * @param id the ID of the mathematical expression to retrieve
+     * @param includePoints whether to include points in the response
+     * @return a {@link ResponseEntity} containing an {@link ApiResponse} with the mathematical expression details
+     */
     @GetMapping("expression/{id}")
     public ResponseEntity<ApiResponse<MathExpressionResponseDto>> getById(
             @PathVariable Integer id,
@@ -60,6 +67,12 @@ public class MathExpressionController {
         return apiMessageFactory.response(dto).ok().build();
     }
 
+    /**
+     * Persists a new mathematical expression.
+     *
+     * @param request the request containing the details of the expression to be created
+     * @return a {@link ResponseEntity} with an {@link ApiResponse} indicating the result of the operation
+     */
     @PostMapping("/expression")
     public  ResponseEntity<ApiResponse<Void>> persistNewExpression(
             @RequestBody @Valid MathExpressionCreationDto request
@@ -68,5 +81,4 @@ public class MathExpressionController {
         URI location = UriHelperBuilder.buildUriFromCurrentRequest(expression.getId());
         return apiMessageFactory.response().created(location).build();
     }
-
 }

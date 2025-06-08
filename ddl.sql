@@ -2,14 +2,12 @@ DROP SCHEMA IF EXISTS mysqldb;
 CREATE SCHEMA IF NOT EXISTS mysqldb;
 USE mysqldb;
 
--- Creacion de tablas.
-
 -- User roles table
 CREATE TABLE IF NOT EXISTS user_role
 (
     id_role     INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    name        VARCHAR(20)         NOT NULL,
-    description VARCHAR(50)
+    name        VARCHAR(20) UNIQUE NOT NULL,
+    description VARCHAR(100)
 );
 
 INSERT INTO user_role (name, description)
@@ -21,17 +19,18 @@ VALUES (
 CREATE TABLE IF NOT EXISTS user
 (
     id        INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    public_id VARCHAR(36) UNIQUE  NOT NULL, -- UUid for public exposure.
+    public_id VARCHAR(36)         NOT NULL UNIQUE,     -- UUid for public exposure.
     username  VARCHAR(45)         NOT NULL UNIQUE,
-    password  VARCHAR(255)           NOT NULL, -- Encrypted password.
+    password  VARCHAR(255)        NOT NULL,  -- password hash.
     email     VARCHAR(200)        NOT NULL UNIQUE,
     role_id   INTEGER             NOT NULL,
 
     -- FK
     CONSTRAINT user_role_fk FOREIGN KEY (role_id) REFERENCES user_role (id_role)
+    ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
--- Table for user preferences
+-- Table for user preferences (DISCARDED FOR NOW)
 CREATE TABLE IF NOT EXISTS user_preferences
 (
     id_settings        INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
@@ -47,32 +46,26 @@ CREATE TABLE IF NOT EXISTS user_preferences
 CREATE TABLE IF NOT EXISTS math_expression
 (
     id              INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    user_id         INTEGER             NOT NULL,
-    expression      VARCHAR(255),
+    expression      VARCHAR(255)        NOT NULL,
     points          LONGTEXT, -- Points in the expression
-    snapshot        VARCHAR(36), -- UUid for snapshot
-    created_at      TIMESTAMP,
-    updated_at      TIMESTAMP,
-
-    -- FK
-    CONSTRAINT expression_user_fk FOREIGN KEY (user_id) REFERENCES user (id)
+    preferences     LONGTEXT -- Preferences in the expression as JSON (color, bound, origin, etc.)
 );
 
-CREATE TABLE IF NOT EXISTS expression_preferences
+CREATE TABLE IF NOT EXISTS user_history
 (
-    id                      INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    use_global_preferences  BOOLEAN,
-    canvas_preferences      JSON,
-    math_expression_id      INTEGER             NOT NULL,
-    math_expression_user_id INTEGER             NOT NULL,
+    id                 INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    user_id            INTEGER             NOT NULL,
+    math_expression_id INTEGER             NOT NULL,
+    created_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    snapshot           VARCHAR(36), -- UUid for snapshot
 
     -- FK
-    CONSTRAINT expression_preferences_expression_fk FOREIGN KEY (math_expression_id) REFERENCES math_expression (id),
-    CONSTRAINT expression_preferences_user_fk FOREIGN KEY (math_expression_user_id) REFERENCES user (id)
+    CONSTRAINT user_history_user_fk FOREIGN KEY (user_id) REFERENCES user (id),
+    CONSTRAINT user_history_expression_fk FOREIGN KEY (math_expression_id) REFERENCES math_expression (id)
 );
 
-
--- Table to store share links
+-- Table to store share links (for future versions)
 CREATE TABLE IF NOT EXISTS share_link
 (
     id                      INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
