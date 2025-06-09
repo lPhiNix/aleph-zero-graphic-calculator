@@ -13,7 +13,7 @@ public interface MathExpressionMapper extends BaseMapper<MathExpression, MathExp
 
     MathExpression toEntityFromCreationDto(MathExpressionCreationDto creationDto);
 
-    @Mapping(target = "points", source = "points", qualifiedByName = "mapPointsIfIncluded")
+    //@Mapping(target = "points", source = "points", qualifiedByName = "mapPointsIfIncluded")
     MathExpressionResponseDto toResponseDtoFromEntity(MathExpression entity, @Context boolean includePoints);
 
     @Named("mapPointsIfIncluded")
