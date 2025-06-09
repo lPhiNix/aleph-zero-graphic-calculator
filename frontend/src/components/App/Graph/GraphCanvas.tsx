@@ -289,13 +289,22 @@ export default function GraphCanvas({
 
         debounceTimer.current = window.setTimeout(() => {
             const { width: cw, height: ch } = canvas;
-            const left = canvasToWorld(0, ch / 2, cw, ch).x;
-            const right = canvasToWorld(cw, ch / 2, cw, ch).x;
-            const top = canvasToWorld(cw / 2, 0, cw, ch).y;
-            const bottom = canvasToWorld(cw / 2, ch, cw, ch).y;
+            // Cálculo original
+            let left   = canvasToWorld(0,   ch / 2, cw, ch).x;
+            let right  = canvasToWorld(cw,  ch / 2, cw, ch).x;
+            let top    = canvasToWorld(cw / 2, 0,   cw, ch).y;
+            let bottom = canvasToWorld(cw / 2, ch,  cw, ch).y;
+
+            // Truncamos a 6 decimales (cambia a 5 si lo prefieres)
+            const decimals = 6;
+            left   = Number(left.toFixed(decimals));
+            right  = Number(right.toFixed(decimals));
+            top    = Number(top.toFixed(decimals));
+            bottom = Number(bottom.toFixed(decimals));
+
             onViewChange({ origin: left, bound: right, bottom, top });
             debounceTimer.current = null;
-        }, 500);
+        }, 50);
 
         return () => {
             if (debounceTimer.current !== null) {

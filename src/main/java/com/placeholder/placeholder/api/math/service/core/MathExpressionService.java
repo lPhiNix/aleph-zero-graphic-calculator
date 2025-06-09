@@ -83,27 +83,21 @@ public class MathExpressionService implements MathEvaluationService {
      * @return the final evaluation response with all expression results
      */
     private MathEvaluationResultResponse evaluateWithTimeout(MathEvaluationRequest request) {
-        logger.debug("Submitting evaluation task to executor");
-        Future<MathEvaluationResultResponse> future = null;
+        Future<MathEvaluationResultResponse> future = executor.submit(() -> evaluateExpressions(request));
         try {
-            future = executor.submit(() -> evaluateExpressions(request));
-            logger.debug("Task submitted, waiting up to {} seconds", TIMEOUT_SECONDS);
-            MathEvaluationResultResponse result = future.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
-            logger.info("Evaluation completed within timeout");
-            return result;
+            return future.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
         } catch (TimeoutException e) {
-            logger.error("Evaluation timed out after {} seconds, cancelling task", TIMEOUT_SECONDS);
             context.stopCurrentEvaluation();
             future.cancel(true);
-            logger.debug("Future task cancelled due to timeout");
             throw new MathEvaluationTimeoutException("Timeout after " + TIMEOUT_SECONDS + " seconds");
         } catch (InterruptedException e) {
-            logger.error("Evaluation was interrupted: {}", e.getMessage(), e);
             Thread.currentThread().interrupt();
             throw new RuntimeException("Evaluation interrupted", e);
         } catch (ExecutionException e) {
-            logger.error("Exception during evaluation execution: {}", e.getCause().getMessage(), e.getCause());
             throw new RuntimeException("Error evaluating math expressions", e.getCause());
+        } finally {
+            memory.clear();
+            context.stopCurrentEvaluation();
         }
     }
 

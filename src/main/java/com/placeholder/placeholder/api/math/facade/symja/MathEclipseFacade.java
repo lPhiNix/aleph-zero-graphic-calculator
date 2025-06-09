@@ -32,9 +32,6 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
     private EvalUtilities mathEclipseEvaluator; // Symja native expression evaluator
     private final TeXFormFactory teXParser;     // LaTeX parser
 
-    // Buffer to capture any errors printed to System.err during evaluation
-    private final ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
-
     @Autowired
     public MathEclipseFacade(
             EvalUtilities mathEclipseEvaluator,
@@ -113,6 +110,8 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
         logger.debug("Entering safeEvaluation() with expression: {}", expression);
         // Redirect System.err to capture evaluation warnings or errors
         PrintStream originalErr = System.err;
+
+        ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
         System.setErr(new PrintStream(errorStream));
         try {
             String result = rawEvaluate(expression);
@@ -168,9 +167,9 @@ public class MathEclipseFacade implements MathLibFacade<MathEclipseEvaluation> {
     @Override
     public String formatResult(String expression) {
         logger.info("Entering formatResult() with expression: {}", expression);
-        String formatted = expression; // Placeholder: no transformation currently
-        logger.debug("formatResult() returning: {}", formatted);
-        return formatted;
+        // Placeholder: no transformation currently
+        logger.debug("formatResult() returning: {}", expression);
+        return expression;
     }
 
     /**

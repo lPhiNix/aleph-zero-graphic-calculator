@@ -50,6 +50,8 @@ public class BooleanEvaluationStrategy implements EvaluationStrategy {
 
         formatOperations(mathEvaluator.getFacade(), evaluation);
 
+        mathEvaluator.clearEvaluator();
+
         return List.of(
                 new MathEvaluationDto(MathEvaluationType.EVALUATION,
                         evaluation.getExpressionEvaluated(),
