@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Entity
+@Deprecated
 @Table(name = "share_link", schema = "mysqldb")
 public class ShareLink {
     @Id
