@@ -9,6 +9,5 @@ import java.io.Serializable;
  */
 public record HistoryExpressionDto(
         Integer id,
-        UserHistoryDto userHistory,
         MathExpressionDto mathExpression) implements Serializable {
   }
