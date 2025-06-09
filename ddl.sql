@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS user_history
     snapshot   VARCHAR(36), -- UUID for image snapshot
 
     CONSTRAINT user_history_user_fk FOREIGN KEY (user_id) REFERENCES user (id)
+    ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS history_expression
@@ -68,8 +69,10 @@ CREATE TABLE IF NOT EXISTS history_expression
     user_history_id    INTEGER             NOT NULL,
     math_expression_id INTEGER             NOT NULL,
 
-    CONSTRAINT history_expr_history_fk FOREIGN KEY (user_history_id) REFERENCES user_history (id),
+    CONSTRAINT history_expr_history_fk FOREIGN KEY (user_history_id) REFERENCES user_history (id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT history_expr_expr_fk FOREIGN KEY (math_expression_id) REFERENCES math_expression (id)
+    ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 
