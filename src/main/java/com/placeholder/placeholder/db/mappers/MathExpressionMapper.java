@@ -10,8 +10,8 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface MathExpressionMapper extends BaseMapper<MathExpression, MathExpressionResponseDto> {
-    MathExpression toEntityFromCreationDto(MathExpressionCreationDto creationDto, @Context User context, @Context String imageHash);
 
+    MathExpression toEntityFromCreationDto(MathExpressionCreationDto creationDto);
 
     @Mapping(target = "points", source = "points", qualifiedByName = "mapPointsIfIncluded")
     MathExpressionResponseDto toResponseDtoFromEntity(MathExpression entity, @Context boolean includePoints);
@@ -20,7 +20,7 @@ public interface MathExpressionMapper extends BaseMapper<MathExpression, MathExp
     default String mapPointIfIncluded (String points, @Context boolean includePoints) {
         return includePoints ? points : null;
     }
-    
+
     @Named("parseSnapshotToUrl")
     default String parseSnapshotToUrl (String snapshot) {
         return SnapshotUtils.getSnapshotUrl(snapshot);

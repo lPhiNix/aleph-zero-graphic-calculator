@@ -1,7 +1,6 @@
 package com.placeholder.placeholder.db.basicdto;
 
 import com.placeholder.placeholder.api.math.dto.request.MathExpressionDto;
-import jakarta.validation.constraints.NotNull;
 
 import java.io.Serializable;
 
@@ -10,6 +9,6 @@ import java.io.Serializable;
  */
 public record HistoryExpressionDto(
         Integer id,
-        MathExpressionDto mathExpression
-) implements Serializable {
-}
+        UserHistoryDto userHistory,
+        MathExpressionDto mathExpression) implements Serializable {
+  }

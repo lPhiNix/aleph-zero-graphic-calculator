@@ -3,7 +3,6 @@ package com.placeholder.placeholder.api.math.service.persistence;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
@@ -23,7 +22,7 @@ public class SnapshotUtils {
         return Base64.getDecoder().decode(base64Data);
     }
 
-    public static Path saveSnapshotToFile(String base64Snapshot, String hash) {
+    public static void saveSnapshotToFile(String base64Snapshot, String hash) {
         // Asegurarse de que el directorio existe
         try {
             if (!Files.exists(SNAPSHOT_DIR)) {
@@ -32,7 +31,7 @@ public class SnapshotUtils {
             }
         } catch (IOException e) {
             logger.error("Failed to create snapshots directory", e);
-            return null;
+            return;
         }
 
         Path imagePath = SNAPSHOT_DIR.resolve(hash + ".jpg"); // Si quieres flexibilidad, que te pasen extensión
@@ -40,10 +39,8 @@ public class SnapshotUtils {
             byte[] imageBytes = getSnapshotBytes(base64Snapshot);
             Files.write(imagePath, imageBytes);
             logger.info("Saved image to {}", imagePath.toAbsolutePath());
-            return imagePath;
         } catch (IOException e) {
             logger.error("Failed to save snapshot to file {}", imagePath.toAbsolutePath(), e);
-            return null;
         }
     }
 

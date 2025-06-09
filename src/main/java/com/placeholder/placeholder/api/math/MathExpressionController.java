@@ -5,7 +5,6 @@ import com.placeholder.placeholder.api.math.dto.request.MathExpressionCreationDt
 import com.placeholder.placeholder.api.math.dto.response.MathEvaluationResultResponse;
 import com.placeholder.placeholder.api.math.service.persistence.MathExpressionPersistenceService;
 import com.placeholder.placeholder.api.math.service.core.MathExpressionService;
-import com.placeholder.placeholder.api.math.service.persistence.SnapshotUtils;
 import com.placeholder.placeholder.api.util.common.messages.ApiMessageFactory;
 import com.placeholder.placeholder.api.util.common.messages.UriHelperBuilder;
 import com.placeholder.placeholder.api.util.common.messages.dto.ApiResponse;

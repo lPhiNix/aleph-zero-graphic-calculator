@@ -36,7 +36,7 @@ public class UserHistory {
     @Column(name = "snapshot", length = 36)
     private String snapshot;
 
-    @OneToMany(mappedBy = "userHistory")
+    @OneToMany(mappedBy = "userHistory", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<HistoryExpression> historyExpressions = new LinkedHashSet<>();
 
     @PrePersist

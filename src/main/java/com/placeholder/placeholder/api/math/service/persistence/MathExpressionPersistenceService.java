@@ -1,33 +1,27 @@
 package com.placeholder.placeholder.api.math.service.persistence;
 
-import com.placeholder.placeholder.api.auth.service.SquipUserDetailService;
 import com.placeholder.placeholder.api.math.dto.request.MathExpressionCreationDto;
-import com.placeholder.placeholder.api.user.service.UserService;
+import com.placeholder.placeholder.api.math.dto.request.UserHistoryCreationDto;
 import com.placeholder.placeholder.api.util.common.service.AbstractCrudService;
 import com.placeholder.placeholder.db.mappers.MathExpressionMapper;
+import com.placeholder.placeholder.db.mappers.UserHistoryMapper;
 import com.placeholder.placeholder.db.models.MathExpression;
-import com.placeholder.placeholder.db.models.User;
 import com.placeholder.placeholder.db.repositories.MathExpressionRepository;
 
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
-
 @Service
 public class MathExpressionPersistenceService extends AbstractCrudService<MathExpression, Integer, MathExpressionRepository> {
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(MathExpressionPersistenceService.class);
 
     private final MathExpressionMapper mathExpressionMapper;
-    private final UserService userService;
-    private final SquipUserDetailService squipUserDetailService;
+    private final UserHistoryMapper userHistoryMapper;
 
-    public MathExpressionPersistenceService(MathExpressionRepository repository, MathExpressionMapper mathExpressionMapper, UserService userService, SquipUserDetailService squipUserDetailService) {
+    public MathExpressionPersistenceService(MathExpressionRepository repository, MathExpressionMapper mathExpressionMapper, UserHistoryMapper userHistoryMapper) {
         super(repository);
         this.mathExpressionMapper = mathExpressionMapper;
-        this.userService = userService;
-        this.squipUserDetailService = squipUserDetailService;
+        this.userHistoryMapper = userHistoryMapper;
     }
 
     /**
@@ -39,15 +33,8 @@ public class MathExpressionPersistenceService extends AbstractCrudService<MathEx
      */
     @Transactional
     public MathExpression createNewExpression(MathExpressionCreationDto request) {
-        User owner = squipUserDetailService.getCurrentUser();
-
-        String imageHash = UUID.randomUUID().toString();
-        logger.info("User {} is creating a new math expression with image hash: {}", owner.getUsername(), imageHash);
-
-        MathExpression mathExpression = mathExpressionMapper.toEntityFromCreationDto(request, owner, imageHash);
-
-        // save the snapshot to a file with the specified hash
-        SnapshotUtils.saveSnapshotToFile(request.snapshot(), imageHash);
+        MathExpression mathExpression = mathExpressionMapper.toEntityFromCreationDto(request);
         return save(mathExpression);
     }
+
 }

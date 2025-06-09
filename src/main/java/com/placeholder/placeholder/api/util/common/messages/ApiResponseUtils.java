@@ -92,14 +92,4 @@ public class ApiResponseUtils {
                 ))
                 .collect(Collectors.toList());
     }
-
-    public static List<ErrorDetail> getErrorDetails(Collection<OAuth2Error> errors, ErrorCategory category) {
-        return errors.stream()
-                .map(error -> new ErrorDetail(
-                        category,
-                        error.getErrorCode(),
-                        error.getDescription()
-                ))
-                .toList();
-    }
 }
