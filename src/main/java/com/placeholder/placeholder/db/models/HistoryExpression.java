@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "history_expression", schema = "mysqldb")
-public class HistoryExpression {
+public class            HistoryExpression {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -24,5 +24,4 @@ public class HistoryExpression {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "math_expression_id", nullable = false)
     private MathExpression mathExpression;
-
 }

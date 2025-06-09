@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -34,6 +36,9 @@ public class UserHistory {
     @Column(name = "snapshot", length = 36)
     private String snapshot;
 
+    @OneToMany(mappedBy = "userHistory")
+    private Set<HistoryExpression> historyExpressions = new LinkedHashSet<>();
+
     @PrePersist
     public void prePersist() {
         Instant now = Instant.now();
@@ -45,4 +50,5 @@ public class UserHistory {
     public void preUpdate() {
         this.updatedAt = Instant.now();
     }
+
 }
