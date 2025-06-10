@@ -15,6 +15,7 @@ import java.util.Base64;
 public class SnapshotUtils {
     private static final Logger logger = LoggerFactory.getLogger(SnapshotUtils.class);
     private static final Path SNAPSHOT_DIR = Paths.get("snapshots");
+    private static final String PLACEHOLDER_FILENAME = "placeholder.jpg";
 
     private static byte[] getSnapshotBytes(String base64Snapshot) {
         String[] parts = base64Snapshot.split(",", 2);
@@ -45,9 +46,14 @@ public class SnapshotUtils {
     }
 
     public static String getSnapshotUrl(String hash) {
+        String filename = hash + ".jpg";
+        Path snapshotPath = Paths.get(SNAPSHOT_DIR.toString(), filename);
+
+        String finalFilename = Files.exists(snapshotPath) ? filename : PLACEHOLDER_FILENAME;
+
         return ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/snapshots/")
-                .path(hash + ".jpg")
+                .path(finalFilename)
                 .toUriString();
     }
 
