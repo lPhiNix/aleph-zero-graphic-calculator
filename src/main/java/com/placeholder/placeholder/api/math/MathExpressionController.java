@@ -30,10 +30,7 @@ import java.net.URI;
 @RequiredArgsConstructor
 public class MathExpressionController {
     private final MathExpressionService service;
-    private final MathExpressionPersistenceService persistenceService;
     private final ApiMessageFactory messageFactory;
-    private final MathExpressionMapper mathExpressionMapper;
-    private final ApiMessageFactory apiMessageFactory;
 
     /**
      * Evaluates one or more mathematical expressions with optional formatting settings.
@@ -47,37 +44,5 @@ public class MathExpressionController {
     ) {
         MathEvaluationResultResponse response = service.evaluation(mathExpressionRequest);
         return messageFactory.response(response).ok().build();
-    }
-
-    /**
-     * Retrieves a mathematical expression by its ID.
-     * @param id the ID of the mathematical expression to retrieve
-     * @param includePoints whether to include points in the response
-     * @return a {@link ResponseEntity} containing an {@link ApiResponse} with the mathematical expression details
-     */
-    @GetMapping("expression/{id}")
-    public ResponseEntity<ApiResponse<MathExpressionResponseDto>> getById(
-            @PathVariable Integer id,
-            @RequestParam(required = false, defaultValue = "false") boolean includePoints) {
-
-        MathExpression expression = persistenceService.findByIdReadOnly(id);
-        MathExpressionResponseDto dto = mathExpressionMapper.toResponseDtoFromEntity(expression, includePoints);
-
-        return apiMessageFactory.response(dto).ok().build();
-    }
-
-    /**
-     * Persists a new mathematical expression.
-     *
-     * @param request the request containing the details of the expression to be created
-     * @return a {@link ResponseEntity} with an {@link ApiResponse} indicating the result of the operation
-     */
-    @PostMapping("/expression")
-    public  ResponseEntity<ApiResponse<Void>> persistNewExpression(
-            @RequestBody @Valid MathExpressionCreationDto request
-    ) {
-        MathExpression expression = persistenceService.createNewExpression(request);
-        URI location = UriHelperBuilder.buildUriFromCurrentRequest(expression.getId());
-        return apiMessageFactory.response().created(location).build();
     }
 }
