@@ -148,7 +148,7 @@ export default function MathKeyboard({
                     onClick={() => setOpenMenu(openMenu === 'symja' ? null : 'symja')}
                     data-virtualkey="true"
                 >
-                    Funciones Symja ▾
+                    Symja ▾
                 </button>
                 {openMenu === 'symja' && (
                     <Submenu

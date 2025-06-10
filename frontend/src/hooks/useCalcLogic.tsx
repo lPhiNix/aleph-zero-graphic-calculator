@@ -228,6 +228,7 @@ export function useCalculatorLogic() {
         });
     }, []);
 
+
     const handleToggleDisabled = useCallback((i: number) => {
         setDisabledFlags(prev => {
             const u = [...prev];

@@ -2,8 +2,8 @@ import Header from '../components/App/Header';
 import ExpressionList from '../components/App/ExpressionList';
 import GraphCanvas from '../components/App/Graph/GraphCanvas';
 import MathKeyboard from '../components/App/MathKeyboard';
-import styles from '../styles/modules/graphCanvas.module.css';
 import { useCalculatorLogic } from '../hooks/useCalcLogic.tsx';
+import styles from '../styles/modules/graphCanvas.module.css';
 
 /**
  * Now you can define all keys, including submenus, with all the same options as the main keyboard:
@@ -54,12 +54,9 @@ export default function Calculator() {
         { label: 'zeta',       onClick: () => insertIntoExpression('zeta()', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true, category: 'Especiales'},
         { label: 'erf',        onClick: () => insertIntoExpression('erf()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: 'Especiales' },
         { label: 'fresnelc',   onClick: () => insertIntoExpression('fresnelc()', { deltaCaret: 9, selectLength: 0 }), dataVirtualKey: true, category: 'Especiales' },
-        { label: 'c',          onClick: () => insertIntoExpression('c', { deltaCaret: 1, selectLength: 0 }), dataVirtualKey: true, category: 'Especiales' },
 
         // Operaciones matemáticas básicas
-        { label: 'sqrt',       onClick: () => insertIntoExpression('sqrt()', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true, category: 'Básicas' },
         { label: 'exp',        onClick: () => insertIntoExpression('exp()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: 'Básicas' },
-        { label: 'log',        onClick: () => insertIntoExpression('log()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: 'Básicas' },
         { label: 'log10',      onClick: () => insertIntoExpression('log10()', { deltaCaret: 6, selectLength: 0 }), dataVirtualKey: true, category: 'Básicas' },
         { label: 'log2',       onClick: () => insertIntoExpression('log2()', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true, category: 'Básicas' },
         { label: 'abs',        onClick: () => insertIntoExpression('abs()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: 'Básicas' },
@@ -130,18 +127,18 @@ export default function Calculator() {
 
     // --- Constants (submenu) ---
     const constantKeys = [
-        { label: 'Pi',               onClick: () => insertIntoExpression('Pi', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true,  },
-        { label: 'E',                onClick: () => insertIntoExpression('E', { deltaCaret: 1, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'I',                onClick: () => insertIntoExpression('I', { deltaCaret: 1, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'Phi',              onClick: () => insertIntoExpression('Phi', { deltaCaret: 3, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'Infinity',         onClick: () => insertIntoExpression('Infinity', { deltaCaret: 8, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'ComplexInfinity',  onClick: () => insertIntoExpression('ComplexInfinity', { deltaCaret: 15, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'EulerGamma',       onClick: () => insertIntoExpression('EulerGamma', { deltaCaret: 10, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'Degree',           onClick: () => insertIntoExpression('Degree', { deltaCaret: 6, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'Catalan',          onClick: () => insertIntoExpression('Catalan', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'MeisselMertens',   onClick: () => insertIntoExpression('MeisselMertens', { deltaCaret: 14, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'Glaisher',         onClick: () => insertIntoExpression('Glaisher', { deltaCaret: 8, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'Khinchin',         onClick: () => insertIntoExpression('Khinchin', { deltaCaret: 8, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'Pi',               onClick: () => insertIntoExpression('Pi', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true, category: 'Constantes' },
+        { label: 'E',                onClick: () => insertIntoExpression('E', { deltaCaret: 1, selectLength: 0 }), dataVirtualKey: true, category: 'Constantes' },
+        { label: 'I',                onClick: () => insertIntoExpression('I', { deltaCaret: 1, selectLength: 0 }), dataVirtualKey: true, category: 'Constantes' },
+        { label: 'Phi',              onClick: () => insertIntoExpression('Phi', { deltaCaret: 3, selectLength: 0 }), dataVirtualKey: true, category: 'Constantes' },
+        { label: 'Infinity',         onClick: () => insertIntoExpression('Infinity', { deltaCaret: 8, selectLength: 0 }), dataVirtualKey: true, category: 'Constantes' },
+        { label: 'ComplexInfinity',  onClick: () => insertIntoExpression('ComplexInfinity', { deltaCaret: 15, selectLength: 0 }), dataVirtualKey: true, category: 'Constantes' },
+        { label: 'EulerGamma',       onClick: () => insertIntoExpression('EulerGamma', { deltaCaret: 10, selectLength: 0 }), dataVirtualKey: true, category: 'Constantes' },
+        { label: 'Degree',           onClick: () => insertIntoExpression('Degree', { deltaCaret: 6, selectLength: 0 }), dataVirtualKey: true, category: 'Constantes' },
+        { label: 'Catalan',          onClick: () => insertIntoExpression('Catalan', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true, category: 'Constantes' },
+        { label: 'MeisselMertens',   onClick: () => insertIntoExpression('MeisselMertens', { deltaCaret: 14, selectLength: 0 }), dataVirtualKey: true, category: 'Constantes' },
+        { label: 'Glaisher',         onClick: () => insertIntoExpression('Glaisher', { deltaCaret: 8, selectLength: 0 }), dataVirtualKey: true, category: 'Constantes' },
+        { label: 'Khinchin',         onClick: () => insertIntoExpression('Khinchin', { deltaCaret: 8, selectLength: 0 }), dataVirtualKey: true, category: 'Constantes' },
     ];
 
     // --- Main Keyboard Keys (all properties are configurable) ---
@@ -149,7 +146,7 @@ export default function Calculator() {
         { label: 'x²', onClick: () => insertIntoExpression('()^2', { deltaCaret: 1, selectLength: 0 }), dataVirtualKey: true },
         { label: '1/x', onClick: () => insertIntoExpression('1/()', { deltaCaret: 3, selectLength: 0 }), dataVirtualKey: true },
         { label: 'CE', onClick: clearAll, dataVirtualKey: true },
-        { label: 'C', onClick: clearAll, dataVirtualKey: true },
+        { label: 'C', onClick: () => { if (focusedIndex !== null) handleDeleteRow(focusedIndex); }, dataVirtualKey: true },
         { label: '⌫', onClick: backspace, dataVirtualKey: true },
         { label: '<', onClick: () => insertIntoExpression('<'), dataVirtualKey: true },
         { label: '>', onClick: () => insertIntoExpression('>'), dataVirtualKey: true },
@@ -176,7 +173,7 @@ export default function Calculator() {
         { label: '2', onClick: () => insertIntoExpression('2'), dataVirtualKey: true },
         { label: '3', onClick: () => insertIntoExpression('3'), dataVirtualKey: true },
         { label: '+', onClick: () => insertIntoExpression('+'), dataVirtualKey: true },
-        { label: '(-)', onClick: () => insertIntoExpression('10^()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true },
+        { label: '(-)', onClick: () => insertIntoExpression('(-)', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true },
         { label: '.', onClick: () => insertIntoExpression("."), dataVirtualKey: true },
         { label: '0', onClick: () => insertIntoExpression('0'), dataVirtualKey: true },
         { label: ',', onClick: () => insertIntoExpression(','), dataVirtualKey: true },
@@ -185,8 +182,8 @@ export default function Calculator() {
 
     const mathCategoryConfig = [
         { name: "Genéricas", columns: 2 },
-        { name: "Especiales", columns: 5 },
-        { name: "Básicas", columns: 3 },
+        { name: "Especiales", columns: 4 },
+        { name: "Básicas", columns: 2 },
         { name: "Trigonométricas", columns: 3 },
         { name: "Trigonométricas de Arco", columns: 3 },
         { name: "Hiperbólicas", columns: 3 },
@@ -198,7 +195,7 @@ export default function Calculator() {
 
     ];
     const constantCategoryConfig = [
-        { name: "Principales", columns: 3 },
+        { name: "Constantes", columns: 2 },
     ];
 
     return (
