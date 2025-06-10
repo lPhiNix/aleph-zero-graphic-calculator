@@ -22,6 +22,7 @@ public interface UserHistoryMapper extends BaseMapper<UserHistory, UserHistoryDt
     UserHistory toEntityFromCreationDto(UserHistoryCreationDto creationDto, @Context MappingContext context);
 
     SimpleUserHistoryDto toSimpleResponseDtoFromEntity(UserHistory entity);
+    List<SimpleUserHistoryDto> toSimpleResponseDtoListFromEntityList(List<UserHistory> entities);
 
     default String getFirst(List<HistoryExpression> historyExpressions) {
         return historyExpressions.stream()

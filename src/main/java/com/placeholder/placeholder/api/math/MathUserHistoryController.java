@@ -17,9 +17,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 
 @RequiredArgsConstructor
-@RestController("api/v1/math/user-history")
+@RestController("api/v1/math/history")
 public class MathUserHistoryController {
     private final MathExpressionPersistenceService persistenceService;
     private final MathUserHistoryService mathUserHistoryService;
@@ -44,9 +45,18 @@ public class MathUserHistoryController {
 
     @PreAuthorize("@userHistorySecurity.hasAccessTo(#id, authentication)")
     @GetMapping("summary/{id}")
-    public ResponseEntity<ApiResponse<SimpleUserHistoryDto>> getHistorySummary(@PathVariable Integer id){
+    public ResponseEntity<ApiResponse<SimpleUserHistoryDto>> getHistorySummaryById(@PathVariable Integer id){
         UserHistory history = mathUserHistoryService.findByIdReadOnly(id);
         SimpleUserHistoryDto dto = userHistoryMapper.toSimpleResponseDtoFromEntity(history);
         return apiMessageFactory.response(dto).ok().build();
     }
+
+    @GetMapping("summary/")
+    public ResponseEntity<ApiResponse<List<SimpleUserHistoryDto>>> getHistorySummary(){
+        List<UserHistory> elements = mathUserHistoryService.findAllByCurrentUserReadOnly();
+        List<SimpleUserHistoryDto> dto = userHistoryMapper.toSimpleResponseDtoListFromEntityList(elements);
+        return apiMessageFactory.response(dto).ok().build();
+    }
+
+
 }

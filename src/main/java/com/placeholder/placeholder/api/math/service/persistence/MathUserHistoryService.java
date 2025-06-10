@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -43,5 +44,13 @@ public class MathUserHistoryService extends AbstractCrudService<UserHistory, Int
         SnapshotUtils.saveSnapshotToFile(request.snapshot(), snapshotUUid);
 
         return persisted;
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserHistory> findAllByCurrentUserReadOnly() {
+        User currentUser = squipUserDetailService.getCurrentUser();
+        List<UserHistory> elements = repository.findAllByUser(currentUser);
+        logger.info("Finding all user history for user: {}, found {} elements", currentUser.getUsername(), elements.size());
+        return elements;
     }
 }
