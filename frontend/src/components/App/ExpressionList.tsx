@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import styles from '../../styles/modules/expressionList.module.css';
 
 interface ExpressionListProps {
@@ -17,6 +17,12 @@ interface ExpressionListProps {
         errors?: string[];
         warnings?: string[];
     }>;
+    focusedIndex: number | null;
+    setFocusedIndex: (i: number | null) => void;
+    caretPosition: number;
+    setCaretPosition: (pos: number) => void;
+    selectionLength: number;
+    setSelectionLength: (len: number) => void;
 }
 
 export default function ExpressionList({
@@ -30,12 +36,17 @@ export default function ExpressionList({
                                            onDeleteRow,
                                            expressionTypes,
                                            results,
+                                           focusedIndex,
+                                           setFocusedIndex,
+                                           caretPosition,
+                                           setCaretPosition,
+                                           selectionLength,
+                                           setSelectionLength,
                                        }: ExpressionListProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
     const colorInputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
-    const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const [sliderConfigs, setSliderConfigs] = useState<{ min: number; max: number; step: number }[]>([]);
 
@@ -55,19 +66,58 @@ export default function ExpressionList({
         if (el) el.scrollTop = el.scrollHeight;
     }, [expressions]);
 
+    useEffect(() => {
+        // Si hay un input enfocado, pon el foco y la selección correctamente
+        if (
+            focusedIndex !== null &&
+            inputRefs.current[focusedIndex]
+        ) {
+            const input = inputRefs.current[focusedIndex]!;
+            input.focus();
+            // Selecciona si hay selectionLength distinto de 0, si no solo mueve el caret
+            const start = caretPosition;
+            const end = caretPosition + selectionLength;
+            input.setSelectionRange(start, end);
+        }
+    }, [focusedIndex, caretPosition, selectionLength, expressions]);
+
+    // Lógica para asegurar que siempre hay una fila vacía al final
+    useEffect(() => {
+        if (expressions.length === 0 || expressions[expressions.length - 1].trim() !== '') {
+            onExpressionsChange(prev => {
+                if (prev.length === 0 || prev[prev.length - 1].trim() !== '') {
+                    return [...prev, ''];
+                }
+                return prev;
+            });
+        }
+        // Opcional: eliminar filas vacías duplicadas al final
+        else if (
+            expressions.length > 1 &&
+            expressions[expressions.length - 2].trim() === '' &&
+            expressions[expressions.length - 1].trim() === ''
+        ) {
+            onExpressionsChange(prev => {
+                let copy = [...prev];
+                while (
+                    copy.length > 1 &&
+                    copy[copy.length - 2].trim() === '' &&
+                    copy[copy.length - 1].trim() === ''
+                    ) {
+                    copy.pop();
+                }
+                return copy;
+            });
+        }
+    }, [expressions, onExpressionsChange]);
+
     const handleChange = (index: number, value: string) => {
         onExpressionsChange(prev => {
             const updated = [...prev];
             updated[index] = value;
-            if (index === prev.length - 1 && value.trim() !== '') {
-                updated.push('');
-            }
             return updated;
         });
-        // clear previous results
-        const newResults = [...results];
-        newResults[index] = {} as any;
-        // You might want to lift results higher if needed
+        // Limpiar resultados si lo necesitas
     };
 
     return (
@@ -162,10 +212,54 @@ export default function ExpressionList({
                                 ref={el => {
                                     inputRefs.current[idx] = el
                                 }}
-                                onChange={e => handleChange(idx, e.target.value)}
-                                onFocus={() => setFocusedIndex(idx)}
-                                onBlur={() => {
+                                onChange={e => {
+                                    handleChange(idx, e.target.value);
+                                    setCaretPosition(e.target.selectionStart ?? 0);
+                                    setSelectionLength(
+                                        (e.target.selectionEnd ?? 0) - (e.target.selectionStart ?? 0)
+                                    );
+                                }}
+                                onFocus={e => {
+                                    setFocusedIndex(idx);
+                                    setCaretPosition(e.target.selectionStart ?? 0);
+                                    setSelectionLength(
+                                        (e.target.selectionEnd ?? 0) - (e.target.selectionStart ?? 0)
+                                    );
+                                }}
+                                onClick={e => {
+                                    setFocusedIndex(idx);
+                                    setCaretPosition(e.currentTarget.selectionStart ?? 0);
+                                    setSelectionLength(
+                                        (e.currentTarget.selectionEnd ?? 0) - (e.currentTarget.selectionStart ?? 0)
+                                    );
+                                }}
+                                onSelect={e => {
+                                    setFocusedIndex(idx);
+                                    setCaretPosition(e.currentTarget.selectionStart ?? 0);
+                                    setSelectionLength(
+                                        (e.currentTarget.selectionEnd ?? 0) - (e.currentTarget.selectionStart ?? 0)
+                                    );
+                                }}
+                                // Cambiado: NO limpiar el foco al hacer blur si el blur viene de click del teclado virtual
+                                onBlur={e => {
+                                    // Si el blur fue provocado por un botón del teclado virtual, no pierdas el foco
+                                    if (
+                                        e.relatedTarget &&
+                                        (e.relatedTarget as HTMLElement).dataset &&
+                                        (e.relatedTarget as HTMLElement).dataset.virtualkey === "true"
+                                    ) {
+                                        // Vuelve a enfocar el input al siguiente tick
+                                        setTimeout(() => {
+                                            inputRefs.current[idx]?.focus();
+                                            const selStart = caretPosition;
+                                            const selEnd = caretPosition + selectionLength;
+                                            inputRefs.current[idx]?.setSelectionRange(selStart, selEnd);
+                                        }, 0);
+                                        return;
+                                    }
                                     setFocusedIndex(null);
+                                    setCaretPosition(0);
+                                    setSelectionLength(0);
                                     onExpressionBlur(idx, expr);
                                 }}
                                 aria-label={`Expresión ${idx + 1}`}
@@ -217,6 +311,8 @@ export default function ExpressionList({
                                         u[idx] = '';
                                         return u;
                                     });
+                                    setCaretPosition(0);
+                                    setSelectionLength(0);
                                 }}>×</button>
                             )}
 

@@ -1,397 +1,216 @@
-// src/pages/Calculator.tsx
-import { useState, useEffect, useCallback, useRef } from 'react';
 import Header from '../components/App/Header';
 import ExpressionList from '../components/App/ExpressionList';
 import GraphCanvas from '../components/App/Graph/GraphCanvas';
 import MathKeyboard from '../components/App/MathKeyboard';
 import styles from '../styles/modules/graphCanvas.module.css';
-import {
-    evaluateSingleExpression,
-    evaluateBatchExpressions,
-} from '../services/mathService';
-import type { ExpressionResult } from '../types/math';
+import { useCalculatorLogic } from '../hooks/useCalcLogic.tsx';
 
-interface ViewWindow {
-    origin: number;
-    bound: number;
-    bottom: number;
-    top: number;
-}
-
-type IntervalData = {
-    from: number;
-    to: number;
-    points: Array<{ x: number; y: number }>;
-};
-
+/**
+ * Now you can define all keys, including submenus, with all the same options as the main keyboard:
+ *  - label
+ *  - onClick (with insertIntoExpression and cursor/selection logic)
+ *  - className (for optional wide keys, styles)
+ *  - dataVirtualKey (for focus handling)
+ */
 export default function Calculator() {
-    // 1. Estado de las expresiones actuales
-    const [expressions, setExpressions] = useState<string[]>(['']);
+    const {
+        expressions,
+        setExpressions,
+        results,
+        colors,
+        disabledFlags,
+        focusedIndex,
+        setFocusedIndex,
+        caretPosition,
+        setCaretPosition,
+        selectionLength,
+        setSelectionLength,
+        handleExpressionBlur,
+        handleViewChange,
+        handleColorChange,
+        handleToggleDisabled,
+        handleDeleteRow,
+        insertIntoExpression,
+        backspace,
+        clearAll,
+        evaluateExpression,
+        allDrawingSets
+    } = useCalculatorLogic();
 
-    // 2. Estado de resultados: un objeto por cada línea de expresión
-    const [results, setResults] = useState<ExpressionResult[]>(() =>
-        expressions.map(() => ({}))
-    );
+    // --- Math Functions (submenu) ---
+    const mathFuncKeys = [
+        // Funciones definidas por el usuario
+        { label: 'f',          onClick: () => insertIntoExpression('f()', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true, category: 'Genéricas' },
+        { label: 'g',          onClick: () => insertIntoExpression('g()', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true, category: 'Genéricas' },
+        { label: 'h',          onClick: () => insertIntoExpression('h()', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true, category: 'Genéricas' },
 
-    // 3. Estado de colores: un color hex por cada expresión
-    const [colors, setColors] = useState<string[]>(['#ff0000']);
+        // Variables paramétricas
+        { label: 'x',          onClick: () => insertIntoExpression('x()', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true, category: 'Genéricas' },
+        { label: 'Y',          onClick: () => insertIntoExpression('y()', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true, category: 'Genéricas' },
+        { label: 'z',          onClick: () => insertIntoExpression('z()', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true, category: 'Genéricas' },
 
-    // 3b. Estado de “disabledFlags”: indica si cada fila está deshabilitada
-    const [disabledFlags, setDisabledFlags] = useState<boolean[]>([false]);
+        // Funciones especiales
+        { label: 'gamma',      onClick: () => insertIntoExpression('gamma()', { deltaCaret: 6, selectLength: 0 }), dataVirtualKey: true, category: 'Especiales' },
+        { label: 'zeta',       onClick: () => insertIntoExpression('zeta()', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true, category: 'Especiales'},
+        { label: 'erf',        onClick: () => insertIntoExpression('erf()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: 'Especiales' },
+        { label: 'fresnelc',   onClick: () => insertIntoExpression('fresnelc()', { deltaCaret: 9, selectLength: 0 }), dataVirtualKey: true, category: 'Especiales' },
+        { label: 'c',          onClick: () => insertIntoExpression('c', { deltaCaret: 1, selectLength: 0 }), dataVirtualKey: true, category: 'Especiales' },
 
-    // 4. Estado de la ventana actual de dibujo
-    const [viewWindow, setViewWindow] = useState<ViewWindow>({
-        origin: -10,
-        bound: 10,
-        bottom: -10,
-        top: 10,
-    });
+        // Operaciones matemáticas básicas
+        { label: 'sqrt',       onClick: () => insertIntoExpression('sqrt()', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true, category: 'Básicas' },
+        { label: 'exp',        onClick: () => insertIntoExpression('exp()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: 'Básicas' },
+        { label: 'log',        onClick: () => insertIntoExpression('log()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: 'Básicas' },
+        { label: 'log10',      onClick: () => insertIntoExpression('log10()', { deltaCaret: 6, selectLength: 0 }), dataVirtualKey: true, category: 'Básicas' },
+        { label: 'log2',       onClick: () => insertIntoExpression('log2()', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true, category: 'Básicas' },
+        { label: 'abs',        onClick: () => insertIntoExpression('abs()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: 'Básicas' },
 
-    // Ref para detectar el primer render y evitar doble llamada
-    const isFirstRender = useRef(true);
+        // Funciones trigonométricas
+        { label: 'sin',        onClick: () => insertIntoExpression('sin()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: 'Trigonométricas' },
+        { label: 'cos',        onClick: () => insertIntoExpression('cos()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: 'Trigonométricas' },
+        { label: 'tan',        onClick: () => insertIntoExpression('tan()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: 'Trigonométricas' },
+        { label: 'csc',        onClick: () => insertIntoExpression('csc()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: 'Trigonométricas' },
+        { label: 'cot',        onClick: () => insertIntoExpression('cot()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: 'Trigonométricas' },
+        { label: 'sec',        onClick: () => insertIntoExpression('sec()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: 'Trigonométricas' },
 
-    // Ref para almacenar, por cada índice de expresión, los intervalos cacheados
-    const cacheRef = useRef<Record<number, IntervalData[]>>({});
+        // Funciones trigonométricas inversas
+        { label: 'arcsin',     onClick: () => insertIntoExpression('arcsin()', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true, category: 'Trigonométricas de Arco' },
+        { label: 'arccos',     onClick: () => insertIntoExpression('arccos()', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true, category: 'Trigonométricas de Arco' },
+        { label: 'arctan',     onClick: () => insertIntoExpression('arctan()', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true, category: 'Trigonométricas de Arco' },
+        { label: 'arccsc',     onClick: () => insertIntoExpression('arccsc()', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true, category: 'Trigonométricas de Arco' },
+        { label: 'arccot',     onClick: () => insertIntoExpression('arccot()', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true, category: 'Trigonométricas de Arco' },
+        { label: 'arcsec',     onClick: () => insertIntoExpression('arcsec()', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true, category: 'Trigonométricas de Arco' },
 
-    // Sincronizar arrays cuando cambie el número de expresiones
-    useEffect(() => {
-        setResults(prev => {
-            const upd = [...prev];
-            while (upd.length < expressions.length) upd.push({});
-            upd.length = expressions.length;
-            return upd;
-        });
-        setColors(prev => {
-            const upd = [...prev];
-            while (upd.length < expressions.length) upd.push('#000000');
-            upd.length = expressions.length;
-            return upd;
-        });
-        setDisabledFlags(prev => {
-            const upd = [...prev];
-            while (upd.length < expressions.length) upd.push(false);
-            upd.length = expressions.length;
-            return upd;
-        });
-        expressions.forEach((_, i) => {
-            if (!cacheRef.current[i]) cacheRef.current[i] = [];
-        });
-    }, [expressions]);
+        // Funciones hiperbólicas
+        { label: 'sinh',       onClick: () => insertIntoExpression('sinh()', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true, category: 'Hiperbólicas' },
+        { label: 'cosh',       onClick: () => insertIntoExpression('cosh()', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true, category: 'Hiperbólicas' },
+        { label: 'tanh',       onClick: () => insertIntoExpression('tanh()', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true, category: 'Hiperbólicas' },
+        { label: 'coth',       onClick: () => insertIntoExpression('coth()', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true, category: 'Hiperbólicas' },
+        { label: 'sech',       onClick: () => insertIntoExpression('sech()', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true, category: 'Hiperbólicas' },
+        { label: 'csch',       onClick: () => insertIntoExpression('csch()', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true, category: 'Hiperbólicas' },
 
-    // Util para missing intervals (igual que antes)
-    const getMissingIntervals = useCallback(
-        (from: number, to: number, existing: IntervalData[]) => {
-            if (from >= to) return [];
-            let intervals: Array<[number, number]> = [[from, to]];
-            existing
-                .sort((a, b) => a.from - b.from)
-                .forEach(({ from: f, to: t }) => {
-                    const next: Array<[number, number]> = [];
-                    intervals.forEach(([a, b]) => {
-                        if (t <= a || f >= b) next.push([a, b]);
-                        else {
-                            if (a < f) next.push([a, f]);
-                            if (b > t) next.push([t, b]);
-                        }
-                    });
-                    intervals = next;
-                });
-            return intervals;
-        },
-        []
-    );
+        // Funciones hiperbólicas inversas
+        { label: 'arcsinh',    onClick: () => insertIntoExpression('arcsinh()', { deltaCaret: 8, selectLength: 0 }), dataVirtualKey: true, category: 'Hiperbólicas de Arco' },
+        { label: 'arccosh',    onClick: () => insertIntoExpression('arccosh()', { deltaCaret: 8, selectLength: 0 }), dataVirtualKey: true, category: 'Hiperbólicas de Arco' },
+        { label: 'arctanh',    onClick: () => insertIntoExpression('arctanh()', { deltaCaret: 8, selectLength: 0 }), dataVirtualKey: true, category: 'Hiperbólicas de Arco' },
+        { label: 'arccoth',    onClick: () => insertIntoExpression('arccoth()', { deltaCaret: 8, selectLength: 0 }), dataVirtualKey: true, category: 'Hiperbólicas de Arco' },
+        { label: 'arcsech',    onClick: () => insertIntoExpression('arcsech()', { deltaCaret: 8, selectLength: 0 }), dataVirtualKey: true, category: 'Hiperbólicas de Arco' },
+        { label: 'arccsch',    onClick: () => insertIntoExpression('arccsch()', { deltaCaret: 8, selectLength: 0 }), dataVirtualKey: true, category: 'Hiperbólicas de Arco' }
+    ];
 
-    // Fetch parcial al cambiar viewWindow (sin cambios en batching)
-    useEffect(() => {
-        if (isFirstRender.current) {
-            isFirstRender.current = false;
-            return;
-        }
-        let mounted = true;
-        const { origin, bound } = viewWindow;
-        const dec = '50';
+    // --- Symja Functions (submenu) ---
+    const symjaKeys = [
+        // Derivadas y cálculo
+        { label: 'D',          onClick: () => insertIntoExpression('D[, ]', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'Diff',       onClick: () => insertIntoExpression('Diff[, ]', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'Integrate',  onClick: () => insertIntoExpression('Integrate[, ]', { deltaCaret: 10, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'Taylor',     onClick: () => insertIntoExpression('Taylor[, ]', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'Limit',      onClick: () => insertIntoExpression('Limit[, ]', { deltaCaret: 6, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'Solve',      onClick: () => insertIntoExpression('Solve[, ]', { deltaCaret: 6, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'DSolve',     onClick: () => insertIntoExpression('DSolve[, ]', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true },
 
-        expressions.forEach((expr, idx) => {
-            if (disabledFlags[idx] || expr.trim() === '') {
-                if (!mounted) return;
-                cacheRef.current[idx] = [];
-                setResults(prev => {
-                    const copy = [...prev];
-                    copy[idx] = { exprType: prev[idx]?.exprType };
-                    return copy;
-                });
-                return;
-            }
-            const existing = cacheRef.current[idx] || [];
-            const missing = getMissingIntervals(origin, bound, existing);
-            if (missing.length === 0) {
-                const pts: Array<{ x: number; y: number }> = [];
-                existing
-                    .filter(iv => iv.to > origin && iv.from < bound)
-                    .forEach(iv =>
-                        iv.points.forEach(pt => {
-                            if (pt.x >= origin && pt.x <= bound) pts.push(pt);
-                        })
-                    );
-                pts.sort((a, b) => a.x - b.x);
-                setResults(prev => {
-                    if (!mounted) return prev;
-                    const u = prev.map(r => ({ ...r }));
-                    u[idx] = { ...u[idx], drawingPoints: pts, exprType: u[idx]?.exprType };
-                    return u;
-                });
-                return;
-            }
-            (async () => {
-                for (const [f, t] of missing) {
-                    try {
-                        const res = await evaluateSingleExpression(
-                            expr,
-                            dec,
-                            f.toString(),
-                            t.toString()
-                        );
-                        if (!mounted) return;
-                        cacheRef.current[idx].push({ from: f, to: t, points: res.drawingPoints || [] });
-                        const merged: Array<{ x: number; y: number }> = [];
-                        cacheRef.current[idx]
-                            .filter(iv => iv.to > origin && iv.from < bound)
-                            .forEach(iv =>
-                                iv.points.forEach(pt => {
-                                    if (pt.x >= origin && pt.x <= bound) merged.push(pt);
-                                })
-                            );
-                        merged.sort((a, b) => a.x - b.x);
-                        setResults(prev => {
-                            if (!mounted) return prev;
-                            const u = prev.map(r => ({ ...r }));
-                            u[idx] = { ...u[idx], drawingPoints: merged, exprType: u[idx]?.exprType };
-                            return u;
-                        });
-                    } catch {
-                        if (!mounted) return;
-                        setResults(prev => {
-                            const u = prev.map(r => ({ ...r }));
-                            u[idx] = {
-                                ...u[idx],
-                                errors: [...(u[idx].errors || []), `Error intervalo [${f},${t}]`],
-                                exprType: u[idx]?.exprType,
-                            };
-                            return u;
-                        });
-                    }
-                }
-            })();
-        });
+        // Álgebra y simplificación
+        { label: 'Simplify',   onClick: () => insertIntoExpression('Simplify[]', { deltaCaret: 9, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'Expand',     onClick: () => insertIntoExpression('Expand[]', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true },
 
-        return () => {
-            mounted = false;
-        };
-    }, [viewWindow, expressions, disabledFlags, getMissingIntervals]);
+        // Operaciones vectoriales y matrices
+        { label: 'Dot',        onClick: () => insertIntoExpression('Dot[]', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'Cross',      onClick: () => insertIntoExpression('Cross[]', { deltaCaret: 6, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'Norm',       onClick: () => insertIntoExpression('Norm[]', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'Normalize',  onClick: () => insertIntoExpression('Normalize[]', { deltaCaret: 10, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'Vectorangle',onClick: () => insertIntoExpression('Vectorangle[]', { deltaCaret: 11, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'Projection', onClick: () => insertIntoExpression('Projection[]', { deltaCaret: 11, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'Eigenvalues',onClick: () => insertIntoExpression('Eigenvalues[]', { deltaCaret: 12, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'Inverse',    onClick: () => insertIntoExpression('Inverse[]', { deltaCaret: 8, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'Transpose',  onClick: () => insertIntoExpression('Transpose[]', { deltaCaret: 10, selectLength: 0 }), dataVirtualKey: true },
 
-    // Nuevo handle: evalúa lote que incluye asignaciones anteriores + expr actual
-    const handleExpressionBlur = useCallback(
-        async (index: number, expr: string) => {
-            if (disabledFlags[index] || expr.trim() === '') return;
+        // Funciones aritméticas
+        { label: 'GCD',        onClick: () => insertIntoExpression('GCD[]', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'LCM',        onClick: () => insertIntoExpression('LCM[]', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true }
+    ];
 
-            // Encontrar todas las asignaciones anteriores a `index`
-            const batchIndices = expressions
-                .slice(0, index + 1)
-                .map((e, i) => ({ expr: e, i }))
-                .filter(({i }) => results[i]?.exprType === 'ASSIGNMENT')
-                .map(({ i }) => i);
+    // --- Constants (submenu) ---
+    const constantKeys = [
+        { label: 'Pi',               onClick: () => insertIntoExpression('Pi', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true,  },
+        { label: 'E',                onClick: () => insertIntoExpression('E', { deltaCaret: 1, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'I',                onClick: () => insertIntoExpression('I', { deltaCaret: 1, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'Phi',              onClick: () => insertIntoExpression('Phi', { deltaCaret: 3, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'Infinity',         onClick: () => insertIntoExpression('Infinity', { deltaCaret: 8, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'ComplexInfinity',  onClick: () => insertIntoExpression('ComplexInfinity', { deltaCaret: 15, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'EulerGamma',       onClick: () => insertIntoExpression('EulerGamma', { deltaCaret: 10, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'Degree',           onClick: () => insertIntoExpression('Degree', { deltaCaret: 6, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'Catalan',          onClick: () => insertIntoExpression('Catalan', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'MeisselMertens',   onClick: () => insertIntoExpression('MeisselMertens', { deltaCaret: 14, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'Glaisher',         onClick: () => insertIntoExpression('Glaisher', { deltaCaret: 8, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'Khinchin',         onClick: () => insertIntoExpression('Khinchin', { deltaCaret: 8, selectLength: 0 }), dataVirtualKey: true },
+    ];
 
-            // siempre incluimos la expresión actual
-            batchIndices.push(index);
+    // --- Main Keyboard Keys (all properties are configurable) ---
+    const keys = [
+        { label: 'x²', onClick: () => insertIntoExpression('()^2', { deltaCaret: 1, selectLength: 0 }), dataVirtualKey: true },
+        { label: '1/x', onClick: () => insertIntoExpression('1/()', { deltaCaret: 3, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'CE', onClick: clearAll, dataVirtualKey: true },
+        { label: 'C', onClick: clearAll, dataVirtualKey: true },
+        { label: '⌫', onClick: backspace, dataVirtualKey: true },
+        { label: '<', onClick: () => insertIntoExpression('<'), dataVirtualKey: true },
+        { label: '>', onClick: () => insertIntoExpression('>'), dataVirtualKey: true },
+        { label: 'x', onClick: () => insertIntoExpression('x'), dataVirtualKey: true },
+        { label: 'y', onClick: () => insertIntoExpression('y'), dataVirtualKey: true },
+        { label: 'z', onClick: () => insertIntoExpression('z'), dataVirtualKey: true },
+        { label: '√', onClick: () => insertIntoExpression('Sqrt()', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true },
+        { label: '(', onClick: () => insertIntoExpression('('), dataVirtualKey: true },
+        { label: ')', onClick: () => insertIntoExpression(')'), dataVirtualKey: true },
+        { label: '=', onClick: () => insertIntoExpression('='), dataVirtualKey: true },
+        { label: '÷', onClick: () => insertIntoExpression('/'), dataVirtualKey: true },
+        { label: 'xʸ', onClick: () => insertIntoExpression('^()', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true },
+        { label: '7', onClick: () => insertIntoExpression('7'), dataVirtualKey: true },
+        { label: '8', onClick: () => insertIntoExpression('8'), dataVirtualKey: true },
+        { label: '9', onClick: () => insertIntoExpression('9'), dataVirtualKey: true },
+        { label: '×', onClick: () => insertIntoExpression('*'), dataVirtualKey: true },
+        { label: '10ˣ', onClick: () => insertIntoExpression('10^()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true },
+        { label: '4', onClick: () => insertIntoExpression('4'), dataVirtualKey: true },
+        { label: '5', onClick: () => insertIntoExpression('5'), dataVirtualKey: true },
+        { label: '6', onClick: () => insertIntoExpression('6'), dataVirtualKey: true },
+        { label: '−', onClick: () => insertIntoExpression('-'), dataVirtualKey: true },
+        { label: 'log', onClick: () => insertIntoExpression('log10()', { deltaCaret: 6, selectLength: 0 }), dataVirtualKey: true },
+        { label: '1', onClick: () => insertIntoExpression('1'), dataVirtualKey: true },
+        { label: '2', onClick: () => insertIntoExpression('2'), dataVirtualKey: true },
+        { label: '3', onClick: () => insertIntoExpression('3'), dataVirtualKey: true },
+        { label: '+', onClick: () => insertIntoExpression('+'), dataVirtualKey: true },
+        { label: '(-)', onClick: () => insertIntoExpression('10^()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true },
+        { label: '.', onClick: () => insertIntoExpression("."), dataVirtualKey: true },
+        { label: '0', onClick: () => insertIntoExpression('0'), dataVirtualKey: true },
+        { label: ',', onClick: () => insertIntoExpression(','), dataVirtualKey: true },
+        { label: '↵', onClick: evaluateExpression, className: 'wideKey', dataVirtualKey: true },
+    ];
 
-            // construir array de expresiones por posición
-            const batchExprs = batchIndices.map(i => expressions[i]);
+    const mathCategoryConfig = [
+        { name: "Genéricas", columns: 2 },
+        { name: "Especiales", columns: 5 },
+        { name: "Básicas", columns: 3 },
+        { name: "Trigonométricas", columns: 3 },
+        { name: "Trigonométricas de Arco", columns: 3 },
+        { name: "Hiperbólicas", columns: 3 },
+        { name: "Hiperbólicas de Arco", columns: 3 }
+    ];
+    const symjaCategoryConfig = [
+        { name: "Cálculo", columns: 3 },
+        { name: "Álgebra", columns: 2 },
 
-            const dec = '50';
-            const origin = viewWindow.origin.toString();
-            const bound = viewWindow.bound.toString();
-
-            try {
-                const batchResults = await evaluateBatchExpressions(
-                    batchExprs,
-                    dec,
-                    origin,
-                    bound
-                );
-                // actualizar cada índice
-                setResults(prev => {
-                    const u = [...prev];
-                    batchIndices.forEach((origIdx, idxInBatch) => {
-                        const res = batchResults[idxInBatch];
-                        u[origIdx] = {
-                            ...res,
-                            // conservar exprType si manque
-                            exprType: res.exprType || prev[origIdx]?.exprType,
-                        };
-                        // recargar caché sólo para dibujo del actual
-                        if (origIdx === index) {
-                            cacheRef.current[origIdx] = [
-                                {
-                                    from: viewWindow.origin,
-                                    to: viewWindow.bound,
-                                    points: res.drawingPoints || [],
-                                },
-                            ];
-                        }
-                    });
-                    return u;
-                });
-            } catch (err) {
-                console.error('Error batch evaluation:', err);
-            }
-        },
-        [expressions, results, disabledFlags, viewWindow]
-    );
-
-    const handleViewChange = useCallback((vw: ViewWindow) => {
-        setViewWindow(vw);
-    }, []);
-
-    const handleColorChange = useCallback((i: number, color: string) => {
-        setColors(prev => {
-            const u = [...prev];
-            u[i] = color;
-            return u;
-        });
-    }, []);
-
-    const handleToggleDisabled = useCallback((i: number) => {
-        setDisabledFlags(prev => {
-            const u = [...prev];
-            u[i] = !u[i];
-            return u;
-        });
-    }, []);
-
-    const handleDeleteRow = useCallback((idx: number) => {
-        // 1) Expresiones
-        setExpressions(prev => {
-            const u = [...prev];
-            u.splice(idx, 1);
-            return u.length > 0 ? u : [''];
-        });
-        // 2) Colores
-        setColors(prev => {
-            const u = [...prev];
-            u.splice(idx, 1);
-            return u.length > 0 ? u : ['#000000'];
-        });
-        // 3) Disabled flags
-        setDisabledFlags(prev => {
-            const u = [...prev];
-            u.splice(idx, 1);
-            return u.length > 0 ? u : [false];
-        });
-        // 4) Resultados
-        setResults(prev => {
-            const u = [...prev];
-            u.splice(idx, 1);
-            return u.length > 0 ? u : [{}];
-        });
-
-        // 5) Cache de dibujo: eliminar el entry idx y reindexar
-        const newCache: typeof cacheRef.current = {};
-        Object.entries(cacheRef.current).forEach(([key, val]) => {
-            const k = Number(key);
-            if (k === idx) return;       // lo borramos
-            newCache[k > idx ? k - 1 : k] = val;
-        });
-        cacheRef.current = newCache;
-    }, []);
-
-    const insertIntoExpression = (v: string) =>
-        setExpressions(prev => {
-            const u = [...prev];
-            u[u.length - 1] += v;
-            return u;
-        });
-
-    const backspace = () =>
-        setExpressions(prev => {
-            const u = [...prev];
-            const li = u.length - 1;
-            u[li] = u[li].slice(0, -1);
-            return u;
-        });
-
-    const clearAll = () => {
-        setExpressions(['']);
-        setResults([{}]);
-        cacheRef.current = {};
-        setColors(['#000000']);
-        setDisabledFlags([false]);
-    };
-
-    const evaluateExpression = () => {
-        const li = expressions.length - 1;
-        if (expressions[li].trim() !== '' && !disabledFlags[li]) {
-            handleExpressionBlur(li, expressions[li]).then(() => {});
-        }
-    };
-
-    const allDrawingSets = expressions.map((_, i) =>
-        disabledFlags[i]
-            ? { points: [], color: '#666666' }
-            : { points: results[i]?.drawingPoints || [], color: colors[i] }
-    );
-
-    // ──────── DEFINICIÓN DEL TECLADO ────────
-    const teclas = [
-        { label: '2nd', onClick: () => insertIntoExpression('2nd') },
-        { label: 'π', onClick: () => insertIntoExpression('π') },
-        { label: 'e', onClick: () => insertIntoExpression('e') },
-        { label: 'C', onClick: clearAll },
-        { label: '⌫', onClick: backspace },
-        { label: 'x²', onClick: () => insertIntoExpression('^2') },
-        { label: '1/x', onClick: () => insertIntoExpression('1/') },
-        { label: '|x|', onClick: () => insertIntoExpression('| |') },
-        { label: 'x', onClick: () => insertIntoExpression('x') },
-        { label: 'y', onClick: () => insertIntoExpression('y') },
-        { label: '√', onClick: () => insertIntoExpression('√(') },
-        { label: '(', onClick: () => insertIntoExpression('(') },
-        { label: ')', onClick: () => insertIntoExpression(')') },
-        { label: '=', onClick: () => insertIntoExpression('=') },
-        { label: '÷', onClick: () => insertIntoExpression('/') },
-        { label: 'xʸ', onClick: () => insertIntoExpression('^') },
-        { label: '7', onClick: () => insertIntoExpression('7') },
-        { label: '8', onClick: () => insertIntoExpression('8') },
-        { label: '9', onClick: () => insertIntoExpression('9') },
-        { label: '×', onClick: () => insertIntoExpression('*') },
-        { label: '10ˣ', onClick: () => insertIntoExpression('10^') },
-        { label: '4', onClick: () => insertIntoExpression('4') },
-        { label: '5', onClick: () => insertIntoExpression('5') },
-        { label: '6', onClick: () => insertIntoExpression('6') },
-        { label: '−', onClick: () => insertIntoExpression('-') },
-        { label: 'log', onClick: () => insertIntoExpression('log(') },
-        { label: '1', onClick: () => insertIntoExpression('1') },
-        { label: '2', onClick: () => insertIntoExpression('2') },
-        { label: '3', onClick: () => insertIntoExpression('3') },
-        { label: '+', onClick: () => insertIntoExpression('+') },
-        { label: 'ln', onClick: () => insertIntoExpression('ln(') },
-        { label: '⟲', onClick: () => console.log('Undo pressed') },
-        { label: '0', onClick: () => insertIntoExpression('0') },
-        { label: ',', onClick: () => insertIntoExpression(',') },
-        { label: '↵', onClick: evaluateExpression, className: 'wideKey' },
+    ];
+    const constantCategoryConfig = [
+        { name: "Principales", columns: 3 },
     ];
 
     return (
         <div className={styles.pageContainer}>
             <Header title="Placeholder" />
             <div className={styles.mainArea}>
-                {/* ─── IZQUIERDA: CANVAS ───────────────────────────────────────────────────── */}
                 <div className={styles.canvasWrapper}>
                     <GraphCanvas
                         drawingSets={allDrawingSets}
                         onViewChange={handleViewChange}
                     />
                 </div>
-
-                {/* ─── DERECHA: EXPRESSION LIST + TECLADO ─────────────────────────────────── */}
                 <div className={styles.expressionsWrapper}>
                     <ExpressionList
                         expressions={expressions}
@@ -404,10 +223,22 @@ export default function Calculator() {
                         expressionTypes={results.map((r) => r.exprType)}
                         onDeleteRow={handleDeleteRow}
                         results={results}
+                        focusedIndex={focusedIndex}
+                        setFocusedIndex={setFocusedIndex}
+                        caretPosition={caretPosition}
+                        setCaretPosition={setCaretPosition}
+                        selectionLength={selectionLength}
+                        setSelectionLength={setSelectionLength}
                     />
-
-                    {/* ─── TECLADO matemático ────────────────────────────────────────────────── */}
-                    <MathKeyboard keys={teclas} />
+                    <MathKeyboard
+                        keys={keys}
+                        symjaKeys={symjaKeys}
+                        mathFuncKeys={mathFuncKeys}
+                        constantKeys={constantKeys}
+                        mathCategoryConfig={mathCategoryConfig}
+                        symjaCategoryConfig={symjaCategoryConfig}
+                        constantCategoryConfig={constantCategoryConfig}
+                    />
                 </div>
             </div>
         </div>
