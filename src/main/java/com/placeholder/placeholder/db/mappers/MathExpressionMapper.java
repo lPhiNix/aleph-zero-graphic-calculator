@@ -20,9 +20,4 @@ public interface MathExpressionMapper extends BaseMapper<MathExpression, MathExp
     default String mapPointIfIncluded (String points, @Context boolean includePoints) {
         return includePoints ? points : null;
     }
-
-    @Named("parseSnapshotToUrl")
-    default String parseSnapshotToUrl (String snapshot) {
-        return SnapshotUtils.getSnapshotUrl(snapshot);
-    }
 }
