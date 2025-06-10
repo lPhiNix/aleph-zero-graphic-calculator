@@ -7,5 +7,6 @@ import java.io.Serializable;
  */
 public record HistoryExpressionDto(
         Integer id,
+        Integer indexOrder,
         MathExpressionResponseDto mathExpression) implements Serializable {
   }

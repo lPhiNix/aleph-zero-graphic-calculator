@@ -1,7 +1,6 @@
 package com.placeholder.placeholder.api.math.service.persistence;
 
-import com.placeholder.placeholder.api.math.dto.request.MathExpressionCreationDto;
-import com.placeholder.placeholder.api.math.dto.request.UserHistoryCreationDto;
+import com.placeholder.placeholder.api.math.dto.request.history.MathExpressionCreationDto;
 import com.placeholder.placeholder.api.util.common.service.AbstractCrudService;
 import com.placeholder.placeholder.db.mappers.MathExpressionMapper;
 import com.placeholder.placeholder.db.mappers.UserHistoryMapper;

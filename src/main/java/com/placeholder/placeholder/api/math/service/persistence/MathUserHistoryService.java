@@ -1,7 +1,7 @@
 package com.placeholder.placeholder.api.math.service.persistence;
 
 import com.placeholder.placeholder.api.auth.service.SquipUserDetailService;
-import com.placeholder.placeholder.api.math.dto.request.UserHistoryCreationDto;
+import com.placeholder.placeholder.api.math.dto.request.history.UserHistoryCreationDto;
 import com.placeholder.placeholder.api.util.common.mapper.MappingContext;
 import com.placeholder.placeholder.api.util.common.service.AbstractCrudService;
 import com.placeholder.placeholder.db.mappers.MathExpressionMapper;

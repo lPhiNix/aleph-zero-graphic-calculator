@@ -1,11 +1,7 @@
-package com.placeholder.placeholder.api.math.dto.response;
-
-import com.placeholder.placeholder.db.models.MathExpression;
-import jakarta.validation.constraints.Size;
+package com.placeholder.placeholder.db.basicdto;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.Set;
 
 /**
  * DTO for {@link com.placeholder.placeholder.db.models.UserHistory}

@@ -66,6 +66,7 @@ CREATE TABLE IF NOT EXISTS user_history
 CREATE TABLE IF NOT EXISTS history_expression
 (
     id                 INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    index_order        INTEGER DEFAULT 0,
     user_history_id    INTEGER             NOT NULL,
     math_expression_id INTEGER             NOT NULL,
 

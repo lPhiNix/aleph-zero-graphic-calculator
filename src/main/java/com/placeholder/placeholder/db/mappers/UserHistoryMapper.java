@@ -1,7 +1,7 @@
 package com.placeholder.placeholder.db.mappers;
 
-import com.placeholder.placeholder.api.math.dto.request.UserHistoryCreationDto;
-import com.placeholder.placeholder.api.math.dto.response.SimpleUserHistoryDto;
+import com.placeholder.placeholder.api.math.dto.request.history.UserHistoryCreationDto;
+import com.placeholder.placeholder.db.basicdto.SimpleUserHistoryDto;
 import com.placeholder.placeholder.api.math.service.persistence.SnapshotUtils;
 import com.placeholder.placeholder.api.util.common.mapper.BaseMapper;
 import com.placeholder.placeholder.api.util.common.mapper.MappingContext;
@@ -19,6 +19,11 @@ import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring", uses = {HistoryExpressionMapper.class, UserMapper.class, MathExpressionMapper.class})
 public interface UserHistoryMapper extends BaseMapper<UserHistory, UserHistoryDto> {
+
+    @Override
+    @Mapping(source = "snapshot", target = "snapshot", qualifiedByName = "parseSnapshotToUrl")
+    UserHistoryDto toResponseDtoFromEntity(UserHistory entity);
+
     @Mapping(source = "snapshot", target = "snapshot", qualifiedByName = "parseSnapshotToUrl")
     UserHistory toEntityFromCreationDto(UserHistoryCreationDto creationDto, @Context MappingContext context);
 
@@ -56,15 +61,13 @@ public interface UserHistoryMapper extends BaseMapper<UserHistory, UserHistoryDt
         entity.setUser(user);
         entity.setSnapshot(snapshotUuid);
 
-        Set<MathExpression> expressions = dto.mathExpressions().stream()
-                .map(mathExpressionMapper::toEntityFromCreationDto)
-                .collect(Collectors.toSet());
-
-        Set<HistoryExpression> historyExpressions = expressions.stream()
-                .map(expr -> {
+        Set<HistoryExpression> historyExpressions = dto.mathExpressions().stream()
+                .map(exprDto -> {
+                    MathExpression expr = mathExpressionMapper.toEntityFromCreationDto(exprDto);
                     HistoryExpression hx = new HistoryExpression();
                     hx.setMathExpression(expr);
                     hx.setUserHistory(entity);
+                    hx.setIndexOrder(exprDto.orderIndex());
                     return hx;
                 })
                 .collect(Collectors.toSet());

@@ -1,4 +1,4 @@
-package com.placeholder.placeholder.api.math.dto.request;
+package com.placeholder.placeholder.api.math.dto.request.history;
 
 import com.placeholder.placeholder.db.models.MathExpressionPreferences;
 import jakarta.validation.constraints.NotBlank;
@@ -15,6 +15,7 @@ import java.io.Serializable;
  */
 public record MathExpressionCreationDto(
         @NotBlank String expression,
+        @NotNull Integer orderIndex,
         @NotBlank String points,
         @NotNull MathExpressionPreferences preferences
 )

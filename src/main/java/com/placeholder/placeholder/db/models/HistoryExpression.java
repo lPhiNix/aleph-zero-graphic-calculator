@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
 @Getter
 @Setter
@@ -24,4 +25,9 @@ public class HistoryExpression {
     @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "math_expression_id", nullable = false)
     private MathExpression mathExpression;
+
+
+    @ColumnDefault("0")
+    @Column(name = "index_order")
+    private Integer indexOrder;
 }

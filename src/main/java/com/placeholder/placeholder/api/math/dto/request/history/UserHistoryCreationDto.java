@@ -1,4 +1,4 @@
-package com.placeholder.placeholder.api.math.dto.request;
+package com.placeholder.placeholder.api.math.dto.request.history;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

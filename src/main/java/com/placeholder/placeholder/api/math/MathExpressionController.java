@@ -1,22 +1,14 @@
 package com.placeholder.placeholder.api.math;
 
 import com.placeholder.placeholder.api.math.dto.request.MathEvaluationRequest;
-import com.placeholder.placeholder.api.math.dto.request.MathExpressionCreationDto;
 import com.placeholder.placeholder.api.math.dto.response.MathEvaluationResultResponse;
-import com.placeholder.placeholder.api.math.service.persistence.MathExpressionPersistenceService;
 import com.placeholder.placeholder.api.math.service.core.MathExpressionService;
 import com.placeholder.placeholder.api.util.common.messages.ApiMessageFactory;
-import com.placeholder.placeholder.api.util.common.messages.UriHelperBuilder;
 import com.placeholder.placeholder.api.util.common.messages.dto.ApiResponse;
-import com.placeholder.placeholder.db.basicdto.MathExpressionResponseDto;
-import com.placeholder.placeholder.db.mappers.MathExpressionMapper;
-import com.placeholder.placeholder.db.models.MathExpression;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.net.URI;
 
 /**
  * REST controller that exposes endpoints related to mathematical expression processing.

@@ -50,4 +50,6 @@ public class UserHistory {
     public void preUpdate() {
         this.updatedAt = Instant.now();
     }
+
+
 }

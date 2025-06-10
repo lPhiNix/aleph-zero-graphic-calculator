@@ -1,9 +1,8 @@
 package com.placeholder.placeholder.api.math;
 
 import com.placeholder.placeholder.api.auth.service.SquipUserDetailService;
-import com.placeholder.placeholder.api.math.dto.request.UserHistoryCreationDto;
-import com.placeholder.placeholder.api.math.dto.request.UserHistoryUpdateDto;
-import com.placeholder.placeholder.api.math.dto.response.SimpleUserHistoryDto;
+import com.placeholder.placeholder.api.math.dto.request.history.UserHistoryCreationDto;
+import com.placeholder.placeholder.db.basicdto.SimpleUserHistoryDto;
 import com.placeholder.placeholder.api.math.service.persistence.MathExpressionPersistenceService;
 import com.placeholder.placeholder.api.math.service.persistence.MathUserHistoryService;
 import com.placeholder.placeholder.api.util.common.messages.ApiMessageFactory;
@@ -23,11 +22,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController("api/v1/math/history")
 public class MathUserHistoryController {
-    private final MathExpressionPersistenceService persistenceService;
     private final MathUserHistoryService mathUserHistoryService;
     private final ApiMessageFactory apiMessageFactory;
     private final UserHistoryMapper userHistoryMapper;
-    private final SquipUserDetailService squipUserDetailService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> addEntryToUserHistory(@RequestBody UserHistoryCreationDto request) {
@@ -42,7 +39,6 @@ public class MathUserHistoryController {
         mathUserHistoryService.deleteById(id);
         return apiMessageFactory.response().noContent().build();
     }
-
 
     @PreAuthorize("@userHistorySecurity.hasAccessTo(#id, authentication)")
     @GetMapping("/{id}")
@@ -66,6 +62,4 @@ public class MathUserHistoryController {
         List<SimpleUserHistoryDto> dto = userHistoryMapper.toSimpleResponseDtoListFromEntityList(elements);
         return apiMessageFactory.response(dto).ok().build();
     }
-
-
 }
