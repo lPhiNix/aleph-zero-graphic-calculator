@@ -1,4 +1,12 @@
-/* src/styles/graphCanvas.module.css */
+:root {
+    --gc-background: #fff;
+    --gc-canvas-bg: #ffffff;
+    --gc-axis: #444;
+    --gc-grid-minor: #e0e0e0;
+    --gc-grid-major: #cccccc;
+    --gc-grid-label: #333;
+    --gc-border: #ddd;
+}
 
 .pageContainer {
     display: flex;
@@ -9,23 +17,29 @@
 
 .mainArea {
     display: flex;
-    flex: 1; /* para que ocupe todo el alto disponible menos el header */
+    flex: 1;
     overflow: hidden;
 }
 
 .canvasWrapper {
-    flex: 7; /* 70% de ancho (puedes ajustar) */
+    flex: 7;
     position: relative;
-    background-color: #ffffff; /* fondo blanco para la cuadricula */
+    background-color: var(--gc-canvas-bg);
 }
 
 .expressionsWrapper {
-    flex: 3; /* 30% de ancho */
-    border-left: 1px solid #ddd;
+    flex: 3;
+    border-left: 1px solid var(--gc-border);
     display: flex;
     flex-direction: column;
-    /* Para que la lista de expresiones haga scroll vertical si hay muchas filas */
     overflow-y: auto;
-    background-color: var(--app-color); /* opcional: color de fondo distinto */
+    background-color: var(--app-color);
     padding: 1rem;
+}
+
+.canvas {
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    display: block;
 }

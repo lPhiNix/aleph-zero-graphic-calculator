@@ -46,8 +46,8 @@ function CategoryGrid({
             {Object.entries(grouped).map(([cat, btns]) => {
                 const col = categories?.find(c => c.name === cat)?.columns ?? 5;
                 return (
-                    <div key={cat} style={{ marginBottom: "1.5rem" }}>
-                        <div style={{ fontWeight: "bold", fontSize: ".95rem", margin: ".5rem 0", color: "#6ad" }}>
+                    <div key={cat} className={styles.categoryWrapper}>
+                        <div className={styles.categoryHeader}>
                             {cat}
                         </div>
                         <div
@@ -92,21 +92,6 @@ function Submenu({
         <div
             ref={submenuRef}
             className={styles.categorySubmenu}
-            style={{
-                position: 'absolute',
-                left: 0,
-                top: '2.5rem',
-                minWidth: '16rem',
-                maxHeight: '45.5vh',
-                overflowY: 'auto',
-                background: '#222',
-                color: '#fff',
-                border: '1px solid #444',
-                zIndex: 20,
-                borderRadius: '0 0 6px 6px',
-                boxShadow: '0 3px 12px 0 #000c',
-                padding: '0.5rem 0.7rem'
-            }}
         >
             <CategoryGrid items={items} categories={categories} />
             {children}
@@ -129,7 +114,6 @@ export default function MathKeyboard({
     const toolbarRef = useRef<HTMLDivElement>(null);
     const submenuRef = useRef<HTMLDivElement>(null);
 
-    // Cierra el submenu si haces click fuera del toolbar y del submenu
     useEffect(() => {
         if (!openMenu) return;
         function handleClick(e: MouseEvent) {
@@ -151,7 +135,6 @@ export default function MathKeyboard({
             <div
                 className={styles.toolbar}
                 ref={toolbarRef}
-                style={{ position: 'relative', display: 'flex', gap: 8 }}
             >
                 <button
                     type="button"
@@ -199,7 +182,6 @@ export default function MathKeyboard({
                     />
                 )}
             </div>
-            {/* ─── GRID DE TECLAS (7 × 5) ────────────────────────────────── */}
             <div className={styles.grid}>
                 {keys.map((key, idx) => (
                     <button

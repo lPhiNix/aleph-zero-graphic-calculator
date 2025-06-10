@@ -1,10 +1,24 @@
+:root {
+    --expr-bg: #1e1e1e;
+    --expr-result-line: #cfcfcf;
+    --expr-input-color: #e0e0e0;
+    --expr-placeholder: #888888;
+    --expr-label: #fff;
+    --expr-disabled-color: #666666;
+    --expr-clear-hover: #e53935;
+    --expr-slider-border: #444;
+    --expr-slider-bg: #1e1e1e;
+    --expr-slider-color: #e0e0e0;
+    --expr-row-shadow: 0px -2px 20px 0px #000c;
+    --expr-highlight-bg: #2a2a2a;
+}
+
 .listContainer {
     display: flex;
     flex-direction: column;
     flex: 1;
     overflow-y: auto;
-    /* Sombra igual que en .keyboardContainer */
-    box-shadow: 0px -2px 20px 0px #000c;
+    box-shadow: var(--expr-row-shadow);
 }
 
 .inputWrapper {
@@ -12,20 +26,18 @@
     flex-direction: column;
     margin-bottom: 0.5rem;
     position: relative;
-    background-color: #1e1e1e;
+    background-color: var(--expr-bg);
     border-radius: 4px;
     border: 2px solid transparent;
     padding: 0.25rem 0.5rem;
     transition: border-color 0.15s ease;
-    /* Sombra igual que en .keyboardContainer */
-    box-shadow: 0px -2px 20px 0px #000c;
+    box-shadow: var(--expr-row-shadow);
 }
 
 .rowHighlighted {
     border-color: var(--highlight-border);
 }
 
-/* FILA SUPERIOR: input, etiquetas y botones */
 .inputRow {
     display: flex;
     align-items: center;
@@ -46,19 +58,21 @@
     margin-left: -0.15rem;
     flex-shrink: 0;
     transition: border-color 0.15s ease;
+    background: var(--expr-disabled-color);
+    color: var(--expr-label);
 }
 
 .fLetter {
     font-family: 'Segoe UI', sans-serif;
     font-weight: bold;
-    color: white;
+    color: var(--expr-label);
     font-size: 1rem;
     line-height: 1;
 }
 
 .fSubscript {
     font-size: 0.65rem;
-    color: white;
+    color: var(--expr-label);
     line-height: 1;
     position: relative;
     top: 0.1rem;
@@ -68,18 +82,18 @@
     flex: 1;
     padding: 0.5rem 2.5rem 0.5rem 0.5rem;
     font-size: 1rem;
-    color: #e0e0e0;
+    color: var(--expr-input-color);
     background: transparent;
     border: none;
     outline: none;
 }
 
 .exprInput.hasButtons {
-    padding-right: 12rem; /* suficiente espacio para evitar solapamiento */
+    padding-right: 12rem;
 }
 
 .exprInput::placeholder {
-    color: #888888;
+    color: var(--expr-placeholder);
 }
 
 .clearButton {
@@ -97,12 +111,12 @@
     cursor: pointer;
     padding: 0;
     font-size: 1rem;
-    color: white;
+    color: var(--expr-label);
     transition: color 0.15s ease;
 }
 
 .clearButton:hover {
-    color: #e53935;
+    color: var(--expr-clear-hover);
 }
 
 .buttonsContainer {
@@ -129,43 +143,40 @@
 .iconButton span {
     font-size: 1rem;
     line-height: 1;
-    color: white;
+    color: var(--expr-label);
 }
 
 .iconButton:hover,
 .iconButton:focus {
-    background-color: var(--button-color);
+    background-color: var(--button-color, var(--expr-highlight-bg));
     outline: none;
 }
 
-/* Icono de error (⚠️) junto a los botones */
 .errorIcon {
     font-size: 1.1rem;
     cursor: default;
 }
 
-/* Líneas de resultado */
 .resultLines {
     margin-top: 0.25rem;
     margin-left: 2.5rem;
     display: flex;
     flex-direction: column;
     gap: 0.125rem;
-    /* permitir scroll horizontal si el texto es muy largo */
     overflow-x: auto;
 }
 
 .resultLine {
     font-size: 0.9rem;
-    color: #cfcfcf;
-    white-space: nowrap; /* evitar salto de línea después del "=" */
+    color: var(--expr-result-line);
+    white-space: nowrap;
 }
 
 .sliderRow {
     display: flex;
     flex-direction: column;
     margin-top: 0.5rem;
-    margin-left: 2.5rem; /* alinea con el contenido */
+    margin-left: 2.5rem;
     gap: 0.25rem;
 }
 
@@ -191,8 +202,16 @@
     width: 4rem;
     padding: 0.1rem;
     font-size: 0.85rem;
-    border: 1px solid #444;
+    border: 1px solid var(--expr-slider-border);
     border-radius: 4px;
-    background: #1e1e1e;
-    color: #e0e0e0;
+    background: var(--expr-slider-bg);
+    color: var(--expr-slider-color);
+}
+
+.colorInput {
+    position: fixed;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
 }

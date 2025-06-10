@@ -67,21 +67,18 @@ export default function ExpressionList({
     }, [expressions]);
 
     useEffect(() => {
-        // Si hay un input enfocado, pon el foco y la selección correctamente
         if (
             focusedIndex !== null &&
             inputRefs.current[focusedIndex]
         ) {
             const input = inputRefs.current[focusedIndex]!;
             input.focus();
-            // Selecciona si hay selectionLength distinto de 0, si no solo mueve el caret
             const start = caretPosition;
             const end = caretPosition + selectionLength;
             input.setSelectionRange(start, end);
         }
     }, [focusedIndex, caretPosition, selectionLength, expressions]);
 
-    // Lógica para asegurar que siempre hay una fila vacía al final
     useEffect(() => {
         if (expressions.length === 0 || expressions[expressions.length - 1].trim() !== '') {
             onExpressionsChange(prev => {
@@ -91,7 +88,6 @@ export default function ExpressionList({
                 return prev;
             });
         }
-        // Opcional: eliminar filas vacías duplicadas al final
         else if (
             expressions.length > 1 &&
             expressions[expressions.length - 2].trim() === '' &&
@@ -117,7 +113,6 @@ export default function ExpressionList({
             updated[index] = value;
             return updated;
         });
-        // Limpiar resultados si lo necesitas
     };
 
     return (
@@ -151,8 +146,8 @@ export default function ExpressionList({
                     default:
                         etiqueta = 'Ex';
                 }
-                const originalColor = isLastGap ? '#666666' : colors[idx] || '#666666';
-                const functionColor = disabledFlags[idx] ? '#666666' : originalColor;
+                const originalColor = isLastGap ? 'var(--expr-disabled-color)' : colors[idx] || 'var(--expr-disabled-color)';
+                const functionColor = disabledFlags[idx] ? 'var(--expr-disabled-color)' : originalColor;
 
                 const countSameTypeBefore = expressionTypes.slice(0, idx).filter(t => t === tipo).length;
                 const subIndex = isLastGap ? '' : String(countSameTypeBefore + 1);
@@ -172,12 +167,12 @@ export default function ExpressionList({
                 const iconCount =
                     (errors && errors.length > 0 ? 1 : 0) +
                     (results[idx]?.warnings?.length ? 1 : 0) +
-                    (!disabledFlags[idx] ? 1 : 0) + // ⚡
-                    1 + // 🎨
-                    1;  // 🗑️
+                    (!disabledFlags[idx] ? 1 : 0) +
+                    1 +
+                    1;
 
                 const dynamicPadding = hoveredIndex === idx && focusedIndex !== idx && !isLastGap
-                    ? `${2.35 + iconCount * 2.35}rem`
+                    ? `calc(2.35rem + ${iconCount} * 2.35rem)`
                     : '2.5rem';
 
                 return (
@@ -240,15 +235,12 @@ export default function ExpressionList({
                                         (e.currentTarget.selectionEnd ?? 0) - (e.currentTarget.selectionStart ?? 0)
                                     );
                                 }}
-                                // Cambiado: NO limpiar el foco al hacer blur si el blur viene de click del teclado virtual
                                 onBlur={e => {
-                                    // Si el blur fue provocado por un botón del teclado virtual, no pierdas el foco
                                     if (
                                         e.relatedTarget &&
                                         (e.relatedTarget as HTMLElement).dataset &&
                                         (e.relatedTarget as HTMLElement).dataset.virtualkey === "true"
                                     ) {
-                                        // Vuelve a enfocar el input al siguiente tick
                                         setTimeout(() => {
                                             inputRefs.current[idx]?.focus();
                                             const selStart = caretPosition;
@@ -318,13 +310,7 @@ export default function ExpressionList({
 
                             <input type="color" ref={el => {
                                 colorInputRefs.current[idx] = el
-                            }} value={functionColor} onChange={e => onColorChange(idx, e.target.value)} style={{
-                                position: 'fixed',
-                                width: '1px',
-                                height: '1px',
-                                opacity: 0,
-                                pointerEvents: 'none'
-                            }}/>
+                            }} value={functionColor} onChange={e => onColorChange(idx, e.target.value)} className={styles.colorInput}/>
                         </div>
 
                         {isNumericAssign && (

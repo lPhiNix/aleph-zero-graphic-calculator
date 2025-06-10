@@ -1,35 +1,61 @@
-/* ─── Contenedor general del teclado ─────────────────────────────────── */
+:root {
+    --mathkb-bg: #181818;
+    --mathkb-toolbar-bg: #181818;
+    --mathkb-toolbar-border: #242424;
+    --mathkb-toolbar-color: #aaa;
+    --mathkb-toolbar-hover-bg: #222;
+    --mathkb-toolbar-hover-color: #fff;
+    --mathkb-key-bg: #232323;
+    --mathkb-key-color: #fff;
+    --mathkb-key-hover-bg: #24262b;
+    --mathkb-key-hover-color: #ffe082;
+    --mathkb-key-shadow: 0 1px 2px 0 #0004;
+    --mathkb-key-active-bg: #26282b;
+    --mathkb-key-disabled: 0.5;
+    --mathkb-key-enter-bg: #ffb300;
+    --mathkb-key-enter-hover-bg: #ffa000;
+    --mathkb-key-enter-color: #222;
+    --mathkb-key-enter-shadow: 0 1px 4px 0 #0006;
+    --mathkb-submenu-bg: #202124;
+    --mathkb-submenu-color: #fff;
+    --mathkb-submenu-border: #222;
+    --mathkb-submenu-shadow: 0 8px 22px 0 #000e;
+    --mathkb-category-header-color: #81d4fa;
+    --mathkb-category-header-shadow: 0 1px 2px #0003;
+    --mathkb-category-separator: #2e2e2e;
+    --mathkb-row-shadow: 0px -2px 20px 0px #000c;
+}
+
 .keyboardContainer {
     display: flex;
     flex-direction: column;
     width: 100%;
-    background-color: #181818;
-    color: #fff;
+    background-color: var(--mathkb-bg);
+    color: var(--mathkb-key-color);
     border-radius: 0 0 12px 12px;
-    box-shadow: 0px -2px 20px 0px #000c;
-    padding-bottom: 0.3rem; /* reducido */
+    box-shadow: var(--mathkb-row-shadow);
+    padding-bottom: 0.3rem;
 }
 
-/* ─── Barra superior (toolbar) ──────────────────────────────────────── */
 .toolbar {
     display: flex;
     align-items: center;
-    background-color: #181818;
-    padding: 0.12rem 0.5rem 0.25rem 0.5rem; /* reducido vertical */
-    border-bottom: 1px solid #242424;
+    background-color: var(--mathkb-toolbar-bg);
+    padding: 0.12rem 0.5rem 0.25rem 0.5rem;
+    border-bottom: 1px solid var(--mathkb-toolbar-border);
     gap: 0.7rem;
     font-size: 1rem;
     user-select: none;
+    position: relative;
 }
 
-/* Botón desplegable estilo pestaña */
 .dropdownButton {
     background: none;
     border: none;
-    color: #aaa;
+    color: var(--mathkb-toolbar-color);
     font-size: 0.98rem;
     cursor: pointer;
-    padding: 0.37rem 1.2rem 0.25rem 1.2rem; /* reducido vertical */
+    padding: 0.37rem 1.2rem 0.25rem 1.2rem;
     border-radius: 8px 8px 0 0;
     margin-bottom: -1px;
     transition: color 0.2s, background 0.2s;
@@ -42,95 +68,92 @@
 .dropdownButton[aria-expanded="true"],
 .dropdownButton:focus,
 .dropdownButton:hover {
-    background-color: #222;
-    color: #fff;
+    background-color: var(--mathkb-toolbar-hover-bg);
+    color: var(--mathkb-toolbar-hover-color);
     outline: none;
 }
 
-/* Iconos dentro de los botones de la toolbar */
 .toolbarIcon {
     font-size: 1.15em;
     margin-right: 0.25em;
     vertical-align: -2px;
 }
 
-/* ─── Grid de teclas: ajustable por JS pero por defecto 5 columnas ──── */
 .grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 7px;
     background: none;
-    margin-top: 0.32rem; /* reducido */
+    margin-top: 0.32rem;
     padding: 0 0.5rem;
 }
 
-/* ─── Cada botón (tecla) en el grid ───────────────────────────────── */
 .keyButton {
-    background-color: #232323;
+    background-color: var(--mathkb-key-bg);
     border: none;
-    color: #fff;
-    font-size: 1.02rem; /* reducido */
+    color: var(--mathkb-key-color);
+    font-size: 1.02rem;
     font-family: inherit;
     font-weight: 500;
-    padding: 0.58rem 0; /* reducido vertical */
+    padding: 0.58rem 0;
     cursor: pointer;
     border-radius: 8px;
     text-align: center;
     transition: background 0.13s, color 0.13s, box-shadow 0.13s;
-    box-shadow: 0 1px 2px 0 #0004;
+    box-shadow: var(--mathkb-key-shadow);
     outline: none;
     position: relative;
     user-select: none;
 }
 
 .keyButton:active {
-    background: #26282b;
+    background: var(--mathkb-key-active-bg);
 }
 
 .keyButton:hover,
 .keyButton:focus {
-    background-color: #24262b;
-    color: #ffe082;
+    background-color: var(--mathkb-key-hover-bg);
+    color: var(--mathkb-key-hover-color);
 }
 
 .keyButton:disabled {
-    opacity: 0.5;
+    opacity: var(--mathkb-key-disabled);
     pointer-events: none;
 }
 
-/* ─── Tecla de “dos columnas” (ej.: Enter) ─────────────────────────── */
 .wideKey {
     grid-column: span 2;
 }
 
-/* Tecla especial "enter" estilo naranja */
 .keyButton.enterKey,
 .keyButton.enterKey:focus,
 .keyButton.enterKey:hover {
-    background: #ffb300;
-    color: #222;
+    background: var(--mathkb-key-enter-bg);
+    color: var(--mathkb-key-enter-color);
     font-weight: bold;
-    box-shadow: 0 1px 4px 0 #0006;
+    box-shadow: var(--mathkb-key-enter-shadow);
     transition: none;
 }
+
 .keyButton.enterKey:active {
-    background: #ffa000;
+    background: var(--mathkb-key-enter-hover-bg);
 }
 
-/* ─── Submenú desplegable ───────────────────────────────────────────── */
 .categorySubmenu {
     position: absolute;
     left: 0;
-    top: 2.1rem; /* submenú más pegado arriba */
-    background: #202124;
-    color: #fff;
-    border: 1px solid #222;
+    top: 2.1rem;
+    background: var(--mathkb-submenu-bg);
+    color: var(--mathkb-submenu-color);
+    border: 1px solid var(--mathkb-submenu-border);
     min-width: 15rem;
     z-index: 20;
     border-radius: 0 0 10px 10px;
-    box-shadow: 0 8px 22px 0 #000e;
-    padding: 0.5rem 1rem 0.7rem 1rem; /* reducido vertical */
+    box-shadow: var(--mathkb-submenu-shadow);
+    padding: 0.5rem 1rem 0.7rem 1rem;
     animation: fadeInMenu 0.15s;
+    max-height: 45.5vh;
+    overflow-y: auto;
 }
 
 @keyframes fadeInMenu {
@@ -138,27 +161,28 @@
     to { opacity: 1; transform: none;}
 }
 
-/* Cabecera de cada categoría en el submenú */
+.categoryWrapper {
+    margin-bottom: 1.5rem;
+}
+
 .categoryHeader {
     font-weight: 600;
     font-size: 0.98rem;
-    margin: 0.4rem 0 0.18rem 0; /* reducido */
-    color: #81d4fa;
-    text-shadow: 0 1px 2px #0003;
+    margin: 0.4rem 0 0.18rem 0;
+    color: var(--mathkb-category-header-color);
+    text-shadow: var(--mathkb-category-header-shadow);
 }
 
-/* Grid interna del submenú (sobreescribe la grid principal) */
 .categoryGrid {
     display: grid;
     gap: 7px;
     background: none;
-    margin-bottom: 0.5rem; /* reducido */
+    margin-bottom: 0.5rem;
 }
 
-/* Opcional: separador entre categorías */
 .categorySeparator {
     height: 1px;
-    background: #2e2e2e;
+    background: var(--mathkb-category-separator);
     margin: 0.5rem 0 0.2rem 0;
     border: none;
 }

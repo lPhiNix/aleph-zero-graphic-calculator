@@ -1,4 +1,3 @@
-// src/components/App/Graph/GraphCanvas.tsx
 import React, { JSX, useCallback, useEffect, useRef, useState } from 'react';
 import styles from '../../../styles/modules/graphCanvas.module.css';
 
@@ -21,13 +20,18 @@ interface DrawingSet {
 }
 
 interface GraphCanvasProps {
-    /** Antes era Array<Array<{x,y}>>; ahora usamos un array de objetos con color */
     drawingSets: DrawingSet[];
-    /** Callback para notificar al padre el “rango” visible */
     onViewChange?: (vw: ViewWindow) => void;
 }
 
-// computeGridStep y formatLabel quedan idénticos
+// Utilidad para obtener una variable CSS (con fallback)
+function getCSSVar(name: string, fallback: string) {
+    return (
+        getComputedStyle(document.documentElement).getPropertyValue(name).trim() ||
+        fallback
+    );
+}
+
 function computeGridStep(desiredPxBetween: number, scale: number): number {
     const rawStep = desiredPxBetween / scale;
     const exponent = Math.floor(Math.log10(rawStep));
@@ -91,7 +95,7 @@ export default function GraphCanvas({
             const { cy: y0 } = worldToCanvas(0, 0, cw, ch);
 
             ctx.beginPath();
-            ctx.strokeStyle = '#444';
+            ctx.strokeStyle = getCSSVar('--gc-axis', '#444');
             ctx.lineWidth = 2;
             ctx.moveTo(x0, 0);
             ctx.lineTo(x0, ch);
@@ -122,7 +126,7 @@ export default function GraphCanvas({
 
             // ─── Líneas menores ─────────────────────────────────────────────
             ctx.beginPath();
-            ctx.strokeStyle = '#e0e0e0';
+            ctx.strokeStyle = getCSSVar('--gc-grid-minor', '#e0e0e0');
             ctx.lineWidth = 1;
 
             let x = Math.floor(left / minorStepWorld) * minorStepWorld;
@@ -146,9 +150,9 @@ export default function GraphCanvas({
 
             // ─── Líneas mayores y etiquetas ──────────────────────────────────
             ctx.beginPath();
-            ctx.strokeStyle = '#cccccc';
+            ctx.strokeStyle = getCSSVar('--gc-grid-major', '#cccccc');
             ctx.lineWidth = 1.5;
-            ctx.fillStyle = '#333';
+            ctx.fillStyle = getCSSVar('--gc-grid-label', '#333');
             ctx.font = '12px sans-serif';
 
             const iMinX = Math.ceil(left / gridStepWorld);
@@ -201,7 +205,7 @@ export default function GraphCanvas({
             ctx.closePath();
 
             if (axisVisibleX && axisVisibleY) {
-                ctx.fillStyle = '#333';
+                ctx.fillStyle = getCSSVar('--gc-grid-label', '#333');
                 ctx.font = '12px sans-serif';
                 ctx.fillText('0', zeroX + 4, zeroY - 4);
             }
@@ -227,7 +231,7 @@ export default function GraphCanvas({
                 if (points.length < 2) return;
 
                 ctx.beginPath();
-                ctx.strokeStyle = color; // <-- Usamos el color que viene en props
+                ctx.strokeStyle = color;
                 ctx.lineWidth = 2;
 
                 let started = false;
@@ -269,7 +273,7 @@ export default function GraphCanvas({
         if (!ctx) return;
         const { width: cw, height: ch } = canvas;
         ctx.clearRect(0, 0, cw, ch);
-        ctx.fillStyle = '#fff';
+        ctx.fillStyle = getCSSVar('--gc-background', '#fff');
         ctx.fillRect(0, 0, cw, ch);
 
         drawAxes(ctx, cw, ch);
@@ -295,7 +299,7 @@ export default function GraphCanvas({
             let top    = canvasToWorld(cw / 2, 0,   cw, ch).y;
             let bottom = canvasToWorld(cw / 2, ch,  cw, ch).y;
 
-            // Truncamos a 6 decimales (cambia a 5 si lo prefieres)
+            // Truncamos a 6 decimales
             const decimals = 6;
             left   = Number(left.toFixed(decimals));
             right  = Number(right.toFixed(decimals));
@@ -314,7 +318,6 @@ export default function GraphCanvas({
         };
     }, [offset, scale, canvasToWorld, onViewChange]);
 
-    /** Observamos cambios de tamaño para redibujar */
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -407,7 +410,6 @@ export default function GraphCanvas({
         <canvas
             ref={canvasRef}
             className={styles.canvas}
-            style={{ touchAction: 'none' }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
