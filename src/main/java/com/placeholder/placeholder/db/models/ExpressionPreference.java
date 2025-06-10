@@ -1,11 +1,17 @@
 package com.placeholder.placeholder.db.models;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.util.Map;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "expression_preferences", schema = "mysqldb")
 public class ExpressionPreference {
@@ -27,45 +33,4 @@ public class ExpressionPreference {
 
     @Column(name = "math_expression_user_id", nullable = false)
     private Integer mathExpressionUserId;
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Boolean getUseGlobalPreferences() {
-        return useGlobalPreferences;
-    }
-
-    public void setUseGlobalPreferences(Boolean useGlobalPreferences) {
-        this.useGlobalPreferences = useGlobalPreferences;
-    }
-
-    public Map<String, Object> getCanvasPreferences() {
-        return canvasPreferences;
-    }
-
-    public void setCanvasPreferences(Map<String, Object> canvasPreferences) {
-        this.canvasPreferences = canvasPreferences;
-    }
-
-    public User getMathExpression() {
-        return mathExpression;
-    }
-
-    public void setMathExpression(User mathExpression) {
-        this.mathExpression = mathExpression;
-    }
-
-    public Integer getMathExpressionUserId() {
-        return mathExpressionUserId;
-    }
-
-    public void setMathExpressionUserId(Integer mathExpressionUserId) {
-        this.mathExpressionUserId = mathExpressionUserId;
-    }
-
 }

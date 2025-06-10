@@ -1,8 +1,15 @@
 package com.placeholder.placeholder.db.models;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
+@Deprecated
 @Table(name = "share_link", schema = "mysqldb")
 public class ShareLink {
     @Id
@@ -10,7 +17,7 @@ public class ShareLink {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "token", nullable = false)
+    @Column(name = "token", nullable = false, unique = true)
     private String token;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -19,37 +26,4 @@ public class ShareLink {
 
     @Column(name = "math_expression_user_id", nullable = false)
     private Integer mathExpressionUserId;
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public User getMathExpression() {
-        return mathExpression;
-    }
-
-    public void setMathExpression(User mathExpression) {
-        this.mathExpression = mathExpression;
-    }
-
-    public Integer getMathExpressionUserId() {
-        return mathExpressionUserId;
-    }
-
-    public void setMathExpressionUserId(Integer mathExpressionUserId) {
-        this.mathExpressionUserId = mathExpressionUserId;
-    }
-
 }

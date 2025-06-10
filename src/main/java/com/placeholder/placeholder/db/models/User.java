@@ -1,12 +1,25 @@
 package com.placeholder.placeholder.db.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+import org.springframework.context.annotation.Lazy;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "user", schema = "mysqldb")
 public class User {
     @Id
     @Column(name = "id", nullable = false)
+    @Lazy
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(name = "username", nullable = false, length = 45)
@@ -15,51 +28,19 @@ public class User {
     @Column(name = "email", nullable = false, length = 200)
     private String email;
 
-    @Column(name = "password", nullable = false)
-    private String password;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "role_id", nullable = false)
     private UserRole role;
 
-    public Integer getId() {
-        return id;
-    }
+    @Size(max = 36)
+    @NotNull
+    @Column(name = "public_id", nullable = false, length = 36)
+    private String publicId;
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public UserRole getRole() {
-        return role;
-    }
-
-    public void setRole(UserRole role) {
-        this.role = role;
-    }
+    @Size(max = 255)
+    @NotNull
+    @Column(name = "password", nullable = false)
+    private String password;
 
 }

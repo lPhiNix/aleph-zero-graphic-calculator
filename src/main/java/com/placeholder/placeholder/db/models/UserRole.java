@@ -1,7 +1,13 @@
 package com.placeholder.placeholder.db.models;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "user_role", schema = "mysqldb")
 public class UserRole {
@@ -16,28 +22,8 @@ public class UserRole {
     @Column(name = "description", length = 50)
     private String description;
 
-    public Integer getId() {
-        return id;
+    @Override
+    public String toString() {
+        return String.format("ROLE_%s", name);
     }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
 }
