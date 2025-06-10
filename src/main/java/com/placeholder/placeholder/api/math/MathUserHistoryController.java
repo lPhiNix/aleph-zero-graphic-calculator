@@ -2,7 +2,7 @@ package com.placeholder.placeholder.api.math;
 
 import com.placeholder.placeholder.api.auth.service.SquipUserDetailService;
 import com.placeholder.placeholder.api.math.dto.request.UserHistoryCreationDto;
-import com.placeholder.placeholder.api.math.dto.request.UserHistoryUpddateDto;
+import com.placeholder.placeholder.api.math.dto.response.SimpleUserHistoryDto;
 import com.placeholder.placeholder.api.math.service.persistence.MathExpressionPersistenceService;
 import com.placeholder.placeholder.api.math.service.persistence.MathUserHistoryService;
 import com.placeholder.placeholder.api.util.common.messages.ApiMessageFactory;
@@ -10,11 +10,9 @@ import com.placeholder.placeholder.api.util.common.messages.UriHelperBuilder;
 import com.placeholder.placeholder.api.util.common.messages.dto.ApiResponse;
 import com.placeholder.placeholder.db.basicdto.UserHistoryDto;
 import com.placeholder.placeholder.db.mappers.UserHistoryMapper;
-import com.placeholder.placeholder.db.models.User;
 import com.placeholder.placeholder.db.models.UserHistory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,9 +38,15 @@ public class MathUserHistoryController {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<UserHistoryDto>> getUserHistory(@PathVariable Integer id) {
         UserHistory entity = mathUserHistoryService.findByIdReadOnly(id);
-        User owner = squipUserDetailService.getCurrentUser();
-
         UserHistoryDto dto =  userHistoryMapper.toResponseDtoFromEntity(entity);
+        return apiMessageFactory.response(dto).ok().build();
+    }
+
+    @PreAuthorize("@userHistorySecurity.hasAccessTo(#id, authentication)")
+    @GetMapping("summary/{id}")
+    public ResponseEntity<ApiResponse<SimpleUserHistoryDto>> getHistorySummary(@PathVariable Integer id){
+        UserHistory history = mathUserHistoryService.findByIdReadOnly(id);
+        SimpleUserHistoryDto dto = userHistoryMapper.toSimpleResponseDtoFromEntity(history);
         return apiMessageFactory.response(dto).ok().build();
     }
 }

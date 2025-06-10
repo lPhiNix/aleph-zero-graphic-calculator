@@ -1,6 +1,7 @@
 package com.placeholder.placeholder.db.mappers;
 
 import com.placeholder.placeholder.api.math.dto.request.UserHistoryCreationDto;
+import com.placeholder.placeholder.api.math.dto.response.SimpleUserHistoryDto;
 import com.placeholder.placeholder.api.util.common.mapper.BaseMapper;
 import com.placeholder.placeholder.api.util.common.mapper.MappingContext;
 import com.placeholder.placeholder.api.util.common.mapper.MappingContextException;
@@ -10,13 +11,24 @@ import com.placeholder.placeholder.db.models.MathExpression;
 import com.placeholder.placeholder.db.models.User;
 import com.placeholder.placeholder.db.models.UserHistory;
 import org.mapstruct.*;
+import org.mapstruct.Named;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring", uses = {HistoryExpressionMapper.class, UserMapper.class, MathExpressionMapper.class})
 public interface UserHistoryMapper extends BaseMapper<UserHistory, UserHistoryDto> {
     UserHistory toEntityFromCreationDto(UserHistoryCreationDto creationDto, @Context MappingContext context);
+
+    SimpleUserHistoryDto toSimpleResponseDtoFromEntity(UserHistory entity);
+
+    default String getFirst(List<HistoryExpression> historyExpressions) {
+        return historyExpressions.stream()
+                .map(xpr -> xpr.getMathExpression().getExpression())
+                .findFirst()
+                .orElse(null);
+    }
 
     @AfterMapping
     default void afterMappingFromCreation(@MappingTarget UserHistory entity, UserHistoryCreationDto dto, @Context MappingContext context) {
