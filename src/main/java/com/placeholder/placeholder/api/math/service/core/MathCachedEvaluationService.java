@@ -5,9 +5,14 @@ import com.placeholder.placeholder.api.math.facade.MathExpressionEvaluation;
 import com.placeholder.placeholder.api.math.facade.MathLibFacade;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.Semaphore;
 
 /**
  * {@code MathCachedEvaluationService} is a service class responsible for evaluating, calculating
@@ -21,21 +26,38 @@ import org.springframework.stereotype.Service;
  * @see MathLibFacade
  */
 @Service
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class MathCachedEvaluationService {
 
     private static final Logger logger = LogManager.getLogger(MathCachedEvaluationService.class);
 
-    private final MathLibFacade mathEclipse;
+    /**
+     * Thread-local holder for MathLibFacade.
+     */
+    private final ThreadLocal<MathLibFacade> threadLocalFacade;
 
     /**
-     * Constructs a cached evaluation service with the given math facade implementation.
+     * Semaphore to limit concurrent Symja evaluations.
+     */
+    private final Semaphore semaphore = new Semaphore(20);
+
+    /**
+     * Constructs a cached evaluation service with a provider for math facade instances.
      *
-     * @param mathEclipse the math library facade used for evaluation
+     * @param facadeProvider the Spring provider for prototype MathLibFacade beans
      */
     @Autowired
-    public MathCachedEvaluationService(MathLibFacade mathEclipse) {
-        this.mathEclipse = mathEclipse;
-        logger.info("MathCachedEvaluationService initialized with MathLibFacade");
+    public MathCachedEvaluationService(ObjectProvider<MathLibFacade> facadeProvider) {
+        // Provider for prototype-scoped MathLibFacade instances.
+        this.threadLocalFacade = ThreadLocal.withInitial(facadeProvider::getObject);
+        logger.info("MathCachedEvaluationService initialized with prototype MathLibFacade provider and semaphore");
+    }
+
+    /**
+     * Retrieves the thread-local MathLibFacade instance.
+     */
+    private MathLibFacade getFacade() {
+        return threadLocalFacade.get();
     }
 
     /**
@@ -46,10 +68,19 @@ public class MathCachedEvaluationService {
      */
     @Cacheable(value = "evaluate", key = "#expression")
     public MathExpressionEvaluation evaluate(String expression) {
-        logger.info("Entering evaluate() with expression: {}", expression);
-        MathExpressionEvaluation result = mathEclipse.evaluate(expression);
-        logger.debug("Result of evaluate('{}'): {}", expression, result);
-        return result;
+        try {
+            semaphore.acquire();
+            logger.info("evaluate() acquired semaphore, permits left={}", semaphore.availablePermits());
+            MathExpressionEvaluation result = getFacade().evaluate(expression);
+            getFacade().clear();
+            return result;
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Interrupted while waiting for Symja permit", ie);
+        } finally {
+            semaphore.release();
+            logger.debug("evaluate() released semaphore, permits left={}", semaphore.availablePermits());
+        }
     }
 
     /**
@@ -62,10 +93,19 @@ public class MathCachedEvaluationService {
      */
     @Cacheable(value = "calculate", key = "#expression + '_' + #data.decimals()")
     public MathExpressionEvaluation calculate(String expression, MathDataDto data) {
-        logger.info("Entering calculate() with expression: {} and decimals: {}", expression, data.decimals());
-        MathExpressionEvaluation result = mathEclipse.calculate(expression, data.decimals());
-        logger.debug("Result of calculate('{}', decimals={}): {}", expression, data.decimals(), result);
-        return result;
+        try {
+            semaphore.acquire();
+            logger.info("calculate() acquired semaphore, permits left={}", semaphore.availablePermits());
+            MathExpressionEvaluation result = getFacade().calculate(expression, data.decimals());
+            getFacade().clear();
+            return result;
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Interrupted while waiting for Symja permit", ie);
+        } finally {
+            semaphore.release();
+            logger.debug("calculate() released semaphore, permits left={}", semaphore.availablePermits());
+        }
     }
 
     /**
@@ -78,25 +118,21 @@ public class MathCachedEvaluationService {
      */
     @Cacheable(value = "draw", key = "#expression + '_' + #data.origin() + '_' + #data.bound()")
     public MathExpressionEvaluation draw(String expression, MathDataDto data) {
-        expression = evaluate(expression).getExpressionEvaluated(); // Pre-evaluation for more optimized process
-        logger.info("Entering draw() with expression: {}, origin: {}, bound: {}",
-                expression, data.origin(), data.bound());
-        String preEvaluatedExpression = evaluate(expression).getExpressionEvaluated();
-        logger.debug("Pre-evaluated expression for draw: {}", preEvaluatedExpression);
-
-        MathExpressionEvaluation result = mathEclipse.draw(preEvaluatedExpression, "x", data.origin(), data.bound());
-        logger.debug("Result of draw('{}', origin={}, bound={}): {}",
-                preEvaluatedExpression, data.origin(), data.bound(), result);
-        return result;
-    }
-
-    /**
-     * Clears the state of the underlying evaluator by removing all stored variables and definitions.
-     */
-    public void clearEvaluator() {
-        logger.info("clearEvaluator() called - clearing math evaluator state");
-        mathEclipse.clear();
-        logger.debug("Math evaluator state cleared");
+        try {
+            semaphore.acquire();
+            logger.info("draw() acquired semaphore, permits left={}", semaphore.availablePermits());
+            // Pre-evaluate expression
+            expression = evaluate(expression).getExpressionEvaluated();
+            MathExpressionEvaluation result = getFacade().draw(expression, "x", data.origin(), data.bound());
+            getFacade().clear();
+            return result;
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Interrupted while waiting for Symja permit", ie);
+        } finally {
+            semaphore.release();
+            logger.debug("draw() released semaphore, permits left={}", semaphore.availablePermits());
+        }
     }
 
     /**
@@ -104,17 +140,14 @@ public class MathCachedEvaluationService {
      */
     public void stopRequest() {
         logger.info("stopRequest() called - stopping ongoing evaluation");
-        mathEclipse.stopRequest();
+        getFacade().stopRequest();
         logger.debug("Ongoing evaluation stopped");
     }
 
     /**
-     * Provides direct access to the underlying MathLibFacade.
-     *
-     * @return the MathLibFacade instance
+     * Provides direct access to the underlying MathLibFacade for advanced operations.
      */
-    public MathLibFacade getFacade() {
-        logger.debug("getFacade() called - returning MathLibFacade instance");
-        return mathEclipse;
+    public MathLibFacade getFacadeInstance() {
+        return getFacade();
     }
 }

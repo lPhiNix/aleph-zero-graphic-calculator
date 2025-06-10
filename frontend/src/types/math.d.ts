@@ -37,9 +37,8 @@ export interface MathApiResponse {
 export interface ExpressionResult {
     evaluation?: string;
     calculation?: string;
-    // Si viene DRAWING, parsearemos a puntos
     drawingPoints?: Array<{ x: number; y: number }>;
     errors?: string[];
-    /** Nuevo campo: el tipo de expresión que devolvió el backend */
     exprType?: MathExpressionEvaluationDto['type'];
+    warnings?: string[];  // Nuevo campo para advertencias
 }

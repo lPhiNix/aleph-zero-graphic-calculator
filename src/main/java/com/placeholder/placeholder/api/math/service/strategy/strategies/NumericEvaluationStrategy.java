@@ -45,10 +45,6 @@ public class NumericEvaluationStrategy implements EvaluationStrategy {
         MathExpressionEvaluation calculation = mathEvaluator.calculate(expression, data);
         MathExpressionEvaluation draw = mathEvaluator.draw(expression, data);
 
-        formatOperations(mathEvaluator.getFacade(), evaluation, calculation);
-
-        mathEvaluator.clearEvaluator();
-
         return List.of(
                 new MathEvaluationDto(MathEvaluationType.EVALUATION,
                         evaluation.getExpressionEvaluated(),

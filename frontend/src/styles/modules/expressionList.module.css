@@ -67,6 +67,10 @@
     outline: none;
 }
 
+.exprInput.hasButtons {
+    padding-right: 12rem; /* suficiente espacio para evitar solapamiento */
+}
+
 .exprInput::placeholder {
     color: #888888;
 }

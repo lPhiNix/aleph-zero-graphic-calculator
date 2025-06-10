@@ -43,10 +43,6 @@ public class MatrixEvaluationStrategy implements EvaluationStrategy {
     public List<MathEvaluationDto> compute(String expression, MathDataDto data) {
         MathExpressionEvaluation evaluation = mathEvaluator.evaluate(expression);
 
-        formatOperations(mathEvaluator.getFacade(), evaluation);
-
-        mathEvaluator.clearEvaluator();
-
         return List.of(
                 new MathEvaluationDto(MathEvaluationType.EVALUATION,
                         evaluation.getExpressionEvaluated(),

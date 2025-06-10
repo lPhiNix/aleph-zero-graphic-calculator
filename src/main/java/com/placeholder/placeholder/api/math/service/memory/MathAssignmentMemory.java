@@ -77,7 +77,11 @@ public class MathAssignmentMemory {
             String var = matcher.group(1);
             String value = matcher.group(2);
             addVariable(var, value);
+            System.out.println(var + " = " + value);
             return var + " = " + value;
+        }
+        for (String s : variableMap.keySet()) {
+            System.out.println(s + " + " + variableMap.get(s));
         }
         return replaceVariables(expression);
     }

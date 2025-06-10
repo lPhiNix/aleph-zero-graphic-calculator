@@ -128,8 +128,6 @@ public class MathExpressionService implements MathEvaluationService {
 
         logger.info("All expressions evaluated; clearing memory");
 
-        // clear memory after evaluation
-        memory.clear();
         context.stopCurrentEvaluation();
 
         MathEvaluationResultResponse response = new MathEvaluationResultResponse(evaluations);

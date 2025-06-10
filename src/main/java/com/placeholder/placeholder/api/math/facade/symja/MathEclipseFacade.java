@@ -3,11 +3,13 @@ package com.placeholder.placeholder.api.math.facade.symja;
 import com.placeholder.placeholder.api.math.facade.MathLibFacade;
 import org.matheclipse.core.eval.EvalUtilities;
 import org.matheclipse.core.eval.ExprEvaluator;
+import org.matheclipse.core.eval.exception.TimeoutException;
 import org.matheclipse.core.form.tex.TeXFormFactory;
 import org.matheclipse.core.interfaces.IExpr;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;

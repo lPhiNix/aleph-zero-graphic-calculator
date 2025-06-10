@@ -1,10 +1,5 @@
 // src/services/mathService.ts
 import axios, { AxiosError } from 'axios';
-import type {
-    MathApiResponse,
-    MathExpressionEvaluationDto,
-    ExpressionResult,
-} from '../types/math';
 
 interface EvaluationRequest {
     expressions: Array<{ expression: string }>;
@@ -60,7 +55,11 @@ async function evaluateSingleExpression(
         const evalDto: MathExpressionEvaluationDto =
             response.data.content.expressionEvaluations[0];
 
-        const result: ExpressionResult = { exprType: evalDto.type };
+        const result: ExpressionResult = {
+            exprType: evalDto.type,
+            warnings: []
+        };
+
         for (const item of evalDto.evaluations) {
             switch (item.evaluationType) {
                 case 'EVALUATION':
@@ -73,8 +72,9 @@ async function evaluateSingleExpression(
                     result.drawingPoints = parseDrawingPoints(item.evaluation);
                     break;
             }
+
             if (item.evaluationProblems?.length) {
-                result.errors = [...(result.errors ?? []), ...item.evaluationProblems];
+                result.warnings = [...(result.warnings ?? []), ...item.evaluationProblems];
             }
         }
         return result;
@@ -82,7 +82,9 @@ async function evaluateSingleExpression(
         if (axios.isAxiosError(error)) {
             const data = (error as AxiosError).response?.data as any;
             if (Array.isArray(data?.errors)) {
-                return { errors: data.errors.map((e: any) => e.message || String(e)) };
+                return {
+                    errors: data.errors.map((e: any) => e.message || String(e))
+                };
             }
         }
         return { errors: ['Error inesperado al comunicarse con el servidor'] };
@@ -113,7 +115,11 @@ export async function evaluateBatchExpressions(
         const dtos = response.data.content.expressionEvaluations;
 
         return dtos.map((evalDto) => {
-            const result: ExpressionResult = { exprType: evalDto.type };
+            const result: ExpressionResult = {
+                exprType: evalDto.type,
+                warnings: []
+            };
+
             for (const item of evalDto.evaluations) {
                 switch (item.evaluationType) {
                     case 'EVALUATION':
@@ -126,8 +132,9 @@ export async function evaluateBatchExpressions(
                         result.drawingPoints = parseDrawingPoints(item.evaluation);
                         break;
                 }
+
                 if (item.evaluationProblems?.length) {
-                    result.errors = [...(result.errors ?? []), ...item.evaluationProblems];
+                    result.warnings = [...(result.warnings ?? []), ...item.evaluationProblems];
                 }
             }
             return result;
@@ -140,9 +147,52 @@ export async function evaluateBatchExpressions(
                 commonError = data.errors.map((e: any) => e.message || String(e));
             }
         }
-        // En caso de fallo global, devolvemos un array del mismo tamaño con el error
-        return exprs.map(() => ({ errors: commonError }));
+        return exprs.map(() => ({
+            errors: commonError,
+            warnings: []
+        }));
     }
 }
 
 export { evaluateSingleExpression };
+
+export type MathEvaluationType = 'EVALUATION' | 'CALCULATION' | 'DRAWING';
+
+export interface MathEvaluationDto {
+    evaluationType: MathEvaluationType;
+    evaluation: string;
+    evaluationProblems?: string[];
+}
+
+export interface MathExpressionEvaluationDto {
+    expression: string;
+    type:
+        | 'FUNCTION'
+        | 'ASSIGNMENT'
+        | 'NUMERIC'
+        | 'EQUATION'
+        | 'MATRIX'
+        | 'VECTOR'
+        | 'BOOLEAN'
+        | 'UNKNOWN'
+        | 'NONE';
+    evaluations: MathEvaluationDto[];
+}
+
+export interface MathApiResponse {
+    code: string;
+    message: string;
+    path: string;
+    content: {
+        expressionEvaluations: MathExpressionEvaluationDto[];
+    };
+}
+
+export interface ExpressionResult {
+    evaluation?: string;
+    calculation?: string;
+    drawingPoints?: Array<{ x: number; y: number }>;
+    errors?: string[];
+    exprType?: MathExpressionEvaluationDto['type'];
+    warnings?: string[];
+}

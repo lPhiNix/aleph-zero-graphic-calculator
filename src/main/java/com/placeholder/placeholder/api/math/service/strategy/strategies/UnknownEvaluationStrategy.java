@@ -44,10 +44,6 @@ public class UnknownEvaluationStrategy implements EvaluationStrategy {
         MathExpressionEvaluation evaluation = mathEvaluator.evaluate(expression);
         MathExpressionEvaluation draw = mathEvaluator.draw(expression, data);
 
-        formatOperations(mathEvaluator.getFacade(), evaluation);
-
-        mathEvaluator.clearEvaluator();
-
         return List.of(
                 new MathEvaluationDto(MathEvaluationType.EVALUATION,
                         evaluation.getExpressionEvaluated(),

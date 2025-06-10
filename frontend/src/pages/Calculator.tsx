@@ -268,6 +268,42 @@ export default function Calculator() {
         });
     }, []);
 
+    const handleDeleteRow = useCallback((idx: number) => {
+        // 1) Expresiones
+        setExpressions(prev => {
+            const u = [...prev];
+            u.splice(idx, 1);
+            return u.length > 0 ? u : [''];
+        });
+        // 2) Colores
+        setColors(prev => {
+            const u = [...prev];
+            u.splice(idx, 1);
+            return u.length > 0 ? u : ['#000000'];
+        });
+        // 3) Disabled flags
+        setDisabledFlags(prev => {
+            const u = [...prev];
+            u.splice(idx, 1);
+            return u.length > 0 ? u : [false];
+        });
+        // 4) Resultados
+        setResults(prev => {
+            const u = [...prev];
+            u.splice(idx, 1);
+            return u.length > 0 ? u : [{}];
+        });
+
+        // 5) Cache de dibujo: eliminar el entry idx y reindexar
+        const newCache: typeof cacheRef.current = {};
+        Object.entries(cacheRef.current).forEach(([key, val]) => {
+            const k = Number(key);
+            if (k === idx) return;       // lo borramos
+            newCache[k > idx ? k - 1 : k] = val;
+        });
+        cacheRef.current = newCache;
+    }, []);
+
     const insertIntoExpression = (v: string) =>
         setExpressions(prev => {
             const u = [...prev];
@@ -294,7 +330,7 @@ export default function Calculator() {
     const evaluateExpression = () => {
         const li = expressions.length - 1;
         if (expressions[li].trim() !== '' && !disabledFlags[li]) {
-            handleExpressionBlur(li, expressions[li]);
+            handleExpressionBlur(li, expressions[li]).then(() => {});
         }
     };
 
@@ -345,7 +381,7 @@ export default function Calculator() {
 
     return (
         <div className={styles.pageContainer}>
-            <Header title="Calculadora con Colores" />
+            <Header title="Placeholder" />
             <div className={styles.mainArea}>
                 {/* ─── IZQUIERDA: CANVAS ───────────────────────────────────────────────────── */}
                 <div className={styles.canvasWrapper}>
@@ -366,6 +402,7 @@ export default function Calculator() {
                         disabledFlags={disabledFlags}
                         onToggleDisabled={handleToggleDisabled}
                         expressionTypes={results.map((r) => r.exprType)}
+                        onDeleteRow={handleDeleteRow}
                         results={results}
                     />
 
