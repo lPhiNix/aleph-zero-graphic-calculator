@@ -12,7 +12,7 @@
     display: flex;
     flex-direction: column;
     height: 100vh;
-    background: var(--background-color);
+    background: var(--login-background-color);
 }
 
 .mainArea {

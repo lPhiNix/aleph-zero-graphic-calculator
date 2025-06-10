@@ -13,7 +13,6 @@ function App() {
               <Route path="/oauth2/callback" element={<Callback />} />
               <Route path={"/"} element={<Dashboard />} />
               <Route path="/calculator"    element={<Calculator />} />
-              {/* otras rutas */}
           </Routes>
       </Router>
   )

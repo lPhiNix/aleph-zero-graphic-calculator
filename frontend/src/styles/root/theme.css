@@ -1,5 +1,5 @@
 :root {
-    --background-color: var(--color-white);
+    --login-background-color: var(--color-white);
     --app-color: var(--primary-color);
     --app-secondary-color: var(--secondary-color);
 

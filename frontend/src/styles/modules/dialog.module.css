@@ -3,7 +3,7 @@
     height: 100vh;
     justify-content: center;
     align-items: center;
-    background: var(--background-color);
+    background: var(--login-background-color);
 }
 
 .toast {
