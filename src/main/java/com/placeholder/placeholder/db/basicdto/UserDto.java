@@ -5,8 +5,6 @@ import java.io.Serializable;
 
 public record UserDto(
         String publicId,
-        String username,
-        String email,
-        UserRoleDto role
+        String username
 ) implements Serializable {
 }

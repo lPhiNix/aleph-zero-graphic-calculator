@@ -24,7 +24,7 @@ public class MathUserHistoryController {
     private final UserHistoryMapper userHistoryMapper;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Void>> createUserHistory(@RequestBody UserHistoryCreationDto request) {
+    public ResponseEntity<ApiResponse<Void>> addEntryToUserHistory(@RequestBody UserHistoryCreationDto request) {
         UserHistory history = mathUserHistoryService.createUserHistory(request);
         URI location = UriHelperBuilder.buildUriFromCurrentRequest(history.getId());
         return apiMessageFactory.response().created(location).build();

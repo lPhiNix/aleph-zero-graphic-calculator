@@ -1,7 +1,5 @@
 package com.placeholder.placeholder.db.basicdto;
 
-import com.placeholder.placeholder.api.math.dto.request.MathExpressionDto;
-
 import java.io.Serializable;
 
 /**
@@ -9,5 +7,5 @@ import java.io.Serializable;
  */
 public record HistoryExpressionDto(
         Integer id,
-        MathExpressionDto mathExpression) implements Serializable {
+        MathExpressionResponseDto mathExpression) implements Serializable {
   }
