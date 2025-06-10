@@ -1,10 +1,10 @@
 package com.placeholder.placeholder.api.util.common.messages.dto.error;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.placeholder.placeholder.api.util.common.messages.dto.content.MessageContent;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.details.ApiErrorDetail;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.details.ValidationErrorDetail;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -18,5 +18,4 @@ public record ErrorResponse(
         String title,
         String summary,
         List<ApiErrorDetail> errors
-) implements MessageContent
-{ }
+) implements Serializable { }

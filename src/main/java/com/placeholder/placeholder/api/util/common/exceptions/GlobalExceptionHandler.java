@@ -1,11 +1,11 @@
 package com.placeholder.placeholder.api.util.common.exceptions;
 
-import com.placeholder.placeholder.util.config.enums.AppCode;
+import com.placeholder.placeholder.api.util.common.messages.ApiMessageFactory;
 import com.placeholder.placeholder.api.util.common.messages.ApiResponseFactory;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.ErrorCategory;
-import com.placeholder.placeholder.api.util.common.messages.dto.error.details.ErrorDetail;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.details.ValidationErrorDetail;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.ErrorResponse;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
@@ -15,8 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.List;
 
 /**
  * Global exception handler for the application.  This class provides centralized handling for various
@@ -29,26 +27,19 @@ import java.util.List;
         */
 @RestControllerAdvice
 @Order(Ordered.LOWEST_PRECEDENCE)
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
     /**
      * The default error message used when a more specific message is not available.
      */
-    public static final String DEFAULT_ERROR_MESSAGE = "An unexpected error occurred";
+    public static final String GENERIC_ERROR_MESSAGE = "An unexpected error occurred";
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
 
     private final ApiResponseFactory responseFactory;
+    private final ApiMessageFactory messageFactory;
 
-    /**
-     * Constructor for {@code GlobalExceptionHandler}.
-     *
-     * @param responseFactory The {@link ApiResponseFactory} used to construct standardized API responses,
-     * including error responses.
-     */
-    public GlobalExceptionHandler(ApiResponseFactory responseFactory) {
-        this.responseFactory = responseFactory;
-    }
 
     /**
      * Handles any uncaught exception.  This is the catch-all handler that deals with
@@ -60,14 +51,8 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllExceptions(Exception ex) {
-        logger.error("RuntimeException caught: {}", ex.getMessage(), ex);
-        return responseFactory.error(
-                AppCode.INTERNAL_ERROR,
-                "Runtime error",
-                List.of(new ErrorDetail(ErrorCategory.INTERNAL,
-                        (ex.getCause() != null) ? ex.getCause().getMessage() : DEFAULT_ERROR_MESSAGE,
-                        DEFAULT_ERROR_MESSAGE))
-        );
+        logger.error("Unhandled exception caught: {}", ex.getMessage(), ex);
+        return messageFactory.error().internal(GENERIC_ERROR_MESSAGE).build();
     }
 
     /**
@@ -79,13 +64,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex) {
         logger.error("RuntimeException caught: {}", ex.getMessage(), ex);
-        return responseFactory.error(
-                AppCode.INTERNAL_ERROR,
-                "Runtime error",
-                List.of(new ErrorDetail(ErrorCategory.INTERNAL,
-                        (ex.getCause() != null) ? ex.getCause().getMessage() : DEFAULT_ERROR_MESSAGE,
-                        DEFAULT_ERROR_MESSAGE))
-        );
+        return messageFactory.error()
+                .internal("An unexpected runtime error occurred during request processing")
+                .build();
     }
 
     /**
@@ -96,14 +77,10 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
-        logger.warn("IllegalArgumentException caught: {}", ex.getMessage(), ex);
-        return responseFactory.error(
-                AppCode.BAD_REQUEST,
-                "Invalid argument",
-                List.of(new ErrorDetail(ErrorCategory.INTERNAL,
-                        (ex.getCause() != null) ? ex.getCause().getMessage() : DEFAULT_ERROR_MESSAGE,
-                        DEFAULT_ERROR_MESSAGE))
-        );
+        logger.error("IllegalArgumentException caught: {}", ex.getMessage(), ex);
+        return messageFactory.error()
+                .badRequest("The request contains one or more invalid arguments. Please verify your input.")
+                .build();
     }
 
     /**
@@ -115,14 +92,10 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ErrorResponse> handleIllegalStateException(IllegalStateException ex) {
-        logger.warn("IllegalStateException caught: {}", ex.getMessage(), ex);
-        return responseFactory.error(
-                AppCode.CONFLICT,
-                "Illegal state",
-                List.of(new ErrorDetail(ErrorCategory.INTERNAL,
-                        (ex.getCause() != null) ? ex.getCause().getMessage() : DEFAULT_ERROR_MESSAGE,
-                        DEFAULT_ERROR_MESSAGE))
-        );
+        logger.error("IllegalStateException caught: {}", ex.getMessage(), ex);
+        return messageFactory.error()
+                .conflict("The application encountered an invalid state while processing the request.")
+                .build();
     }
 
     /**
@@ -148,12 +121,12 @@ public class GlobalExceptionHandler {
                 ex.getValue()
         );
 
-        return responseFactory.error(
-                AppCode.BAD_REQUEST,
-                "Type mismatch",
-                List.of(detail)
-        );
+        return messageFactory.error()
+                .badRequest("Type mismatch")
+                .detail(detail)
+                .build();
     }
+
 
     /**
      * Handles {@link HttpMessageNotReadableException}. This exception is thrown when the HTTP message body is not readable,
@@ -165,17 +138,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
         logger.warn("HttpMessageNotReadableException caught: {}", ex.getMessage(), ex);
-        ErrorDetail detail = new ErrorDetail(
-                ErrorCategory.VALIDATION,
-                "Request body error",
-                "Message body is not readable"
-        );
-
-        return responseFactory.error(
-                AppCode.BAD_REQUEST,
-                "Malformed request body",
-                List.of(detail)
-        );
+        return messageFactory.error()
+                .badRequest("Message body not readable, request may be malformed")
+                .build();
     }
 }
 

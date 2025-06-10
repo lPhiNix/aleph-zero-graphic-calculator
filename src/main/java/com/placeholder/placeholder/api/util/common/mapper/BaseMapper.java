@@ -1,15 +1,6 @@
-package com.placeholder.placeholder.util.mapper;
+package com.placeholder.placeholder.api.util.common.mapper;
 
-import org.mapstruct.MapperConfig;
 
-/**
- * Base interface for DTO<-->ENTITY mappers
- * @param <E> JPA Entity
- * @param <D> Base DTO
- */
-@MapperConfig(
-        componentModel = "spring"                    //Spring dependency injection
-)
 public interface BaseMapper<E, D> {
 
     /**

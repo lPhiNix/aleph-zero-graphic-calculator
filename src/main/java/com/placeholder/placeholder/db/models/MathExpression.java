@@ -7,8 +7,6 @@ import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.time.Instant;
-import java.util.Map;
 
 @Getter
 @Setter
@@ -21,20 +19,16 @@ public class MathExpression {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
     @Column(name = "expression")
     private String expression;
 
-    @Column(name = "points_snapshot")
+    @Lob
+    @Column(name = "points")
+    private String points;
+
+    @Lob
+    @Column(name = "preferences", columnDefinition = "LONGTEXT")
     @JdbcTypeCode(SqlTypes.JSON)
-    private Map<String, Object> pointsSnapshot;
+    private MathExpressionPreferences preferences;
 
-    @Column(name = "created_at")
-    private Instant createdAt;
-
-    @Column(name = "updated_at")
-    private Instant updatedAt;
 }

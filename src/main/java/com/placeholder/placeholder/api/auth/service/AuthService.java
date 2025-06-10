@@ -1,6 +1,7 @@
 package com.placeholder.placeholder.api.auth.service;
 
 import com.placeholder.placeholder.api.auth.dto.RegistrationFormDto;
+import com.placeholder.placeholder.api.math.service.persistence.MathUserHistoryService;
 import com.placeholder.placeholder.api.user.service.UserRoleService;
 import com.placeholder.placeholder.api.user.service.UserService;
 import com.placeholder.placeholder.db.models.User;
@@ -27,6 +28,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AuthService {
     private final UserService userService;
+
     private final UserRoleService userRoleService;
     private final PasswordEncoder passwordEncoder;
 

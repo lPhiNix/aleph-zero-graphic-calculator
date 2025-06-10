@@ -52,7 +52,7 @@ public enum AppCode {
      * <p>
      * Maps to HTTP 400 Bad Request.
      */
-    BAD_REQUEST(HttpStatus.BAD_REQUEST, "Bad request"),
+    BAD_REQUEST(HttpStatus.BAD_REQUEST, "Malformed request"),
 
     /**
      * The server timed out waiting for the request.
@@ -94,7 +94,7 @@ public enum AppCode {
      * <p>
      * Maps to HTTP 405 Method Not Allowed.
      */
-    METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "Method not allowed"),
+    METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "HTTP Method is not supported"),
 
     /**
      * The resource cannot generate content acceptable according to the Accept headers.
@@ -132,7 +132,7 @@ public enum AppCode {
      * <p>
      * Maps to HTTP 409 Conflict.
      */
-    DUPLICATE_ENTITY(HttpStatus.CONFLICT, "Duplicate entity"),
+    INTEGRITY_VIOLATION(HttpStatus.CONFLICT, "Database integrity violation"),
 
     // --- Server errors ---
 

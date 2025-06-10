@@ -1,27 +1,24 @@
 package com.placeholder.placeholder.api.util.common.exceptions;
 
 import com.placeholder.placeholder.util.config.enums.AppCode;
-import com.placeholder.placeholder.api.util.common.messages.ApiResponseFactory;
-import com.placeholder.placeholder.api.util.common.messages.dto.error.ErrorCategory;
-import com.placeholder.placeholder.api.util.common.messages.dto.error.details.ErrorDetail;
+import com.placeholder.placeholder.api.util.common.messages.ApiMessageFactory;
 import com.placeholder.placeholder.api.util.common.messages.dto.error.ErrorResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.util.List;
 /**
  * Exception handler focused on handling HTTP-specific exceptions such as:
  * - Unsupported HTTP methods
  * - Unsupported or unacceptable media types
  * - Authentication and authorization errors
- *<p>
+ * <p>
  * This handler is assigned an explicit order using {@link Order} to allow coordination
  * with other exception handlers in the system.
  * </p>
@@ -29,16 +26,17 @@ import java.util.List;
 @ControllerAdvice
 @Order(3)
 public class HTTPExceptionHandler {
+    private static final Logger logger = LoggerFactory.getLogger(HTTPExceptionHandler.class);
 
-    private final ApiResponseFactory responseFactory;
+    private final ApiMessageFactory messageFactory;
 
     /**
      * Constructor for {@code HTTPExceptionHandler}.
      *
-     * @param responseFactory The factory used to generate standardized error responses.
+     * @param messageFactory The factory used to generate standardized error responses.
      */
-    public HTTPExceptionHandler(ApiResponseFactory responseFactory) {
-        this.responseFactory = responseFactory;
+    public HTTPExceptionHandler(ApiMessageFactory messageFactory) {
+        this.messageFactory = messageFactory;
     }
 
     /**
@@ -52,11 +50,11 @@ public class HTTPExceptionHandler {
     public ResponseEntity<ErrorResponse> handleMethodNotSupported(
             HttpRequestMethodNotSupportedException ex
     ) {
-        return responseFactory.error(
-                AppCode.METHOD_NOT_ALLOWED,
-                "HTTP Method is not supported",
-                ex.getMethod() + " is not allowed to perform this request"
-        );
+        logger.warn("Unsupported HTTP method: {}", ex.getMethod(), ex);
+        return messageFactory.error()
+                .code(AppCode.METHOD_NOT_ALLOWED)
+                .summary(String.format("The HTTP method '%s' is not supported for this endpoint.", ex.getMethod()))
+                .build();
     }
 
     /**
@@ -70,19 +68,11 @@ public class HTTPExceptionHandler {
     public ResponseEntity<ErrorResponse> handleUnsupportedMediaType(
             HttpMediaTypeNotSupportedException ex
     ) {
-        String message = "Unsupported media type: " + ex.getContentType();
-        ErrorDetail detail = new ErrorDetail(
-                ErrorCategory.INTERNAL,
-                (ex.getCause() != null) ? ex.getCause().getMessage() : message,
-                message
-        );
-
-        return responseFactory.error(
-                AppCode.UNSUPPORTED_MEDIA_TYPE,
-                message,
-                ex.getMessage(),
-                List.of(detail)
-        );
+        logger.warn("Unsupported media type: {}", ex.getContentType(), ex);
+        return messageFactory.error()
+                .code(AppCode.UNSUPPORTED_MEDIA_TYPE)
+                .summary("The specified media type is not supported.")
+                .build();
     }
 
     /**
@@ -96,75 +86,9 @@ public class HTTPExceptionHandler {
     public ResponseEntity<ErrorResponse> handleMediaTypeNotAcceptable(
             HttpMediaTypeNotAcceptableException ex
     ) {
-        String message = "Not acceptable media type";
-        ErrorDetail detail = new ErrorDetail(
-                ErrorCategory.INTERNAL,
-                (ex.getCause() != null) ? ex.getCause().getMessage() : message,
-                message
-        );
-
-        return responseFactory.error(
-                AppCode.NOT_ACCEPTABLE,
-                message,
-                ex.getMessage(),
-                List.of(detail)
-        );
-    }
-
-    // THESE TWO WILL BE MOVED TO ANOTHER HANDLER
-
-    /**
-     * Handles authorization failures where the client is authenticated but does not have
-     * sufficient privileges to access the requested resource (e.g., role restrictions).
-     *
-     * ⚠ This handler may later be extracted to a dedicated AuthExceptionHandler.
-     *
-     * @param ex Exception indicating access is denied.
-     * @return A {@link ResponseEntity} containing an {@link ErrorResponse} with FORBIDDEN status.
-     */
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleAccessDenied(
-            AccessDeniedException ex
-    ) {
-        String message = "Access denied: insufficient permissions";
-        ErrorDetail detail = new ErrorDetail(
-                ErrorCategory.AUTHORIZATION,
-                (ex.getCause() != null) ? ex.getCause().getMessage() : message,
-                message
-        );
-
-        return responseFactory.error(
-                AppCode.FORBIDDEN,
-                message,
-                ex.getMessage(),
-                List.of(detail)
-        );
-    }
-
-    /**
-     * Handles authentication failures, such as missing credentials, invalid tokens,
-     * or incorrect username/password. This is distinct from access denial.
-     *
-     * @param ex Exception related to authentication problems.
-     * @return A {@link ResponseEntity} containing an {@link ErrorResponse} with UNAUTHORIZED status.
-     */
-    @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ErrorResponse> handleAuthenticationException(
-            AuthenticationException ex
-    ) {
-        String message = "Authentication failed: " + ex.getMessage();
-        ErrorDetail detail = new ErrorDetail(
-                ErrorCategory.AUTHENTICATION,
-                (ex.getCause() != null) ? ex.getCause().getMessage() : message,
-                message
-        );
-
-        return responseFactory.error(
-                AppCode.UNAUTHORIZED,
-                message,
-                ex.getMessage(),
-                List.of(detail)
-        );
+        return messageFactory.error()
+                .code(AppCode.NOT_ACCEPTABLE)
+                .summary("The server cannot respond with a content type acceptable by the client.")
+                .build();
     }
 }
-
