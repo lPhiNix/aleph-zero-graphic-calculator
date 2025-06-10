@@ -2,6 +2,7 @@ package com.placeholder.placeholder.api.math;
 
 import com.placeholder.placeholder.api.auth.service.SquipUserDetailService;
 import com.placeholder.placeholder.api.math.dto.request.UserHistoryCreationDto;
+import com.placeholder.placeholder.api.math.dto.request.UserHistoryUpdateDto;
 import com.placeholder.placeholder.api.math.dto.response.SimpleUserHistoryDto;
 import com.placeholder.placeholder.api.math.service.persistence.MathExpressionPersistenceService;
 import com.placeholder.placeholder.api.math.service.persistence.MathUserHistoryService;
@@ -34,6 +35,14 @@ public class MathUserHistoryController {
         URI location = UriHelperBuilder.buildUriFromCurrentRequest(history.getId());
         return apiMessageFactory.response().created(location).build();
     }
+
+    @PreAuthorize("@userHistorySecurity.hasAccessTo(#id, authentication)")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteUserHistory(@PathVariable Integer id) {
+        mathUserHistoryService.deleteById(id);
+        return apiMessageFactory.response().noContent().build();
+    }
+
 
     @PreAuthorize("@userHistorySecurity.hasAccessTo(#id, authentication)")
     @GetMapping("/{id}")
