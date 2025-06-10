@@ -36,14 +36,11 @@ public class MathUserHistoryController {
         return apiMessageFactory.response().created(location).build();
     }
 
+    @PreAuthorize("@userHistorySecurity.hasAccessTo(#id, authentication)")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<UserHistoryDto>> getUserHistory(@PathVariable Integer id) {
         UserHistory entity = mathUserHistoryService.findByIdReadOnly(id);
         User owner = squipUserDetailService.getCurrentUser();
-
-        if (!owner.equals(entity.getUser())) {
-            throw new AccessDeniedException(String.format("Entry %d does not belong to user: %s", entity.getId(), owner.getUsername()));
-        }
 
         UserHistoryDto dto =  userHistoryMapper.toResponseDtoFromEntity(entity);
         return apiMessageFactory.response(dto).ok().build();
