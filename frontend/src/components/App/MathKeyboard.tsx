@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import styles from '../../styles/modules/mathKeyboard.module.css';
+import styles from '../../styles/modules/mathkeyboard.module.css';
 
 interface KeyButton {
     label: string;
@@ -85,7 +85,7 @@ function Submenu({
                  }: {
     items: KeyButton[];
     categories?: CategoryConfig[];
-    submenuRef: React.RefObject<HTMLDivElement>;
+    submenuRef: React.RefObject<HTMLDivElement | null>; // 🔧 modificado aquí
     children?: React.ReactNode;
 }) {
     return (
@@ -111,8 +111,9 @@ export default function MathKeyboard({
                                      }: MathKeyboardProps) {
     const [openMenu, setOpenMenu] = useState<null | 'math' | 'symja' | 'constants'>(null);
 
-    const toolbarRef = useRef<HTMLDivElement>(null);
-    const submenuRef = useRef<HTMLDivElement>(null);
+    const toolbarRef = useRef<HTMLDivElement | null>(null);
+    const submenuRef = useRef<HTMLDivElement | null>(null);
+
 
     useEffect(() => {
         if (!openMenu) return;

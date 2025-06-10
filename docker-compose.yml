@@ -1,44 +1,55 @@
-version: '3.8'
-
-# NOTA: NO EJECUTAR COMPOSE UP DENTRO DEL PROYECTO, COPIA ESTE ARCHIVO A UNA CARPETA A PARTE
-# NOTA: DURANTE EL DESARROLLO HAZ SOLO COMPOSE DE LA BASE DE DATOS
-
 services:
-  db:
-    image: mysql:8.0
-    container_name: mysql-db
-    restart: always
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_DATABASE: mysqldb
-      MYSQL_ROOT_PASSWORD: 1234
-    volumes:
-      - db-data:/var/lib/mysql
-
   backend:
-    build: ./backend
-    container_name: springboot-app
-    restart: always
-    ports:
-      - "8080:8080"
+    build: ./
+    container_name: backend
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/appdb?useSSL=false&serverTimezone=UTC
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: 1234
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/mysqldb
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
     depends_on:
       - db
+    networks:
+      - internal
 
   frontend:
-    build: ./frontend
-    container_name: react-frontend
-    ports:
-      - "5173:5173"
-    restart: always
-    depends_on:
-      - backend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    networks:
+      - internal
+
+  db:
+    image: mysql:latest
+    container_name: mysql
     environment:
-      VITE_API_URL: http://backend:8080 # acceso interno dentro de la red de Docker
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: root
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - internal
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/fullchain.pem:/etc/nginx/certs/fullchain.pem:ro
+      - ./nginx/privkey.pem:/etc/nginx/certs/privkey.pem:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - internal
 
 volumes:
-  db-data:
+  db_data:
+
+networks:
+  internal:
