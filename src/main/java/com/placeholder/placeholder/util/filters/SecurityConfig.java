@@ -1,6 +1,6 @@
 package com.placeholder.placeholder.util.filters;
 
-import com.placeholder.placeholder.util.CustomAccessDeniedHandler;
+import com.placeholder.placeholder.util.exceptions.CustomAccessDeniedHandler;
 import com.placeholder.placeholder.util.exceptions.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
