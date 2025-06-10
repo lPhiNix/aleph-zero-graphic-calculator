@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styles from '../../styles/modules/mathKeyboard.module.css';
 
 interface KeyButton {
@@ -9,7 +9,6 @@ interface KeyButton {
     category?: string;
 }
 
-// Nuevo tipo para la configuración de categorías
 interface CategoryConfig {
     name: string;
     columns: number;
@@ -26,7 +25,6 @@ interface MathKeyboardProps {
     onAnyKeyPress?: (label: string) => void;
 }
 
-// Helper para grid por categoría
 function CategoryGrid({
                           items,
                           categories,
@@ -36,7 +34,6 @@ function CategoryGrid({
     categories?: CategoryConfig[];
     onAnyKeyPress?: (label: string) => void;
 }) {
-    // Agrupa por categoría
     const grouped: Record<string, KeyButton[]> = {};
     for (const k of items) {
         const cat = k.category || 'Sin categoría';
@@ -47,7 +44,6 @@ function CategoryGrid({
     return (
         <div>
             {Object.entries(grouped).map(([cat, btns]) => {
-                // Busca config de columnas
                 const col = categories?.find(c => c.name === cat)?.columns ?? 5;
                 return (
                     <div key={cat} style={{ marginBottom: "1.5rem" }}>
@@ -81,6 +77,43 @@ function CategoryGrid({
     );
 }
 
+function Submenu({
+                     items,
+                     categories,
+                     submenuRef,
+                     children,
+                 }: {
+    items: KeyButton[];
+    categories?: CategoryConfig[];
+    submenuRef: React.RefObject<HTMLDivElement>;
+    children?: React.ReactNode;
+}) {
+    return (
+        <div
+            ref={submenuRef}
+            className={styles.categorySubmenu}
+            style={{
+                position: 'absolute',
+                left: 0,
+                top: '2.5rem',
+                minWidth: '16rem',
+                maxHeight: '45.5vh',
+                overflowY: 'auto',
+                background: '#222',
+                color: '#fff',
+                border: '1px solid #444',
+                zIndex: 20,
+                borderRadius: '0 0 6px 6px',
+                boxShadow: '0 3px 12px 0 #000c',
+                padding: '0.5rem 0.7rem'
+            }}
+        >
+            <CategoryGrid items={items} categories={categories} />
+            {children}
+        </div>
+    );
+}
+
 export default function MathKeyboard({
                                          keys,
                                          symjaKeys,
@@ -93,40 +126,33 @@ export default function MathKeyboard({
                                      }: MathKeyboardProps) {
     const [openMenu, setOpenMenu] = useState<null | 'math' | 'symja' | 'constants'>(null);
 
-    function Submenu({
-                         items,
-                         categories,
-                         onClose,
-                     }: {
-        items: KeyButton[];
-        categories?: CategoryConfig[];
-        onClose: () => void;
-    }) {
-        return (
-            <div
-                style={{
-                    position: 'absolute',
-                    left: 0,
-                    top: '2.5rem',
-                    background: '#222',
-                    color: '#fff',
-                    border: '1px solid #444',
-                    minWidth: '16rem',
-                    zIndex: 20,
-                    borderRadius: '0 0 6px 6px',
-                    boxShadow: '0 3px 12px 0 #000c',
-                    padding: '0.5rem 0.7rem'
-                }}
-                onMouseLeave={onClose}
-            >
-                <CategoryGrid items={items} categories={categories} onAnyKeyPress={onAnyKeyPress} />
-            </div>
-        );
-    }
+    const toolbarRef = useRef<HTMLDivElement>(null);
+    const submenuRef = useRef<HTMLDivElement>(null);
+
+    // Cierra el submenu si haces click fuera del toolbar y del submenu
+    useEffect(() => {
+        if (!openMenu) return;
+        function handleClick(e: MouseEvent) {
+            if (
+                toolbarRef.current &&
+                !toolbarRef.current.contains(e.target as Node) &&
+                submenuRef.current &&
+                !submenuRef.current.contains(e.target as Node)
+            ) {
+                setOpenMenu(null);
+            }
+        }
+        window.addEventListener('mousedown', handleClick);
+        return () => window.removeEventListener('mousedown', handleClick);
+    }, [openMenu]);
 
     return (
         <div className={styles.keyboardContainer}>
-            <div className={styles.toolbar} style={{ position: 'relative', display: 'flex', gap: 8 }}>
+            <div
+                className={styles.toolbar}
+                ref={toolbarRef}
+                style={{ position: 'relative', display: 'flex', gap: 8 }}
+            >
                 <button
                     type="button"
                     className={styles.dropdownButton}
@@ -139,7 +165,7 @@ export default function MathKeyboard({
                     <Submenu
                         items={mathFuncKeys}
                         categories={mathCategoryConfig}
-                        onClose={() => setOpenMenu(null)}
+                        submenuRef={submenuRef}
                     />
                 )}
                 <button
@@ -154,7 +180,7 @@ export default function MathKeyboard({
                     <Submenu
                         items={symjaKeys}
                         categories={symjaCategoryConfig}
-                        onClose={() => setOpenMenu(null)}
+                        submenuRef={submenuRef}
                     />
                 )}
                 <button
@@ -169,7 +195,7 @@ export default function MathKeyboard({
                     <Submenu
                         items={constantKeys}
                         categories={constantCategoryConfig}
-                        onClose={() => setOpenMenu(null)}
+                        submenuRef={submenuRef}
                     />
                 )}
             </div>
