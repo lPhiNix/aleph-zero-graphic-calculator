@@ -4,7 +4,8 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-snapshots
+snapshots/*.jpg
+!snapshots/placeholder.jpg
 
 ### STS ###
 .apt_generated
