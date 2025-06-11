@@ -36,14 +36,8 @@ public class CorsConfig {
      */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        String cleanFrontendUrl = frontendUrl;
-        if ((frontendUrl.contains("localhost") || frontendUrl.contains("127.0.0.1")) &&
-                (frontendUrl.endsWith(":80") || frontendUrl.endsWith(":443"))) {
-            cleanFrontendUrl = frontendUrl.substring(0, frontendUrl.lastIndexOf(':'));
-        }
-
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of(cleanFrontendUrl + "*"));
+        configuration.setAllowedOrigins(List.of(frontendUrl));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
