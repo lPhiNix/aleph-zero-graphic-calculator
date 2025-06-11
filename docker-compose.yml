@@ -1,44 +1,72 @@
-version: '3.8'
-
-# NOTA: NO EJECUTAR COMPOSE UP DENTRO DEL PROYECTO, COPIA ESTE ARCHIVO A UNA CARPETA A PARTE
-# NOTA: DURANTE EL DESARROLLO HAZ SOLO COMPOSE DE LA BASE DE DATOS
-
 services:
-  db:
-    image: mysql:8.0
-    container_name: mysql-db
-    restart: always
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_DATABASE: mysqldb
-      MYSQL_ROOT_PASSWORD: 1234
-    volumes:
-      - db-data:/var/lib/mysql
-
   backend:
-    build: ./backend
-    container_name: springboot-app
-    restart: always
-    ports:
-      - "8080:8080"
+    build: .
+    container_name: backend
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/appdb?useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/mysqldb
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: 1234
+      SPRING_DATASOURCE_PASSWORD: root
+      FRONTEND_URL: http://localhost
     depends_on:
-      - db
+      - db  # Wait for DB container to start (no healthcheck)
+    ports:
+      - "8080:8080"  # Expose backend on host port 8080
+    networks:
+      - internal  # Backend connects only to internal network (not exposed externally)
+    restart: unless-stopped  # Restart policy to keep container running unless stopped manually
+    logging:
+      driver: json-file  # Limit log file size and rotation to avoid disk bloat
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   frontend:
-    build: ./frontend
-    container_name: react-frontend
-    ports:
-      - "5173:5173"
-    restart: always
-    depends_on:
-      - backend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
     environment:
-      VITE_API_URL: http://backend:8080 # acceso interno dentro de la red de Docker
+      VITE_BACKEND_URL: http://localhost:8080
+      VITE_FRONTEND_URL: http://localhost
+    ports:
+      - "80:80" #for PROD (Http only)
+    depends_on:
+      - backend  # Wait for backend container to start
+    networks:
+      - internal  # Agregado para que frontend pueda llamar al backend por nombre de servicio
+      - frontend_net  # Also connected to frontend_net to expose frontend externally
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  db:
+    image: mysql:latest
+    container_name: mysql
+    environment:
+      # Credentials and DB name for MySQL (development generic values)
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mysqldb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    volumes:
+      - db_data:/var/lib/mysql  # Persist DB data across container restarts
+    networks:
+      - internal  # DB only accessible inside internal network
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
-  db-data:
+  db_data:  # Volume for persistent MySQL data
+
+networks:
+  internal:
+    driver: bridge  # Internal network for backend and db communication only
+  frontend_net:
+    driver: bridge  # Network to expose frontend externally

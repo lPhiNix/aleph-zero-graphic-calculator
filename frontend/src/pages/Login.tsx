@@ -12,12 +12,16 @@ const Login: React.FC = () => {
             sessionStorage.setItem("code_challenge", code_challenge);
 
             const clientId = "react-client";
-            const redirectUri = encodeURIComponent("http://localhost:5173/oauth2/callback");
+
+            const backendUrl = window.ENV?.VITE_BACKEND_URL || "http://localhost:8080";
+            const frontendUrl = window.ENV?.VITE_FRONTEND_URL || "http://localhost:5173";
+
+            const redirectUri = encodeURIComponent(`${frontendUrl}/oauth2/callback`);
             const scope = encodeURIComponent("openid read");
             const responseType = "code";
             const codeChallengeMethod = "S256";
 
-            window.location.href = `http://localhost:8080/oauth2/authorize?response_type=${responseType}&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&code_challenge=${code_challenge}&code_challenge_method=${codeChallengeMethod}`;
+            window.location.href = `${backendUrl}/oauth2/authorize?response_type=${responseType}&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&code_challenge=${code_challenge}&code_challenge_method=${codeChallengeMethod}`;
         }
 
         generatePkce();

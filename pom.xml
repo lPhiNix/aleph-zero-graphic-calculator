@@ -15,7 +15,7 @@
 
     <groupId>com.placeholder</groupId>
     <artifactId>placeholder</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
     <name>placeholder</name>
     <description>Mathematical function plotter with Java Spring and React.</description>
 
@@ -27,7 +27,7 @@
         <org.mapstruct.version>1.6.3</org.mapstruct.version>
         <log4j2.version>2.24.3</log4j2.version>
         <jjwt.version>0.12.6</jjwt.version>
-        <antlr4.version>4.13.1</antlr4.version>
+        <antlr4.version>4.13.0</antlr4.version>
         <springdoc.version>2.8.6</springdoc.version>
         <lombok.version>1.18.38</lombok.version>
     </properties>
@@ -191,12 +191,6 @@
 
     <build>
         <plugins>
-            <!-- Spring Boot Maven Plugin for packaging -->
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-
             <!-- Maven Compiler Plugin with annotation processors -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -239,34 +233,20 @@
                 </configuration>
             </plugin>
 
-            <!-- Maven Assembly Plugin to create uber-jar with dependencies -->
+            <!-- Spring Boot Maven Plugin for packaging -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.3.0</version>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>3.4.4</version>
                 <executions>
                     <execution>
-                        <phase>package</phase>
                         <goals>
-                            <goal>single</goal> <!-- Build single assembly -->
+                            <goal>repackage</goal>
                         </goals>
-                        <configuration>
-                            <appendAssemblyId>false</appendAssemblyId> <!-- No extra classifier -->
-                            <archive>
-                                <manifest>
-                                    <mainClass>com.placeholder.placeholder.PlaceholderApplication</mainClass> <!-- Main class -->
-                                </manifest>
-                                <manifestEntries>
-                                    <Multi-Release>true</Multi-Release>
-                                </manifestEntries>
-                            </archive>
-                            <descriptorRefs>
-                                <descriptorRef>jar-with-dependencies</descriptorRef> <!-- Include dependencies -->
-                            </descriptorRefs>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
     </build>
 </project>

@@ -1,4 +1,3 @@
-DROP SCHEMA IF EXISTS mysqldb;
 CREATE SCHEMA IF NOT EXISTS mysqldb;
 USE mysqldb;
 
@@ -10,7 +9,7 @@ CREATE TABLE IF NOT EXISTS user_role
     description VARCHAR(100)
 );
 
-INSERT INTO user_role (name, description)
+INSERT IGNORE INTO user_role (name, description)
 VALUES
     ('ADMIN', 'Administrator with full access rights'),
     ('USER', 'Regular user with limited access rights');

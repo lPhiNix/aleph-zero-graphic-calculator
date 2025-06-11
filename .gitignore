@@ -1,38 +1,52 @@
-HELP.md
+# === Maven / Java build artifacts ===
 target/
-!.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+HELP.md
 
+# Maven wrapper JAR
+!.mvn/wrapper/maven-wrapper.jar
+
+# === Gradle build artifacts ===
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+.nb-gradle/
+
+# === Frontend build (e.g., Vite, React) ===
+frontend/dist/
+frontend/node_modules/
+
+# === Docker volumes / mounted folders ===
+db-data/
+db_data/
 snapshots/*.jpg
 !snapshots/placeholder.jpg
 
-### STS ###
+# === Spring Tool Suite (STS) ===
 .apt_generated
 .classpath
 .factorypath
 .project
-.settings
+.settings/
 .springBeans
-.sts4-cache
+.sts4-cache/
 
-### IntelliJ IDEA ###
-.idea
+# === IntelliJ IDEA ===
+.idea/
 *.iws
 *.iml
 *.ipr
 
-./db-data
+# === VS Code ===
+.vscode/
 
-### NetBeans ###
+# === NetBeans ===
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
 
-### VS Code ###
-.vscode/
+# === OS-generated files ===
+.DS_Store
+Thumbs.db

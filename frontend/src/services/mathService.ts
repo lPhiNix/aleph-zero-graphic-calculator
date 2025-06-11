@@ -1,5 +1,8 @@
 // src/services/mathService.ts
+import AxiosConfig from './axiosService.ts'; // Ajusta la ruta según tu estructura
 import axios, { AxiosError } from 'axios';
+
+const axiosInstance = AxiosConfig.getInstance();
 
 interface EvaluationRequest {
     expressions: Array<{ expression: string }>;
@@ -47,8 +50,8 @@ async function evaluateSingleExpression(
     };
 
     try {
-        const response = await axios.post<MathApiResponse>(
-            'http://localhost:8080/api/v1/math/evaluation',
+        const response = await axiosInstance.post<MathApiResponse>(
+            '/api/v1/math/evaluation', // mejor usar rutas relativas con baseURL en AxiosConfig
             payload,
             { headers: { 'Content-Type': 'application/json' } }
         );
@@ -107,8 +110,8 @@ export async function evaluateBatchExpressions(
     };
 
     try {
-        const response = await axios.post<MathApiResponse>(
-            'http://localhost:8080/api/v1/math/evaluation',
+        const response = await axiosInstance.post<MathApiResponse>(
+            '/api/v1/math/evaluation',
             payload,
             { headers: { 'Content-Type': 'application/json' } }
         );
