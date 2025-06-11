@@ -22,7 +22,7 @@ public class CorsConfig {
      * The URL of the frontend application, which is allowed to make cross-origin requests.
      * This value is injected from the application properties file.
      */
-    @Value("${squip.frontend.url}")
+    @Value("${FRONTEND_URL}")
     private String frontendUrl;
 
     /**
@@ -36,8 +36,14 @@ public class CorsConfig {
      */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+        String cleanFrontendUrl = frontendUrl;
+        if ((frontendUrl.contains("localhost") || frontendUrl.contains("127.0.0.1")) &&
+                (frontendUrl.endsWith(":80") || frontendUrl.endsWith(":443"))) {
+            cleanFrontendUrl = frontendUrl.substring(0, frontendUrl.lastIndexOf(':'));
+        }
+
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(frontendUrl)); //Frontend URL
+        configuration.setAllowedOriginPatterns(List.of(cleanFrontendUrl + "*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
@@ -46,4 +52,5 @@ public class CorsConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
 }

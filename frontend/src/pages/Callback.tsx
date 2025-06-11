@@ -6,6 +6,9 @@ const Callback: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
+    const frontendUrl = import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173";
+
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const code = params.get("code");
@@ -32,11 +35,11 @@ const Callback: React.FC = () => {
         const body = new URLSearchParams();
         body.append("grant_type", "authorization_code");
         body.append("code", code);
-        body.append("redirect_uri", "http://localhost:5173/oauth2/callback");
+        body.append("redirect_uri", `${frontendUrl}/oauth2/callback`);
         body.append("client_id", "react-client");
         body.append("code_verifier", codeVerifier);
 
-        fetch("http://localhost:8080/oauth2/token", {
+        fetch(`${backendUrl}/oauth2/token`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
