@@ -21,6 +21,7 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
+import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 
@@ -50,6 +51,9 @@ public class AuthorizationServerConfig {
                 .clientId(clientProps.getId())
                 .clientName(clientProps.getName())
                 .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
+                .clientSettings(ClientSettings.builder()
+                        .requireAuthorizationConsent(false) // STFU Consent Screen.
+                        .build())
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .redirectUri(clientProps.getRedirectUri());
