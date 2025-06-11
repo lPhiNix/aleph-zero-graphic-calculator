@@ -7,7 +7,7 @@ class AxiosConfig {
     public static getInstance(): AxiosInstance {
         if (!AxiosConfig.instance) {
             AxiosConfig.instance = axios.create({
-                baseURL: import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080',
+                baseURL: window.ENV?.VITE_BACKEND_URL || "http://localhost:8080",
                 timeout: 5000, // Timeout ms
                 headers: {
                     'Content-Type': 'application/json'
