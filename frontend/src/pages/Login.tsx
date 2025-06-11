@@ -13,8 +13,8 @@ const Login: React.FC = () => {
 
             const clientId = "react-client";
 
-            const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
-            const frontendUrl = import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173";
+            const backendUrl = window.ENV?.VITE_BACKEND_URL || "http://localhost:8080";
+            const frontendUrl = window.ENV?.VITE_FRONTEND_URL || "http://localhost:5173";
 
             const redirectUri = encodeURIComponent(`${frontendUrl}/oauth2/callback`);
             const scope = encodeURIComponent("openid read");

@@ -6,8 +6,8 @@ const Callback: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
-    const frontendUrl = import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173";
+    const backendUrl = window.ENV?.VITE_BACKEND_URL || "http://localhost:8080";
+    const frontendUrl = window.ENV?.VITE_FRONTEND_URL || "http://localhost:5173";
 
     useEffect(() => {
         const params = new URLSearchParams(location.search);
