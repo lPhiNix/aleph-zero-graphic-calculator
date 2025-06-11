@@ -114,6 +114,14 @@ export default function MathKeyboard({
     const toolbarRef = useRef<HTMLDivElement>(null);
     const submenuRef = useRef<HTMLDivElement>(null);
 
+    function getClassNames(...classes: (string | undefined)[]) {
+        // Filtra las clases no definidas y las busca en styles (CSS Modules)
+        return classes
+            .filter(Boolean)
+            .map((cls) => styles[cls!])
+            .join(' ');
+    }
+
     useEffect(() => {
         if (!openMenu) return;
         function handleClick(e: MouseEvent) {
@@ -188,7 +196,7 @@ export default function MathKeyboard({
                     <button
                         key={idx}
                         type="button"
-                        className={`${styles.keyButton} ${key.className || ''}`}
+                        className={getClassNames('keyButton', ...(key.className?.split(' ') || []))}
                         onClick={() => {
                             key.onClick();
                             if (onAnyKeyPress) onAnyKeyPress(key.label);

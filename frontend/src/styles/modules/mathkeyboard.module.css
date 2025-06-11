@@ -123,22 +123,31 @@
     pointer-events: none;
 }
 
+.numberKey {
+    background-color: var(--color-gray-thirty);
+}
+.numberKey:hover,
+.numberKey:focus {
+    background-color: var(--secondary-color);
+    color: var(--highlight-auxiliar-color);
+}
+
+.deleteKey {
+    background-color: var(--highlight-fifth-color);
+}
+.deleteKey:hover,
+.deleteKey:focus {
+    background-color: var(--highlight-fourth-color);
+    color: var(--highlight-primary-color);
+}
+
+.entryKey {
+    color: var(--app-primary-color);
+    background-color: var(--color-yellow-pastel);
+}
+
 .wideKey {
     grid-column: span 2;
-}
-
-.keyButton.enterKey,
-.keyButton.enterKey:focus,
-.keyButton.enterKey:hover {
-    background: var(--mathkb-key-enter-bg);
-    color: var(--mathkb-key-enter-color);
-    font-weight: bold;
-    box-shadow: var(--mathkb-key-enter-shadow);
-    transition: none;
-}
-
-.keyButton.enterKey:active {
-    background: var(--mathkb-key-enter-hover-bg);
 }
 
 .categorySubmenu {
