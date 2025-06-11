@@ -8,7 +8,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: root
       FRONTEND_URL: http://localhost
     depends_on:
-      - db  # Wait for DB container to start (no healthcheck)
+      db:
+        condition: service_healthy # Wait for DB container to start
     ports:
       - "8080:8080"  # Expose backend on host port 8080
     networks:
@@ -56,6 +57,12 @@ services:
     networks:
       - internal  # DB only accessible inside internal network
     restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
     logging:
       driver: json-file
       options:
