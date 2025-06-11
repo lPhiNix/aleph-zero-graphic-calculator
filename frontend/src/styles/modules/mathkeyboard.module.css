@@ -146,6 +146,12 @@
     background-color: var(--color-yellow-pastel);
 }
 
+.entryKey:hover,
+.entryKey:focus{
+    color: var(--highlight-fifth-color);
+    background-color: var(--color-yellow-pastel-soft);
+}
+
 .wideKey {
     grid-column: span 2;
 }
