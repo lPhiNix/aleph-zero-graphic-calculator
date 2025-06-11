@@ -33,7 +33,6 @@ export default function Calculator() {
         insertIntoExpression,
         backspace,
         clearAll,
-        evaluateExpression,
         allDrawingSets
     } = useCalculatorLogic();
 
@@ -181,7 +180,7 @@ export default function Calculator() {
         { label: '.', onClick: () => insertIntoExpression("."), dataVirtualKey: true, className: 'numberKey' },
         { label: '0', onClick: () => insertIntoExpression('0'), dataVirtualKey: true, className: 'numberKey' },
         { label: ',', onClick: () => insertIntoExpression(','), dataVirtualKey: true, className: 'numberKey' },
-        { label: '↵', onClick: evaluateExpression, className: "entryKey", dataVirtualKey: true },
+        { label: '↵', onClick: insertRowBelow, className: "entryKey", dataVirtualKey: true },
     ];
 
     const mathCategoryConfig = [
@@ -205,9 +204,23 @@ export default function Calculator() {
         { name: "Constantes", columns: 2 },
     ];
 
+    function insertRowBelow() {
+        if (focusedIndex === null) return;
+        setExpressions(prev => {
+            const u = [...prev];
+            u.splice(focusedIndex + 1, 0, '');
+            return u;
+        });
+        setTimeout(() => {
+            setFocusedIndex(focusedIndex + 1);
+            setCaretPosition(0);
+            setSelectionLength(0);
+        }, 0);
+    }
+
     return (
         <div className={styles.pageContainer}>
-            <Header title="Placeholder" />
+            <Header title="Aleph-Zero" />
             <div className={styles.mainArea}>
                 <div className={styles.canvasWrapper}>
                     <GraphCanvas

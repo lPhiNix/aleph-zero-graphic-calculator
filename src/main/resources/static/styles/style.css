@@ -1,10 +1,9 @@
-
 .container {
     display: flex;
     height: 100vh;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(150deg, #ffffff, #7A7A7A);
+    background: linear-gradient(150deg, #ffffff,  #e88b7e);
 }
 
 .toast {
@@ -29,7 +28,7 @@
     display: flex;
     width: 800px;
     height: 500px;
-    background: linear-gradient(150deg, #0b0c45, #011173);
+    background: linear-gradient(150deg, #141414, #2D2D2D);
     border-radius: 20px;
     overflow: hidden;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
@@ -38,14 +37,15 @@
 .left {
     flex: 1;
     padding: 40px;
-    color: white;
+    color: #ffffff;
     display: flex;
     flex-direction: column;
 }
 
 .right {
     flex: 1.5;
-    background-color: #4433cc;
+    background-color: #2D2D2D;
+    //background-image: url('../../assets/react.svg');
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
@@ -56,7 +56,7 @@
     line-height: 1.3;
     margin-bottom: 10px;
     text-align: center;
-    background: linear-gradient(150deg, #ffffff, #7A7A7A);
+    background: linear-gradient(150deg, #ffffff,  #e88b7e);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -74,8 +74,8 @@
     padding: 10px;
     background: none;
     border: none;
-    border-bottom: 2px solid #666;
-    color: white;
+    border-bottom: 2px solid #666666;
+    color: #dddddd;
     font-size: 1rem;
 }
 
@@ -85,7 +85,7 @@
     align-items: center;
     font-size: 0.85rem;
     margin: 15px 0;
-    color: #aaa;
+    color: #aaaaaa;
 }
 
 .checkbox input {
@@ -96,21 +96,21 @@
     width: 75%;
     padding: 10px;
     margin-top: 10px;
-    background-color: #5c4dde;
+    background-color: #c66559;
     border: none;
     border-radius: 20px;
-    color: white;
+    color: #ffffff;
     font-size: 1rem;
     cursor: pointer;
     transition: background 0.3s ease;
 }
 
 .button:hover {
-    background-color: #4433cc;
+    background-color:  #e88b7e;
 }
 
 .link {
-    color: #aaaaff;
+    color: #8ab4ca;
     text-decoration: none;
 }
 
@@ -121,7 +121,7 @@
 .registerText {
     margin-top: 20px;
     font-size: 0.85rem;
-    color: #aaa;
+    color: #aaaaaa;
     text-align: center;
 }
 

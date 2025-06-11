@@ -99,25 +99,7 @@ export default function ExpressionList({
                 return prev;
             });
         }
-        // Remove extra blank rows if necessary
-        else if (
-            expressions.length > 1 &&
-            expressions[expressions.length - 2].trim() === '' &&
-            expressions[expressions.length - 1].trim() === ''
-        ) {
-            onExpressionsChange(prev => {
-                let copy = [...prev];
-                while (
-                    copy.length > 1 &&
-                    copy[copy.length - 2].trim() === '' &&
-                    copy[copy.length - 1].trim() === ''
-                    ) {
-                    copy.pop();
-                }
-                return copy;
-            });
-        }
-        // Only rerun this if expressions or onExpressionsChange changes
+        // Ya no eliminamos filas vacías automáticamente aquí
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [expressions, onExpressionsChange, usableRows]);
 
