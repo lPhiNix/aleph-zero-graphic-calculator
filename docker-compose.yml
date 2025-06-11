@@ -6,7 +6,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/mysqldb
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
-      FRONTEND_URL: https://ee188ed0a9da359d452af4080bb4cea2.serveo.net
+      FRONTEND_URL: http://localhost
     depends_on:
       db:
         condition: service_healthy # Wait for DB container to start
@@ -27,8 +27,8 @@ services:
       dockerfile: Dockerfile
     container_name: frontend
     environment:
-      VITE_BACKEND_URL: https://5fb32d1bd96c47ec00788c08c6aa94ec.serveo.net
-      VITE_FRONTEND_URL: https://ee188ed0a9da359d452af4080bb4cea2.serveo.net
+      VITE_BACKEND_URL: http://localhost:8080
+      VITE_FRONTEND_URL: http://localhost
     ports:
       - "80:80" #for PROD (Http only)
     depends_on:
