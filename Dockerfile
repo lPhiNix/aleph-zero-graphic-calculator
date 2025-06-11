@@ -1,17 +1,18 @@
-# Etapa 1: construir la app con Maven y Java 21
+# ./ (root) (backend dockerfile)
+# Stage 1: maven and java
 FROM maven:3.9.6-eclipse-temurin-21-alpine AS builder
 
 WORKDIR /app
 COPY pom.xml ./
 COPY src ./src
 
-# Descargar dependencias primero para caché más eficiente
+# Download dependencies, using fist cache
 RUN mvn dependency:go-offline
 
-# Luego construir el paquete sin tests
+# Build package without tests
 RUN mvn clean package -DskipTests
 
-# Etapa 2: imagen final minimalista con solo el JAR
+# Stage 2: final image with JAR
 FROM eclipse-temurin:21-jdk-alpine
 
 WORKDIR /app

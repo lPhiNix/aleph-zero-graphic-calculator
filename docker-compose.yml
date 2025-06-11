@@ -6,40 +6,66 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/mysqldb
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+      FRONTEND_URL: http://frontend:80  # Frontend exposed on port 80
     depends_on:
-      - db
+      - db  # Wait for DB container to start (no healthcheck)
     ports:
-      - "8080:8080"
+      - "8080:8080"  # Expose backend on host port 8080
     networks:
-      - internal
+      - internal  # Backend connects only to internal network (not exposed externally)
+    restart: unless-stopped  # Restart policy to keep container running unless stopped manually
+    logging:
+      driver: json-file  # Limit log file size and rotation to avoid disk bloat
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: frontend
+    environment:
+      VITE_BACKEND_URL: http://backend:8080
     ports:
-      - "5173:5173"
+      - "80:80" #for PROD (Http only)
     depends_on:
-      - backend
+      - backend  # Wait for backend container to start
     networks:
-      - internal
+      - frontend_net  # Frontend network exposed to outside
+      - internal  # Also connected to internal network to reach backend
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   db:
     image: mysql:latest
     container_name: mysql
     environment:
+      # Credentials and DB name for MySQL (development generic values)
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: mysqldb
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     volumes:
-      - db_data:/var/lib/mysql
+      - db_data:/var/lib/mysql  # Persist DB data across container restarts
     networks:
-      - internal
+      - internal  # DB only accessible inside internal network
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
-  db_data:
+  db_data:  # Volume for persistent MySQL data
 
 networks:
   internal:
+    driver: bridge  # Internal network for backend and db communication only
+  frontend_net:
+    driver: bridge  # Network to expose frontend externally
