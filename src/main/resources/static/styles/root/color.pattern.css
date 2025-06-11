@@ -21,36 +21,14 @@
     --color-gray-medium: #666666;
     --color-gray-muted: #aaaaaa;
 
-    --color-red: #db544b;
+    --color-red: #df544b;
     --color-red-soft: #f1b5ae;
 
     --color-green-aquamarine: #7fffd4;
     --color-blue-pastel: #8ab4ca;
 
-    --color-yellow-pastel: #ead375;
+    --color-yellow-pastel: #edd785;
     --color-yellow-pastel-soft: #e8d9a9;
-
-    --color-purple-pastel: #c6a4d4;
-    --color-purple-soft: #e2d1ec;
-
-    --color-pink-pastel: #f4a5c0;
-    --color-pink-soft: #f8cadb;
-
-    --color-orange-pastel: #f5b97f;
-    --color-orange-soft: #fbd9ba;
-
-    --color-cyan-pastel: #a2e4f2;
-    --color-cyan-soft: #c9eff7;
-
-    --color-lime-pastel: #c4f29b;
-    --color-lime-soft: #def7c8;
-
-    --color-indigo-pastel: #9aa4f2;
-    --color-indigo-soft: #c3c9f9;
-
-    --color-beige-pastel: #f2e0c9;
-    --color-beige-soft: #f7eee1;
-
 
     --primary-color-shadow: 0px -2px 20px 0px #000c;
     --secondary-color-shadow: rgba(0, 0, 0, 0.3);

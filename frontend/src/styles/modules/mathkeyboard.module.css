@@ -1,29 +1,29 @@
 :root {
-    --mathkb-bg: #181818;
-    --mathkb-toolbar-bg: #181818;
-    --mathkb-toolbar-border: #242424;
-    --mathkb-toolbar-color: #aaa;
-    --mathkb-toolbar-hover-bg: #222;
-    --mathkb-toolbar-hover-color: #fff;
-    --mathkb-key-bg: #232323;
-    --mathkb-key-color: #fff;
-    --mathkb-key-hover-bg: #24262b;
-    --mathkb-key-hover-color: #ffe082;
-    --mathkb-key-shadow: 0 1px 2px 0 #0004;
-    --mathkb-key-active-bg: #26282b;
+    --mathkb-bg: var(--color-gray-secondary);
+    --mathkb-toolbar-bg: var(--color-gray-secondary);
+    --mathkb-toolbar-border: var(--highlight-primary-color);
+    --mathkb-toolbar-color: var(--highlight-secondary-color);
+    --mathkb-toolbar-hover-bg: var(--highlight-fifth-color);
+    --mathkb-toolbar-hover-color: var(--highlight-zero-color);
+    --mathkb-key-bg: var(--thirty-color);
+    --mathkb-key-color: var(--highlight-zero-color);
+    --mathkb-key-hover-bg: var(--secondary-color);
+    --mathkb-key-hover-color: var(--highlight-auxiliar-color);
+    --mathkb-key-active-bg: var(--secondary-color);
+    --mathkb-key-enter-bg: var(--color-yellow-pastel);
+    --mathkb-key-enter-hover-bg: var(--color-yellow-pastel-soft);
+    --mathkb-key-enter-color: var(--app-primary-color);
+    --mathkb-submenu-bg: var(--color-gray-secondary);
+    --mathkb-submenu-color: var(--color-white);
+    --mathkb-submenu-border: var(--secondary-color);
+    --mathkb-category-header-color: var(--color-yellow-pastel-soft);
+    --mathkb-category-separator: var(--secondary-color);
+    --mathkb-key-shadow: var(--thirty-color-shadow);
+    --mathkb-key-enter-shadow: var(--fourth-color-shadow);
+    --mathkb-row-shadow: var(--fifth-color-shadow);
+    --mathkb-submenu-shadow: var(--sixth-color-shadow);
+    --mathkb-category-header-shadow: var(--seventh-color-shadow);
     --mathkb-key-disabled: 0.5;
-    --mathkb-key-enter-bg: #ffb300;
-    --mathkb-key-enter-hover-bg: #ffa000;
-    --mathkb-key-enter-color: #222;
-    --mathkb-key-enter-shadow: 0 1px 4px 0 #0006;
-    --mathkb-submenu-bg: #202124;
-    --mathkb-submenu-color: #fff;
-    --mathkb-submenu-border: #222;
-    --mathkb-submenu-shadow: 0 8px 22px 0 #000e;
-    --mathkb-category-header-color: #81d4fa;
-    --mathkb-category-header-shadow: 0 1px 2px #0003;
-    --mathkb-category-separator: #2e2e2e;
-    --mathkb-row-shadow: 0px -2px 20px 0px #000c;
 }
 
 .keyboardContainer {

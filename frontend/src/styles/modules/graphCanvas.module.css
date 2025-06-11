@@ -1,18 +1,18 @@
 :root {
-    --gc-background: #fff;
-    --gc-canvas-bg: #ffffff;
-    --gc-axis: #444;
-    --gc-grid-minor: #e0e0e0;
-    --gc-grid-major: #cccccc;
-    --gc-grid-label: #333;
-    --gc-border: #ddd;
+    --gc-background: var(--gc-canvas-background);
+    --gc-canvas-bg: var(--gc-canvas-background);
+    --gc-axis: var(--gc-canvas-axis);
+    --gc-grid-minor: var(--gc-canvas-grid-minor);
+    --gc-grid-major: var(--gc-canvas-grid-major);
+    --gc-grid-label: var(--gc-canvas-grid-label);
+    --gc-border: var(--gc-canvas-border);
 }
 
 .pageContainer {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    background: var(--login-background-color);
+    background: var(--gc-background);
 }
 
 .mainArea {
@@ -33,7 +33,7 @@
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    background-color: var(--app-color);
+    background-color: var(--app-primary-color);
     padding: 1rem;
 }
 

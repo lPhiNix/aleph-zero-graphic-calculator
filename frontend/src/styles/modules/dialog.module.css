@@ -28,10 +28,10 @@
     display: flex;
     width: 800px;
     height: 500px;
-    background: var(--app-color);
+    background: var(--app-primary-color);
     border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 10px 25px var(--color-shadow);
+    box-shadow: 0 10px 25px var(--secondary-color-shadow);
 }
 
 .left {
@@ -74,7 +74,7 @@
     background: none;
     border: none;
     border-bottom: 2px solid var(--color-gray-medium);
-    color: var(--text-color);
+    color: var(--fourth-color);
     font-size: 1rem;
 }
 

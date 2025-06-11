@@ -1,14 +1,44 @@
 :root {
     --login-background-color: var(--color-white);
-    --app-color: var(--primary-color);
+    --login-component-primary-color: var(--primary-color);
+    --login-component-secondary-color: var(--secondary-color);
+    --login-text-color: var(--fourth-color);
+
+    --app-primary-color: var(--primary-color);
     --app-secondary-color: var(--secondary-color);
 
-    --title-text-color: var(--highlight-color);
-    --text-color: var(--color-white);
+    --gc-canvas-background: var(--color-white);
+    --gc-canvas-axis: var(--highlight-secondary-color);
+    --gc-canvas-grid-minor: var(--fourth-color);
+    --gc-canvas-grid-major: var(--highlight-zero-color);
+    --gc-canvas-grid-label: var(--highlight-fourth-color);
+    --gc-canvas-border: var(--highlight-secondary-color);
+
+    --expr-list-background: var(--color-gray-main);
+    --expr-list-input-color: var(--color-gray-lighter);
+    --expr-list-result-line: var(--color-gray-muted);
+    --expr-list-first: var(--highlight-fourth-color);
+    --expr-list-placeholder: var(--highlight-secondary-color);
+    --expr-list-label: var(--color-white);
+    --expr-list-disabled-color: var(--color-gray-light);
+    --expr-list-clear-hover: var(--color-red);
+    --expr-list-slider-border: var(--color-gray-medium);
+    --expr-list-slider-bg: var(--color-gray-main);
+    --expr-list-slider-color: var(--color-gray-lighter);
+    --expr-list-slider-label-color: var(--color-gray-lighter);
+    --expr-list-highlight-bg: var(--color-gray-main);
+    --expr-list-row-shadow: var(--primary-color-shadow);
+
+
+
+
+
+    --title-text-color: var(--highlight-primary-color);
+    --fourth-color: var(--color-white);
     --link-text-color: var(--color-white);
-    --link-text-hover-color: var(--highlight-secondary-color);
+    --link-text-hover-color: var(--highlight-auxiliar-color);
 
     --color-text-button: var(--color-black);
-    --color-button: var(--highlight-color);
-    --color-button-hover: var(--highlight-secondary-color);
+    --color-button: var(--highlight-primary-color);
+    --color-button-hover: var(--highlight-auxiliar-color);
 }

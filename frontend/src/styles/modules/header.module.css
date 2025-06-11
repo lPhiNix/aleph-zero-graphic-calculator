@@ -1,8 +1,7 @@
 /* src/styles/header.module.css */
 .header {
-    height: 60px;
-    background: var(--primary-color);
-    color: var(--text-color);
+    height: 80px;
+    background: var(--app-primary-color);
     display: flex;
     align-items: center;
     padding: 0 1rem;
@@ -10,6 +9,7 @@
 }
 
 .title {
+    color: var(--title-text-color);
     font-size: 1.5rem;
     margin: 0;
 }

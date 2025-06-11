@@ -146,8 +146,8 @@ export default function ExpressionList({
                     default:
                         etiqueta = 'Ex';
                 }
-                const originalColor = isLastGap ? 'var(--expr-disabled-color)' : colors[idx] || 'var(--expr-disabled-color)';
-                const functionColor = disabledFlags[idx] ? 'var(--expr-disabled-color)' : originalColor;
+                const originalColor = isLastGap ? 'var(--expr-first-color)' : colors[idx] || 'var(--expr-first-color)';
+                const functionColor = disabledFlags[idx] ? 'var(--expr-first-color)' : originalColor;
 
                 const countSameTypeBefore = expressionTypes.slice(0, idx).filter(t => t === tipo).length;
                 const subIndex = isLastGap ? '' : String(countSameTypeBefore + 1);

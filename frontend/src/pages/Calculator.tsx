@@ -46,7 +46,7 @@ export default function Calculator() {
 
         // Variables paramétricas
         { label: 'x',          onClick: () => insertIntoExpression('x()', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true, category: 'Genéricas' },
-        { label: 'Y',          onClick: () => insertIntoExpression('y()', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true, category: 'Genéricas' },
+        { label: 'y',          onClick: () => insertIntoExpression('y()', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true, category: 'Genéricas' },
         { label: 'z',          onClick: () => insertIntoExpression('z()', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true, category: 'Genéricas' },
 
         // Funciones especiales
@@ -177,7 +177,7 @@ export default function Calculator() {
         { label: '.', onClick: () => insertIntoExpression("."), dataVirtualKey: true },
         { label: '0', onClick: () => insertIntoExpression('0'), dataVirtualKey: true },
         { label: ',', onClick: () => insertIntoExpression(','), dataVirtualKey: true },
-        { label: '↵', onClick: evaluateExpression, className: 'wideKey', dataVirtualKey: true },
+        { label: '↵', onClick: evaluateExpression, className: 'enterKey', dataVirtualKey: true },
     ];
 
     const mathCategoryConfig = [

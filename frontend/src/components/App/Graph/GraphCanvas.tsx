@@ -276,8 +276,8 @@ export default function GraphCanvas({
         ctx.fillStyle = getCSSVar('--gc-background', '#fff');
         ctx.fillRect(0, 0, cw, ch);
 
-        drawAxes(ctx, cw, ch);
         drawGrid(ctx, cw, ch);
+        drawAxes(ctx, cw, ch);
         drawAllCurves(ctx, cw, ch);
     }, [drawAxes, drawGrid, drawAllCurves]);
 
