@@ -40,7 +40,7 @@ export default function Calculator() {
     // --- Math Functions (submenu) ---
     const mathFuncKeys = [
         // Funciones definidas por el usuario
-        { label: 'f',          onClick: () => insertIntoExpression('f()', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true, category: 'Genéricas' },
+        { label: 'f',          onClick: () => insertIntoExpression('f()', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true, category: 'Genéricas', tooltip: "nose" },
         { label: 'g',          onClick: () => insertIntoExpression('g()', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true, category: 'Genéricas' },
         { label: 'h',          onClick: () => insertIntoExpression('h()', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true, category: 'Genéricas' },
 
@@ -97,32 +97,36 @@ export default function Calculator() {
     // --- Symja Functions (submenu) ---
     const symjaKeys = [
         // Derivadas y cálculo
-        { label: 'D',          onClick: () => insertIntoExpression('D[, ]', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'Diff',       onClick: () => insertIntoExpression('Diff[, ]', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'Integrate',  onClick: () => insertIntoExpression('Integrate[, ]', { deltaCaret: 10, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'Taylor',     onClick: () => insertIntoExpression('Taylor[, ]', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'Limit',      onClick: () => insertIntoExpression('Limit[, ]', { deltaCaret: 6, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'Solve',      onClick: () => insertIntoExpression('Solve[, ]', { deltaCaret: 6, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'DSolve',     onClick: () => insertIntoExpression('DSolve[, ]', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'D',          onClick: () => insertIntoExpression('D[, ]', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true, category: "Cálculo" },
+        { label: 'Diff',       onClick: () => insertIntoExpression('Diff[, ]', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true, category: "Cálculo" },
+        { label: 'Integrate',  onClick: () => insertIntoExpression('Integrate[, ]', { deltaCaret: 10, selectLength: 0 }), dataVirtualKey: true, category: "Cálculo" },
+        { label: 'Taylor',     onClick: () => insertIntoExpression('Taylor[, ]', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true, category: "Cálculo" },
+        { label: 'Limit',      onClick: () => insertIntoExpression('Limit[, ]', { deltaCaret: 6, selectLength: 0 }), dataVirtualKey: true, category: "Cálculo" },
+
+
+        { label: 'Solve',      onClick: () => insertIntoExpression('Solve[, ]', { deltaCaret: 6, selectLength: 0 }), dataVirtualKey: true, category: "Análisis" },
+        { label: 'DSolve',     onClick: () => insertIntoExpression('DSolve[, ]', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true, category: "Análisis" },
 
         // Álgebra y simplificación
-        { label: 'Simplify',   onClick: () => insertIntoExpression('Simplify[]', { deltaCaret: 9, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'Expand',     onClick: () => insertIntoExpression('Expand[]', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true },
-
-        // Operaciones vectoriales y matrices
-        { label: 'Dot',        onClick: () => insertIntoExpression('Dot[]', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'Cross',      onClick: () => insertIntoExpression('Cross[]', { deltaCaret: 6, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'Norm',       onClick: () => insertIntoExpression('Norm[]', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'Normalize',  onClick: () => insertIntoExpression('Normalize[]', { deltaCaret: 10, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'Vectorangle',onClick: () => insertIntoExpression('Vectorangle[]', { deltaCaret: 11, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'Projection', onClick: () => insertIntoExpression('Projection[]', { deltaCaret: 11, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'Eigenvalues',onClick: () => insertIntoExpression('Eigenvalues[]', { deltaCaret: 12, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'Inverse',    onClick: () => insertIntoExpression('Inverse[]', { deltaCaret: 8, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'Transpose',  onClick: () => insertIntoExpression('Transpose[]', { deltaCaret: 10, selectLength: 0 }), dataVirtualKey: true },
+        { label: 'Simplify',   onClick: () => insertIntoExpression('Simplify[]', { deltaCaret: 9, selectLength: 0 }), dataVirtualKey: true, category: "Álgebra" },
+        { label: 'Expand',     onClick: () => insertIntoExpression('Expand[]', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true, category: "Álgebra"},
 
         // Funciones aritméticas
-        { label: 'GCD',        onClick: () => insertIntoExpression('GCD[]', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true },
-        { label: 'LCM',        onClick: () => insertIntoExpression('LCM[]', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true }
+        { label: 'GCD',        onClick: () => insertIntoExpression('GCD[]', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: "Aritmética" },
+        { label: 'LCM',        onClick: () => insertIntoExpression('LCM[]', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: "Aritmética" },
+
+        // Operaciones vectoriales y matrices
+        { label: 'Dot',        onClick: () => insertIntoExpression('Dot[,]', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: "Operaciones Vectoriales" },
+        { label: 'Cross',      onClick: () => insertIntoExpression('Cross[,]', { deltaCaret: 6, selectLength: 0 }), dataVirtualKey: true, category: "Operaciones Vectoriales" },
+        { label: 'Norm',       onClick: () => insertIntoExpression('Norm[]', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true, category: "Operaciones Vectoriales" },
+        { label: 'Normalize',  onClick: () => insertIntoExpression('Normalize[]', { deltaCaret: 10, selectLength: 0 }), dataVirtualKey: true, category: "Operaciones Vectoriales" },
+        { label: 'Vectorangle',onClick: () => insertIntoExpression('Vectorangle[,]', { deltaCaret: 11, selectLength: 0 }), dataVirtualKey: true, category: "Operaciones Vectoriales" },
+
+
+        { label: 'Projection', onClick: () => insertIntoExpression('Projection[]', { deltaCaret: 11, selectLength: 0 }), dataVirtualKey: true, category: "Matrices" },
+        { label: 'Eigenvalues',onClick: () => insertIntoExpression('Eigenvalues[]', { deltaCaret: 12, selectLength: 0 }), dataVirtualKey: true, category: "Matrices" },
+        { label: 'Inverse',    onClick: () => insertIntoExpression('Inverse[]', { deltaCaret: 8, selectLength: 0 }), dataVirtualKey: true, category: "Matrices" },
+        { label: 'Transpose',  onClick: () => insertIntoExpression('Transpose[]', { deltaCaret: 10, selectLength: 0 }), dataVirtualKey: true, category: "Matrices" },
     ];
 
     // --- Constants (submenu) ---
@@ -190,9 +194,12 @@ export default function Calculator() {
         { name: "Hiperbólicas de Arco", columns: 3 }
     ];
     const symjaCategoryConfig = [
-        { name: "Cálculo", columns: 3 },
+        { name: "Cálculo", columns: 5 },
         { name: "Álgebra", columns: 2 },
-
+        { name: "Análisis", columns: 2},
+        { name: "Aritmética", columns: 2},
+        { name: "Operaciones Vectoriales", columns: 5},
+        { name: "Matrices", columns: 2}
     ];
     const constantCategoryConfig = [
         { name: "Constantes", columns: 2 },

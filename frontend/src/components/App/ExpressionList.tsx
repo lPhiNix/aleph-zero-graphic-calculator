@@ -25,6 +25,8 @@ interface ExpressionListProps {
     setSelectionLength: (len: number) => void;
 }
 
+const MAX_ROWS = 10;
+
 export default function ExpressionList({
                                            expressions,
                                            onExpressionsChange,
@@ -49,6 +51,9 @@ export default function ExpressionList({
 
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const [sliderConfigs, setSliderConfigs] = useState<{ min: number; max: number; step: number }[]>([]);
+
+    // Count only non-empty lines (excluding the last gap row)
+    const usableRows = expressions.filter((expr, idx) => idx !== expressions.length - 1 && expr.trim() !== '').length;
 
     useEffect(() => {
         setSliderConfigs(prev => {
@@ -80,14 +85,21 @@ export default function ExpressionList({
     }, [focusedIndex, caretPosition, selectionLength, expressions]);
 
     useEffect(() => {
-        if (expressions.length === 0 || expressions[expressions.length - 1].trim() !== '') {
+        // Only allow adding a new row if the usableRows is less than MAX_ROWS
+        if (
+            (expressions.length === 0 || expressions[expressions.length - 1].trim() !== '') &&
+            usableRows < MAX_ROWS
+        ) {
             onExpressionsChange(prev => {
-                if (prev.length === 0 || prev[prev.length - 1].trim() !== '') {
+                // Only add blank if not already blank and not exceeding max usable rows
+                const usable = prev.filter((expr, idx) => idx !== prev.length - 1 && expr.trim() !== '').length;
+                if ((prev.length === 0 || prev[prev.length - 1].trim() !== '') && usable < MAX_ROWS) {
                     return [...prev, ''];
                 }
                 return prev;
             });
         }
+        // Remove extra blank rows if necessary
         else if (
             expressions.length > 1 &&
             expressions[expressions.length - 2].trim() === '' &&
@@ -105,9 +117,19 @@ export default function ExpressionList({
                 return copy;
             });
         }
-    }, [expressions, onExpressionsChange]);
+        // Only rerun this if expressions or onExpressionsChange changes
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [expressions, onExpressionsChange, usableRows]);
 
     const handleChange = (index: number, value: string) => {
+        // Prevent adding new content if max rows reached and the row is the last blank
+        if (usableRows >= MAX_ROWS &&
+            index === expressions.length - 1 &&
+            expressions[index].trim() === '' &&
+            value.trim() !== ''
+        ) {
+            return; // Ignore typing into the last gap if at max rows
+        }
         onExpressionsChange(prev => {
             const updated = [...prev];
             updated[index] = value;
@@ -146,8 +168,9 @@ export default function ExpressionList({
                     default:
                         etiqueta = 'Ex';
                 }
+                const isDisabled = disabledFlags[idx];
                 const originalColor = isLastGap ? 'var(--expr-first-color)' : colors[idx] || 'var(--expr-first-color)';
-                const functionColor = disabledFlags[idx] ? 'var(--expr-first-color)' : originalColor;
+                const functionColor = isDisabled ? 'var(--expr-disabled-color)' : originalColor;
 
                 const countSameTypeBefore = expressionTypes.slice(0, idx).filter(t => t === tipo).length;
                 const subIndex = isLastGap ? '' : String(countSameTypeBefore + 1);
@@ -167,7 +190,7 @@ export default function ExpressionList({
                 const iconCount =
                     (errors && errors.length > 0 ? 1 : 0) +
                     (results[idx]?.warnings?.length ? 1 : 0) +
-                    (!disabledFlags[idx] ? 1 : 0) +
+                    (!isDisabled ? 1 : 0) +
                     1 +
                     1;
 
@@ -175,10 +198,15 @@ export default function ExpressionList({
                     ? `calc(2.35rem + ${iconCount} * 2.35rem)`
                     : '2.5rem';
 
+                // Prevent rendering the last gap row if max usable rows reached
+                if (isLastGap && usableRows >= MAX_ROWS) {
+                    return null;
+                }
+
                 return (
                     <div
                         key={idx}
-                        className={`${styles.inputWrapper} ${(hoveredIndex === idx || focusedIndex === idx) && !disabledFlags[idx] ? styles.rowHighlighted : ''}`}
+                        className={`${styles.inputWrapper} ${(hoveredIndex === idx || focusedIndex === idx) && !isDisabled ? styles.rowHighlighted : ''}`}
                         style={{'--highlight-border': functionColor} as React.CSSProperties}
                         onMouseEnter={() => setHoveredIndex(idx)}
                         onMouseLeave={() => setHoveredIndex(prev => (prev === idx ? null : prev))}
@@ -188,8 +216,8 @@ export default function ExpressionList({
                                 className={styles.functionLabel}
                                 style={{
                                     backgroundColor: functionColor,
-                                    borderColor: (hoveredIndex === idx || focusedIndex === idx) && !disabledFlags[idx] ? functionColor : 'transparent',
-                                    color: functionColor,
+                                    borderColor: (hoveredIndex === idx || focusedIndex === idx) && !isDisabled ? functionColor : 'transparent',
+                                    color: isDisabled ? 'var(--expr-label)' : functionColor,
                                     cursor: isLastGap ? 'default' : 'pointer'
                                 }}
                                 onClick={() => !isLastGap && onToggleDisabled(idx)}
@@ -202,7 +230,7 @@ export default function ExpressionList({
                                 type="text"
                                 style={{ paddingRight: dynamicPadding }}
                                 className={`${styles.exprInput} ${(hoveredIndex === idx && focusedIndex !== idx && !isLastGap) ? styles.hasButtons : ''}`}
-                                placeholder={isLastGap ? 'Escribir una función' : ''}
+                                placeholder={isLastGap ? (usableRows >= MAX_ROWS ? 'Máximo 10 filas' : 'Escribir una función') : ''}
                                 value={expr}
                                 ref={el => {
                                     inputRefs.current[idx] = el
@@ -255,6 +283,7 @@ export default function ExpressionList({
                                     onExpressionBlur(idx, expr);
                                 }}
                                 aria-label={`Expresión ${idx + 1}`}
+                                disabled={isLastGap && usableRows >= MAX_ROWS}
                             />
 
                             {hoveredIndex === idx && focusedIndex !== idx && !isLastGap && (
@@ -265,13 +294,13 @@ export default function ExpressionList({
                                     {results[idx]?.warnings && results[idx].warnings.length > 0 &&
                                         <span className={styles.warningIcon} title={results[idx].warnings.join('\n')}
                                               aria-label="Advertencias">⚠️</span>}
-                                    {!disabledFlags[idx] && <button type="button" aria-label={`Evaluar fila ${idx + 1}`}
-                                                                    className={styles.iconButton}
-                                                                    style={{'--button-color': functionColor} as React.CSSProperties}
-                                                                    onMouseDown={e => {
-                                                                        e.preventDefault();
-                                                                        onExpressionBlur(idx, expr);
-                                                                    }}>⚡</button>}
+                                    {!isDisabled && <button type="button" aria-label={`Evaluar fila ${idx + 1}`}
+                                                            className={styles.iconButton}
+                                                            style={{'--button-color': functionColor} as React.CSSProperties}
+                                                            onMouseDown={e => {
+                                                                e.preventDefault();
+                                                                onExpressionBlur(idx, expr);
+                                                            }}>⚡</button>}
                                     <button type="button" aria-label={`Cambiar color fila ${idx + 1}`}
                                             className={styles.iconButton}
                                             style={{'--button-color': functionColor} as React.CSSProperties}

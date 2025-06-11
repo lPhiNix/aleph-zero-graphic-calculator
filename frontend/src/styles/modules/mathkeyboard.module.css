@@ -27,6 +27,8 @@
 }
 
 .keyboardContainer {
+    overflow-x: hidden;
+    overflow-y: hidden;
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -53,9 +55,9 @@
     background: none;
     border: none;
     color: var(--mathkb-toolbar-color);
-    font-size: 0.98rem;
+    font-size: 0.85rem;
     cursor: pointer;
-    padding: 0.37rem 1.2rem 0.25rem 1.2rem;
+    padding: 0.37rem 1rem 0.25rem 1rem;
     border-radius: 8px 8px 0 0;
     margin-bottom: -1px;
     transition: color 0.2s, background 0.2s;
@@ -95,7 +97,7 @@
     font-size: 1.02rem;
     font-family: inherit;
     font-weight: 500;
-    padding: 0.58rem 0;
+    padding: 0.58rem 10px;
     cursor: pointer;
     border-radius: 8px;
     text-align: center;

@@ -142,7 +142,7 @@ export default function MathKeyboard({
                     onClick={() => setOpenMenu(openMenu === 'math' ? null : 'math')}
                     data-virtualkey="true"
                 >
-                    Funciones Matemáticas ▾
+                    📐 Funciones Matemáticas
                 </button>
                 {openMenu === 'math' && (
                     <Submenu
@@ -157,7 +157,7 @@ export default function MathKeyboard({
                     onClick={() => setOpenMenu(openMenu === 'symja' ? null : 'symja')}
                     data-virtualkey="true"
                 >
-                    Symja ▾
+                    🧠 Symja
                 </button>
                 {openMenu === 'symja' && (
                     <Submenu
@@ -172,7 +172,8 @@ export default function MathKeyboard({
                     onClick={() => setOpenMenu(openMenu === 'constants' ? null : 'constants')}
                     data-virtualkey="true"
                 >
-                    Constantes ▾
+                    📏 Constantes
+
                 </button>
                 {openMenu === 'constants' && (
                     <Submenu
