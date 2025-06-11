@@ -44,6 +44,19 @@ public class SquipUserDetailService implements UserDetailsService {
     }
 
 
+    /**
+     * Retrieves the currently authenticated user from the authorization context (JWT token).
+     *
+     * <p>This method extracts the user information from the JWT stored in the {@link SecurityContextHolder},
+     * using the {@code preferred_username} claim to identify the user in the database.</p>
+     *
+     * <p><b>Note:</b> This method assumes that the authentication principal is a {@link Jwt} token
+     * and that it contains a {@code preferred_username} claim. If the JWT is missing or invalid,
+     * or if the user is not found in the database, it throws an {@link IllegalStateException}.</p>
+     *
+     * @return the {@link com.alephzero.alephzero.db.models.User} associated with the JWT
+     * @throws IllegalStateException if no valid JWT is found or the user does not exist in the database
+     */
     public com.alephzero.alephzero.db.models.User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -70,5 +83,6 @@ public class SquipUserDetailService implements UserDetailsService {
         logger.info("Authenticated user loaded: {}", user);
         return user;
     }
+
 
 }
