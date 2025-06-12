@@ -34,7 +34,7 @@ public class AlephzeroUserDetailService implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws EntityNotFoundException {
-        com.alephzero.alephzero.db.models.User user = userService.findUserByIdentifier(username);
+        com.alephzero.alephzero.db.models.User user = userService.findUserByIdentifierReadOnly(username);
         UserRole role = user.getRole();
 
         return User.withUsername(user.getUsername())
@@ -61,7 +61,7 @@ public class AlephzeroUserDetailService implements UserDetailsService {
 
         logger.info("Extracted username from token: {}", username);
 
-        var user = userService.findUserByIdentifier(username);
+        var user = userService.findUserByIdentifierReadOnly(username);
         if (user == null) {
             logger.error("No user found with identifier: {}", username);
             throw new IllegalStateException("Authenticated user not found in database");
