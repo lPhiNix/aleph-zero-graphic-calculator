@@ -12,8 +12,9 @@ public record MathExpressionResponseDto(
         Integer id,
         String expression,
         String points,
-        MathExpressionPreferences preferences,
         String evaluation,
-        String calculation)
+        String calculation,
+        MathExpressionPreferences preferences
+)
         implements Serializable {
 }
