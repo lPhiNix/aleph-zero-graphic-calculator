@@ -1,10 +1,19 @@
 import * as React from "react";
-import {useEffect} from "react";
+import { useEffect } from "react";
 import pkceChallenge from "pkce-challenge";
-
+import { useNavigate } from "react-router-dom";
 
 const Login: React.FC = () => {
+    const navigate = useNavigate();
+
     useEffect(() => {
+        const token = sessionStorage.getItem("access_token");
+        if (token) {
+            // Si ya tiene sesión, vete a /calculator
+            navigate("/calculator", { replace: true });
+            return;
+        }
+
         async function generatePkce() {
             const { code_verifier, code_challenge } = await pkceChallenge();
 
@@ -25,7 +34,7 @@ const Login: React.FC = () => {
         }
 
         generatePkce();
-    }, []);
+    }, [navigate]);
 
     return null;
 };

@@ -1,17 +1,20 @@
-import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import * as React from "react";
 
 const Dashboard: React.FC = () => {
-    const location = useLocation();
-    const params = new URLSearchParams(location.search);
-    const message = params.get("msg");
+    const navigate = useNavigate();
 
-    return (
-        <div>
-            <h1>Dashboard</h1>
-            {message && <p>{message}</p>}
-        </div>
-    );
+    useEffect(() => {
+        const token = sessionStorage.getItem("access_token");
+        if (token) {
+            navigate("/calculator", { replace: true });
+        } else {
+            navigate("/login", { replace: true });
+        }
+    }, [navigate]);
+
+    return <div>Redirigiendo...</div>;
 };
 
 export default Dashboard;

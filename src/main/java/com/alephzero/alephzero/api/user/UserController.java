@@ -1,5 +1,6 @@
 package com.alephzero.alephzero.api.user;
 
+import com.alephzero.alephzero.api.auth.service.AlephzeroUserDetailService;
 import com.alephzero.alephzero.api.user.service.UserService;
 import com.alephzero.alephzero.api.util.common.messages.ApiResponseFactory;
 import com.alephzero.alephzero.api.util.common.messages.dto.ApiResponse;
@@ -19,6 +20,7 @@ public class UserController {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     private final UserService userService;
+    private final AlephzeroUserDetailService userDetailsService;
     private final ApiResponseFactory apiResponseFactory;
     private final UserMapper userMapper;
 
@@ -28,4 +30,12 @@ public class UserController {
         User user = userService.findUserById(id);
         return apiResponseFactory.ok(userMapper.toResponseDtoFromEntity(user));
     }
+
+    @GetMapping()
+    public ResponseEntity<ApiResponse<UserDto>> getUser() {
+        User user = userDetailsService.getCurrentUser();
+        return apiResponseFactory.ok(userMapper.toResponseDtoFromEntity(user));
+    }
+
+
 }

@@ -20,8 +20,8 @@ import org.springframework.security.core.Authentication;
  */
 @Service
 @RequiredArgsConstructor
-public class SquipUserDetailService implements UserDetailsService {
-    private static final Logger logger = LoggerFactory.getLogger(SquipUserDetailService.class);
+public class AlephzeroUserDetailService implements UserDetailsService {
+    private static final Logger logger = LoggerFactory.getLogger(AlephzeroUserDetailService.class);
 
     private final UserService userService;
 
