@@ -22,7 +22,7 @@ public class CorsConfig {
      * The URL of the frontend application, which is allowed to make cross-origin requests.
      * This value is injected from the application properties file.
      */
-    @Value("${FRONTEND_URL:http://localhost:5173}")
+    @Value("${app.frontend.url}")
     private String frontendUrl;
 
     /**
