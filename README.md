@@ -1,17 +1,15 @@
-## ¿Qué es Aleph-Zero?
+## Aleph-Zero
 **TODO:{insertar gif de demostracion}**  
 Aleph-Zero es una calculadora gráfica web que permite representar funciones matemáticas de forma simple y cómoda.  
  
-Todos los cálculos se realizan a nivel de servidor, por lo que esta aplicación es perfecta para usuarios que quieran una self-hosted de código abierto para representar funciones o 
+Todos los cálculos se realizan a nivel de servidor, esta aplicación es perfecta para usuarios que quieran una self-hosted de código abierto para representar funciones o 
 para empresas que posean servidores con una alta capacidad de cómputo.  
 
-AlephZero puede: {insertar lista de las capacidades de la aplicación.}
+La aplicación ha sido construida usando [Spring Boot](https://spring.io/projects/spring-boot) para el backend y [React](https://es.react.dev/) + [Vite](https://vite.dev/) para la interfaz web.
 
-## Tecnologías
-Backend: Spring Boot 3.4.4, Spring Authentication Server & Spring Resource Server   
-Frontend: React+Vite
+### Resumen de características
+AlephZero puede: {insertar lista de las capacidades de la aplicación resumido, terminar con enlace a la wiki}
 
-Herramietnas: SpringDoc OpenApi (swagger)
 
 ## Despliegue
 nose, docker. insertar pequeña guia de como levantar la aplicacion con un docker compose basico.
