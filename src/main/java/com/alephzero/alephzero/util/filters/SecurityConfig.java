@@ -3,6 +3,7 @@ package com.alephzero.alephzero.util.filters;
 import com.alephzero.alephzero.util.exceptions.CustomAccessDeniedHandler;
 import com.alephzero.alephzero.util.exceptions.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -77,13 +78,14 @@ public class SecurityConfig {
      */
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE + 1)
-    public SecurityFilterChain formLoginSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain formLoginSecurityFilterChain(HttpSecurity http, @Value("${app.frontend.url}") String frontendUrl) throws Exception {
         http
                 .securityMatcher("/login", "/register", "/login_process", "/css/**", "/js/**", "/images/**") // Apply this filter chain to specific endpoints
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()) // Allow all requests to these endpoints
                 .formLogin(form -> form
                         .loginPage("/login") // Custom login page
                         .loginProcessingUrl("/login_process") // Endpoint for processing login requests
+                        .defaultSuccessUrl(frontendUrl + "/")
                         .failureUrl("/login?error=true") // Redirect to login page with error on failure
                         .permitAll()
                 )

@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService extends AbstractCrudService<User, Integer, UserRepository> {
 
     /**
-     * Constructs a new {@code UserService} with the given repository.
+     * Constructs a new {@code UserService} with the given repository
      *
      * @param repository the {@link UserRepository} to be used for database access
      */
