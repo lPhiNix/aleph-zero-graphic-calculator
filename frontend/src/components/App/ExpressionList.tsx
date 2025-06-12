@@ -212,7 +212,7 @@ export default function ExpressionList({
                                 type="text"
                                 style={{ paddingRight: dynamicPadding }}
                                 className={`${styles.exprInput} ${(hoveredIndex === idx && focusedIndex !== idx && !isLastGap) ? styles.hasButtons : ''}`}
-                                placeholder={isLastGap ? (usableRows >= MAX_ROWS ? 'Máximo 10 filas' : 'Escribir una función') : ''}
+                                placeholder={isLastGap ? (usableRows >= MAX_ROWS ? 'Máximo 10 filas' : 'Escribir una expresión') : ''}
                                 value={expr}
                                 ref={el => {
                                     inputRefs.current[idx] = el
