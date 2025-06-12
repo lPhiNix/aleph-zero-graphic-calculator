@@ -17,7 +17,8 @@ public record MathExpressionCreationDto(
         @NotBlank String expression,
         @NotNull Integer orderIndex,
         String points,
-        @NotNull MathExpressionPreferences preferences
-)
+        String evaluation,
+        String calculation,
+        @NotNull MathExpressionPreferences preferences)
         implements Serializable {
 }
