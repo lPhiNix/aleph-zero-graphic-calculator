@@ -156,7 +156,7 @@ public class AuthorizationServerConfig {
                 if (principal.getPrincipal() instanceof UserDetails userDetails) {
                     // load user details from the database
                     User user =
-                            userService.findUserByIdentifier(userDetails.getUsername());
+                            userService.findUserByIdentifierReadOnly(userDetails.getUsername());
 
                     if (user != null) {
                         context.getClaims().subject(user.getPublicId());
