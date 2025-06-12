@@ -20,7 +20,7 @@ public class ErrorResponseBuilder {
     private AppCode code;
     private String errorTitle;
     private String errorSummary;
-    private final List<ApiErrorDetail> errorDetails = new ArrayList<>();
+    private List<? extends ApiErrorDetail> errorDetails;
 
     /**
      * Sets the application error code for this error response.
@@ -62,7 +62,7 @@ public class ErrorResponseBuilder {
      * @return this builder instance for chaining
      */
     public ErrorResponseBuilder detail(ApiErrorDetail detail) {
-        this.errorDetails.add(detail);
+        this.errorDetails = List.of(detail);
         return this;
     }
 
@@ -73,8 +73,7 @@ public class ErrorResponseBuilder {
      * @return this builder instance for chaining
      */
     public ErrorResponseBuilder details(List<? extends ApiErrorDetail> details) {
-        this.errorDetails.clear();
-        this.errorDetails.addAll(details);
+        this.errorDetails = List.copyOf(details);
         return this;
     }
 
@@ -200,18 +199,7 @@ public class ErrorResponseBuilder {
         }
 
         ErrorResponse error = new ErrorResponse(errorTitle, errorSummary, errorDetails);
-        ResponseEntity<ErrorResponse> response = ResponseEntity.status(code.getStatus()).body(error);
 
-        // Reset state for reuse
-        reset();
-
-        return response;
-    }
-
-    private void reset() {
-        this.code = null;
-        this.errorTitle = null;
-        this.errorSummary = null;
-        this.errorDetails.clear();
+        return ResponseEntity.status(code.getStatus()).body(error);
     }
 }

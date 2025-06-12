@@ -9,15 +9,13 @@ import java.util.List;
 
 /**
  * Standard DTO response message for errors
- *
- * @param title   a detailed description of the error.
+ * @param title a detailed description of the error.
  * @param summary brief summary of the error, optional parameter.
- * @param errors  optional value, contains a list of {@link ValidationErrorDetail} for more information
+ * @param errors optional value, contains a list of {@link ValidationErrorDetail} for more information
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ErrorResponse(
         String title,
         String summary,
-        List<ApiErrorDetail> errors
-) implements Serializable {
-}
+        List<? extends ApiErrorDetail> errors
+) implements Serializable { }
