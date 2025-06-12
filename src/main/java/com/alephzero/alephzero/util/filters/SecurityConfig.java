@@ -91,7 +91,10 @@ public class SecurityConfig {
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout") // Endpoint for logout
-                        .logoutSuccessUrl("/login?logout=true") // Redirect to login page on successful logout
+                        .logoutSuccessUrl(frontendUrl + "/login?logout=true") // Redirect to login page on successful logout
+                        .invalidateHttpSession(true)
+                        .clearAuthentication(true)
+                        .deleteCookies("JSESSIONID")
                 );
 
         return http.build();

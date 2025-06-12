@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import buttonStyles from '../../styles/modules/circularButton.module.css';
 import styles from '../../styles/modules/mathkeyboard.module.css';
 import AxiosConfig from '../../services/axiosService.ts';
+import { useCurrentUser } from '../../hooks/User/useCurrentUser.tsx';
 
 interface UserMenuCircularButtonProps {
     initial: string;
@@ -13,6 +14,8 @@ export default function UserMenuCircularButton({ initial }: UserMenuCircularButt
     const [open, setOpen] = useState(false);
     const btnRef = useRef<HTMLButtonElement | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
+
+    const { user } = useCurrentUser();
 
     useEffect(() => {
         if (!open) return;
@@ -65,16 +68,39 @@ export default function UserMenuCircularButton({ initial }: UserMenuCircularButt
                 <div
                     ref={menuRef}
                     className={styles.categorySubmenu}
-                    style={{ right: 0, left: 'auto', minWidth: '11rem', padding: '0.7rem 1.1rem' }}
+                    style={{ right: 0, left: 'auto', minWidth: '13rem', padding: '0.7rem 1.1rem' }}
                 >
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.9rem'
+                    }}>
+                        {/* Información del usuario */}
+                        <div style={{
+                            marginBottom: '0.3rem',
+                            paddingBottom: '0.5rem',
+                            borderBottom: '1px solid #ccc',
+                            fontSize: '0.96rem'
+                        }}>
+                            <div>
+                                <strong>Usuario:</strong> {user?.username || <span style={{color:'#aaa'}}>Cargando...</span>}
+                            </div>
+                            <div style={{
+                                fontSize: '0.85em',
+                                color: '#888',
+                                wordBreak: 'break-all'
+                            }}>
+                                <strong>ID:</strong> {user?.publicId || <span style={{color:'#aaa'}}>---</span>}
+                            </div>
+                        </div>
+                        {/* Botones de acción */}
                         <button
                             type="button"
                             className={styles.keyButton}
                             onClick={handleLogout}
                             style={{ fontWeight: 500, textAlign: 'left' }}
                         >
-                            Cerrar sesión
+                            🔑 Cerrar sesión
                         </button>
                         <button
                             type="button"
@@ -82,7 +108,7 @@ export default function UserMenuCircularButton({ initial }: UserMenuCircularButt
                             onClick={handleDelete}
                             style={{ fontWeight: 500, textAlign: 'left' }}
                         >
-                            Borrar cuenta
+                            🗑️ Borrar cuenta
                         </button>
                     </div>
                 </div>

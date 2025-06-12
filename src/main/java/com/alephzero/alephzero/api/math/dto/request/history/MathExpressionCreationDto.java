@@ -16,7 +16,7 @@ import java.io.Serializable;
 public record MathExpressionCreationDto(
         @NotBlank String expression,
         @NotNull Integer orderIndex,
-        @NotBlank String points,
+        String points,
         @NotNull MathExpressionPreferences preferences
 )
         implements Serializable {
