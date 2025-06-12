@@ -53,7 +53,7 @@ const Callback: React.FC = () => {
             })
             .then((data) => {
                 sessionStorage.setItem("access_token", data.access_token);
-                navigate("/?refresh=" + Date.now(), { replace: true });
+                navigate("/");
             })
             .catch((err) => {
                 console.error(err);

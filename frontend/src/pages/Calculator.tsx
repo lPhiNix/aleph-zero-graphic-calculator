@@ -1,8 +1,8 @@
-import Header from '../components/App/Header';
+import Header from '../components/App/Header/Header.tsx';
 import ExpressionList from '../components/App/ExpressionList';
 import GraphCanvas from '../components/App/Graph/GraphCanvas';
 import MathKeyboard from '../components/App/MathKeyboard';
-import { useCalculatorLogic } from '../hooks/useCalcLogic.tsx';
+import { useCalculatorLogic } from '../hooks/Math/useCalcLogic.tsx';
 import styles from '../styles/modules/graphCanvas.module.css';
 
 /**

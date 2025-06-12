@@ -37,5 +37,16 @@ public class UserController {
         return apiResponseFactory.ok(userMapper.toResponseDtoFromEntity(user));
     }
 
+    @PostMapping("/delete/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteUserById(@PathVariable int id) {
+        userService.deleteById(id);
+        return apiResponseFactory.noContent();
+    }
 
+    @PostMapping("/delete")
+    public ResponseEntity<ApiResponse<Void>> deleteCurrentUser() {
+        User user = userDetailsService.getCurrentUser();
+        userService.deleteById(user.getId());
+        return apiResponseFactory.noContent();
+    }
 }

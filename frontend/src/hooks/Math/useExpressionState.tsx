@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import type { ExpressionResult } from '../types/math';
+import type { ExpressionResult } from '../../types/math';
 
 // Tu paleta de colores pastel como variables CSS
 const DEFAULT_COLORS = [
