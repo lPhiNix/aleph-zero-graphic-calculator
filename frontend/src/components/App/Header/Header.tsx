@@ -1,6 +1,6 @@
 import styles from '../../../styles/modules/header.module.css';
 import { useCurrentUser } from '../../../hooks/User/useCurrentUser.tsx';
-import UserMenuCircularButton from '../CircularButton';
+import UserMenuCircularButton from './AccountButton.tsx';
 
 interface HeaderProps {
     title: string;
@@ -8,7 +8,7 @@ interface HeaderProps {
 
 export default function Header({ title }: HeaderProps) {
     const { user, loading } = useCurrentUser();
-    const initial = loading ? '...' : (user?.username?.[0]?.toUpperCase() || 'U');
+    const initial = loading ? '...' : (user?.username?.[0]?.toUpperCase() || '?');
 
     return (
         <header className={styles.header}>

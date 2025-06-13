@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
-import buttonStyles from '../../styles/modules/circularButton.module.css';
-import styles from '../../styles/modules/mathkeyboard.module.css';
-import AxiosConfig from '../../services/axiosService.ts';
-import { useCurrentUser } from '../../hooks/User/useCurrentUser.tsx';
+import buttonStyles from '../../../styles/modules/accountButton.module.css';
+import styles from '../../../styles/modules/mathkeyboard.module.css';
+import AxiosConfig from '../../../services/axiosService.ts';
+import { useCurrentUser } from '../../../hooks/User/useCurrentUser.tsx';
 
 interface UserMenuCircularButtonProps {
     initial: string;

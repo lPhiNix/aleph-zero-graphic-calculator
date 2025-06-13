@@ -18,11 +18,19 @@ import java.net.URI;
 import java.util.List;
 
 @RequiredArgsConstructor
-@RestController("api/v1/math/history")
+@RestController
+@RequestMapping("/api/v1/math/history")
 public class MathUserHistoryController {
     private final MathUserHistoryService mathUserHistoryService;
     private final ApiMessageFactory apiMessageFactory;
     private final UserHistoryMapper userHistoryMapper;
+
+    @GetMapping("/summary")
+    public ResponseEntity<ApiResponse<List<SimpleUserHistoryDto>>> getHistorySummary() {
+        List<UserHistory> elements = mathUserHistoryService.findAllByCurrentUserReadOnly();
+        List<SimpleUserHistoryDto> dto = userHistoryMapper.toSimpleResponseDtoListFromEntityList(elements);
+        return apiMessageFactory.response(dto).ok().build();
+    }
 
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> addEntryToUserHistory(@RequestBody UserHistoryCreationDto request) {
@@ -32,14 +40,14 @@ public class MathUserHistoryController {
     }
 
     @PreAuthorize("@userHistorySecurity.hasAccessTo(#id, authentication)")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id:\\d+}")
     public ResponseEntity<ApiResponse<Void>> deleteUserHistory(@PathVariable Integer id) {
         mathUserHistoryService.deleteById(id);
         return apiMessageFactory.response().noContent().build();
     }
 
     @PreAuthorize("@userHistorySecurity.hasAccessTo(#id, authentication)")
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     public ResponseEntity<ApiResponse<UserHistoryDto>> getUserHistory(@PathVariable Integer id) {
         UserHistory entity = mathUserHistoryService.findByIdReadOnly(id);
         UserHistoryDto dto =  userHistoryMapper.toResponseDtoFromEntity(entity);
@@ -47,17 +55,10 @@ public class MathUserHistoryController {
     }
 
     @PreAuthorize("@userHistorySecurity.hasAccessTo(#id, authentication)")
-    @GetMapping("summary/{id}")
+    @GetMapping("/summary/{id:\\d+}")
     public ResponseEntity<ApiResponse<SimpleUserHistoryDto>> getHistorySummaryById(@PathVariable Integer id){
         UserHistory history = mathUserHistoryService.findByIdReadOnly(id);
         SimpleUserHistoryDto dto = userHistoryMapper.toSimpleResponseDtoFromEntity(history);
-        return apiMessageFactory.response(dto).ok().build();
-    }
-
-    @GetMapping("summary/")
-    public ResponseEntity<ApiResponse<List<SimpleUserHistoryDto>>> getHistorySummary(){
-        List<UserHistory> elements = mathUserHistoryService.findAllByCurrentUserReadOnly();
-        List<SimpleUserHistoryDto> dto = userHistoryMapper.toSimpleResponseDtoListFromEntityList(elements);
         return apiMessageFactory.response(dto).ok().build();
     }
 }

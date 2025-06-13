@@ -34,7 +34,8 @@ public class SecurityConstants {
                 "/favicon.ico",
                 "/favicons/**",
                 "/styles/**",
-                "/scripts/**"
+                "/scripts/**",
+                "/snapshots/**"
         );
     }
 }

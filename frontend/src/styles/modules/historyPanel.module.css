@@ -1,0 +1,124 @@
+.historyPanelWrapper {
+    position: absolute;
+    left: 0;
+    top: 80px;
+    bottom: 0;
+    z-index: 30;
+    display: flex;
+    align-items: flex-start;
+}
+
+.historyTab {
+    width: 44px;
+    height: 110px;
+    border-radius: 0 15px 15px 0;
+    background: var(--app-secondary-color, #2d2d2d);
+    color: var(--highlight-fourth-color, #ddd);
+    border: none;
+    cursor: pointer;
+    font-size: 2.1em;
+    box-shadow: 2px 2px 10px #0004;
+    margin-top: 2rem;
+    margin-left: 0;
+    transition: background 0.18s;
+}
+
+.historyTab:hover,
+.historyTab:focus {
+    background: var(--highlight-fifth-color, #472b2b);
+}
+
+.historyPanel {
+    width: 285px;
+    min-height: 300px;
+    max-height: 80vh;
+    background: var(--app-secondary-color, #2d2d2d);
+    color: var(--fourth-color, #fff);
+    border-radius: 0 16px 16px 0;
+    box-shadow: 4px 4px 22px #000a;
+    padding: 1.2rem 1.3rem 1.4rem 0.9rem;
+    margin-left: -8px;
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+}
+
+.historyPanelHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 1.12em;
+    font-weight: 600;
+    margin-bottom: 0.8rem;
+}
+
+.saveBtn {
+    background: var(--highlight-primary-color, #f1b5ae);
+    color: var(--primary-color, #141414);
+    border: none;
+    border-radius: 7px;
+    padding: 0.33rem 0.75rem;
+    font-size: 1em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.18s;
+}
+
+.saveBtn:hover {
+    background: var(--highlight-auxiliar-color, #8ab4ca);
+}
+
+.historyList {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+}
+
+.historyRow {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.4rem 0.25rem;
+    background: var(--color-gray-thirty, #404040);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px #0002;
+}
+
+.snapshotThumb {
+    width: 56px;
+    height: 36px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1.5px solid var(--highlight-secondary-color, #ea9c92);
+    cursor: pointer;
+    transition: border 0.18s;
+}
+
+.snapshotThumb:hover {
+    border: 2.5px solid var(--highlight-primary-color, #f1b5ae);
+}
+
+.historyMeta {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.22rem;
+    font-size: 0.87em;
+    color: var(--fourth-color, #fff);
+}
+
+.deleteBtn {
+    background: none;
+    border: none;
+    color: var(--color-red, #db544b);
+    font-size: 1.2em;
+    cursor: pointer;
+    align-self: flex-end;
+    margin-top: 0.13rem;
+}
+.deleteBtn:hover {
+    color: var(--highlight-primary-color, #f1b5ae);
+}
