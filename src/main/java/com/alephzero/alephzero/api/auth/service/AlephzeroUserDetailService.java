@@ -44,6 +44,20 @@ public class AlephzeroUserDetailService implements UserDetailsService {
     }
 
 
+    /**
+     * Retrieves the authenticated user based on the JWT token stored in the security context.
+     *
+     * <p>This method performs the following steps:
+     * <ul>
+     *   <li>Extracts the authentication object from the {@link SecurityContextHolder}.</li>
+     *   <li>Verifies that the authentication is based on a valid {@link Jwt} token.</li>
+     *   <li>Extracts the username from the <code>preferred_username</code> claim.</li>
+     *   <li>Loads the user from the database using the extracted username.</li>
+     * </ul>
+     *
+     * @return the authenticated {@link com.alephzero.alephzero.db.models.User} from the database
+     * @throws IllegalStateException if the authentication is missing, invalid, or the user is not found
+     */
     public com.alephzero.alephzero.db.models.User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -70,5 +84,4 @@ public class AlephzeroUserDetailService implements UserDetailsService {
         logger.info("Authenticated user loaded: {}", user);
         return user;
     }
-
 }

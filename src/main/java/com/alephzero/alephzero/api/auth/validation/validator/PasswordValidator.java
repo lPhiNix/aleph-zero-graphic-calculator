@@ -1,6 +1,6 @@
-package com.alephzero.alephzero.api.user.validation.validator;
+package com.alephzero.alephzero.api.auth.validation.validator;
 
-import com.alephzero.alephzero.api.user.validation.annotations.ValidPassword;
+import com.alephzero.alephzero.api.auth.validation.annotations.ValidPassword;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

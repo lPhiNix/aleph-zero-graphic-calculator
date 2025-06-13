@@ -31,7 +31,7 @@ import java.io.IOException;
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
     private static final Logger logger = LoggerFactory.getLogger(CustomAuthenticationEntryPoint.class);
     private final ObjectMapper objectMapper;
-    private final ApiResponseFactory apiResponseFactory;
+    private final ApiResponseFactory apiResponseFactory; // to change.
 
     /**
      * Handles unauthenticated access attempts by returning a 401 Unauthorized response

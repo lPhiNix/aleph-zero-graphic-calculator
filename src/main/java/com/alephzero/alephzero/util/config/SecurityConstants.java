@@ -5,6 +5,10 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.Set;
 
+/**
+ * Configuration class holding all allowed paths for {@link com.alephzero.alephzero.util.filters.CorsConfig} and
+ * public paths for {@link com.alephzero.alephzero.util.filters.SecurityConfig}
+ */
 @Configuration
 public class SecurityConstants {
     /**

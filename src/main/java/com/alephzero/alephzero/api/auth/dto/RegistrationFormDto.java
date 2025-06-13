@@ -1,6 +1,7 @@
 package com.alephzero.alephzero.api.auth.dto;
 
-import com.alephzero.alephzero.api.auth.validation.ValidRegisterForm;
+import com.alephzero.alephzero.api.auth.validation.annotations.ValidRegisterForm;
+import com.alephzero.alephzero.api.auth.validation.annotations.ValidPassword;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
@@ -27,9 +28,11 @@ public record RegistrationFormDto(
         String email,
 
         @NotBlank(message = "Password is required")
+        @ValidPassword
         String password,
 
         @NotBlank(message = "Confirm Password is required")
+        @ValidPassword
         String confirmPassword
 ) implements Serializable {
 }
