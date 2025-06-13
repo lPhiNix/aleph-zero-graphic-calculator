@@ -24,7 +24,7 @@ public class MathAssignmentMemory {
 
     // Pattern for variable or function assignment (supports: x=expr, f(x)=expr, g[y]=expr)
     // LHS: either a single lowercase letter, or a lowercase function name with () or []
-    private static final Pattern ASSIGNMENT_PATTERN = Pattern.compile("^(([a-z])|([a-z]+\\s*\\(\\s*[a-z]\\s*\\))|([a-z]+\\s*\\[\\s*[a-z]\\s*\\]))=(.+)$");
+    private static final Pattern ASSIGNMENT_PATTERN = Pattern.compile("^(([a-z])|([a-z]+\\s*\\(\\s*[a-z]\\s*\\))|([a-z]+\\s*\\[\\s*[a-z]\\s*]))=(.+)$");
 
     private final Map<String, String> variableMap = new HashMap<>(); // Stores variable and function assignments
     private final RegexValidator regexValidator; // Regex-based validator for symbol recognition

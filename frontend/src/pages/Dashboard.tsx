@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import * as React from "react";
 import { useEffect } from "react";
+import styles from "../styles/modules/dashboard.module.css";
 
 const Dashboard: React.FC = () => {
     const location = useLocation();
@@ -20,8 +21,8 @@ const Dashboard: React.FC = () => {
     }, [attempt, navigate]);
 
     return (
-        <div>
-            <h1>Dashboard</h1>
+        <div className={styles.container}>
+            <h1>Aleph-Zero</h1>
             {message && <p>{message}</p>}
         </div>
     );

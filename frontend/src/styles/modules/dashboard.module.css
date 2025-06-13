@@ -1,0 +1,8 @@
+.container {
+    display: flex;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(150deg, #ffffff,  #e88b7e);
+    color: var(--highlight-fourth-color);
+}
