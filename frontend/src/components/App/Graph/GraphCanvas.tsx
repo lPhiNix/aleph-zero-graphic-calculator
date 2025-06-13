@@ -1,5 +1,5 @@
-import React, {useRef, useEffect, useCallback, RefObject, JSX} from 'react';
-import styles from '../../../styles/modules/graphCanvas.module.css';
+import React, { useRef, useEffect, useCallback, RefObject, JSX } from "react";
+import styles from "../../../styles/modules/graphCanvas.module.css";
 
 interface Offset {
     x: number;
@@ -54,8 +54,11 @@ function formatLabel(value: number): string {
     const decimals = Math.max(0, 3 - Math.floor(Math.log10(absVal)));
     return value
         .toFixed(decimals)
-        .replace(/\.?0+$/, '');
+        .replace(/\.?0+$/, "");
 }
+
+const DEFAULT_OFFSET = { x: 0, y: 0 };
+const DEFAULT_SCALE = 40;
 
 export default function GraphCanvas({
                                         drawingSets,
@@ -66,8 +69,8 @@ export default function GraphCanvas({
     const actualRef = canvasRef ?? localCanvasRef;
     const lastMousePos = useRef<{ x: number; y: number } | null>(null);
 
-    const [offset, setOffset] = React.useState<Offset>({ x: 0, y: 0 });
-    const [scale, setScale] = React.useState<number>(40);
+    const [offset, setOffset] = React.useState<Offset>(DEFAULT_OFFSET);
+    const [scale, setScale] = React.useState<number>(DEFAULT_SCALE);
     const debounceTimer = useRef<number | null>(null);
 
     const worldToCanvas = useCallback(
@@ -96,7 +99,7 @@ export default function GraphCanvas({
             const { cy: y0 } = worldToCanvas(0, 0, cw, ch);
 
             ctx.beginPath();
-            ctx.strokeStyle = getCSSVar('--gc-axis', '#444');
+            ctx.strokeStyle = getCSSVar("--gc-axis", "#444");
             ctx.lineWidth = 2;
             ctx.moveTo(x0, 0);
             ctx.lineTo(x0, ch);
@@ -127,7 +130,7 @@ export default function GraphCanvas({
 
             // ─── Líneas menores ─────────────────────────────────────────────
             ctx.beginPath();
-            ctx.strokeStyle = getCSSVar('--gc-grid-minor', '#e0e0e0');
+            ctx.strokeStyle = getCSSVar("--gc-grid-minor", "#e0e0e0");
             ctx.lineWidth = 1;
 
             let x = Math.floor(left / minorStepWorld) * minorStepWorld;
@@ -151,10 +154,10 @@ export default function GraphCanvas({
 
             // ─── Líneas mayores y etiquetas ──────────────────────────────────
             ctx.beginPath();
-            ctx.strokeStyle = getCSSVar('--gc-grid-major', '#cccccc');
+            ctx.strokeStyle = getCSSVar("--gc-grid-major", "#cccccc");
             ctx.lineWidth = 1.5;
-            ctx.fillStyle = getCSSVar('--gc-grid-label', '#333');
-            ctx.font = '12px sans-serif';
+            ctx.fillStyle = getCSSVar("--gc-grid-label", "#333");
+            ctx.font = "12px sans-serif";
 
             const iMinX = Math.ceil(left / gridStepWorld);
             const iMaxX = Math.floor(right / gridStepWorld);
@@ -206,9 +209,9 @@ export default function GraphCanvas({
             ctx.closePath();
 
             if (axisVisibleX && axisVisibleY) {
-                ctx.fillStyle = getCSSVar('--gc-grid-label', '#333');
-                ctx.font = '12px sans-serif';
-                ctx.fillText('0', zeroX + 4, zeroY - 4);
+                ctx.fillStyle = getCSSVar("--gc-grid-label", "#333");
+                ctx.font = "12px sans-serif";
+                ctx.fillText("0", zeroX + 4, zeroY - 4);
             }
         },
         [canvasToWorld, scale, worldToCanvas]
@@ -264,11 +267,11 @@ export default function GraphCanvas({
     const redrawAll = useCallback(() => {
         const canvas = actualRef.current;
         if (!canvas) return;
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext("2d");
         if (!ctx) return;
         const { width: cw, height: ch } = canvas;
         ctx.clearRect(0, 0, cw, ch);
-        ctx.fillStyle = getCSSVar('--gc-background', '#fff');
+        ctx.fillStyle = getCSSVar("--gc-background", "#fff");
         ctx.fillRect(0, 0, cw, ch);
 
         drawGrid(ctx, cw, ch);
@@ -287,15 +290,15 @@ export default function GraphCanvas({
 
         debounceTimer.current = window.setTimeout(() => {
             const { width: cw, height: ch } = canvas;
-            let left   = canvasToWorld(0,   ch / 2, cw, ch).x;
-            let right  = canvasToWorld(cw,  ch / 2, cw, ch).x;
-            let top    = canvasToWorld(cw / 2, 0,   cw, ch).y;
-            let bottom = canvasToWorld(cw / 2, ch,  cw, ch).y;
+            let left = canvasToWorld(0, ch / 2, cw, ch).x;
+            let right = canvasToWorld(cw, ch / 2, cw, ch).x;
+            let top = canvasToWorld(cw / 2, 0, cw, ch).y;
+            let bottom = canvasToWorld(cw / 2, ch, cw, ch).y;
 
             const decimals = 6;
-            left   = Number(left.toFixed(decimals));
-            right  = Number(right.toFixed(decimals));
-            top    = Number(top.toFixed(decimals));
+            left = Number(left.toFixed(decimals));
+            right = Number(right.toFixed(decimals));
+            top = Number(top.toFixed(decimals));
             bottom = Number(bottom.toFixed(decimals));
 
             onViewChange({ origin: left, bound: right, bottom, top });
@@ -388,9 +391,9 @@ export default function GraphCanvas({
     useEffect(() => {
         const canvas = actualRef.current;
         if (!canvas) return;
-        canvas.addEventListener('wheel', handleWheel, { passive: false });
+        canvas.addEventListener("wheel", handleWheel, { passive: false });
         return () => {
-            canvas.removeEventListener('wheel', handleWheel);
+            canvas.removeEventListener("wheel", handleWheel);
         };
     }, [handleWheel, actualRef]);
 
@@ -398,14 +401,64 @@ export default function GraphCanvas({
         redrawAll();
     }, [offset, scale, redrawAll]);
 
+    // --- BUTTONS LOGIC ---
+    const handleZoomIn = () => setScale((prev) => prev * 1.2);
+    const handleZoomOut = () => setScale((prev) => prev / 1.2);
+    const handleResetView = () => {
+        setScale(DEFAULT_SCALE);
+        setOffset(DEFAULT_OFFSET);
+    };
+
     return (
-        <canvas
-            ref={actualRef}
-            className={styles.canvas}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-        />
+        <div className={styles.canvasContainer}>
+            <canvas
+                ref={actualRef}
+                className={styles.canvas}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+            />
+            <div className={styles.zoomControls}>
+                <button
+                    className={styles.zoomBtn}
+                    aria-label="Zoom In"
+                    onClick={handleZoomIn}
+                    tabIndex={0}
+                    type="button"
+                >
+                    {/* SVG Plus icon */}
+                    <svg width="22" height="22" viewBox="0 0 22 22" className={styles.iconSvg}>
+                        <rect x="9" y="4" width="4" height="14" rx="2" fill="white"/>
+                        <rect x="4" y="9" width="14" height="4" rx="2" fill="white"/>
+                    </svg>
+                </button>
+                <button
+                    className={styles.zoomBtn}
+                    aria-label="Zoom Out"
+                    onClick={handleZoomOut}
+                    tabIndex={0}
+                    type="button"
+                >
+                    {/* SVG Minus icon */}
+                    <svg width="22" height="22" viewBox="0 0 22 22" className={styles.iconSvg}>
+                        <rect x="4" y="9" width="14" height="4" rx="2" fill="white"/>
+                    </svg>
+                </button>
+                <button
+                    className={styles.zoomBtn}
+                    aria-label="Reset View"
+                    onClick={handleResetView}
+                    tabIndex={0}
+                    type="button"
+                >
+                    <svg className={styles.resetIcon} width="18" height="18" viewBox="0 0 18 18">
+                        <circle cx="9" cy="9" r="7" stroke="white" strokeWidth="1.5" fill="none" />
+                        <path d="M12.75 9A3.75 3.75 0 1 1 9 5.25" stroke="white" strokeWidth="1.5" fill="none" />
+                        <circle cx="9" cy="9" r="1.25" fill="white"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
     );
 }

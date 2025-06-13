@@ -34,7 +34,7 @@ public class MathExpressionService implements MathEvaluationService {
     private final ExecutorService executor;
 
     /** Maximum allowed time (in seconds) for expression evaluation */
-    private static final long TIMEOUT_SECONDS = 60;
+    private static final long TIMEOUT_SECONDS = 120;
 
     private final MathAssignmentMemory memory;
     private final Classifier mathExpressionClassifier;

@@ -37,9 +37,71 @@
     padding: 1rem;
 }
 
+.canvasContainer {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
 .canvas {
     width: 100%;
     height: 100%;
     touch-action: none;
     display: block;
+}
+
+.zoomControls {
+    position: absolute;
+    bottom: 22px;
+    right: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 10;
+    background: none;
+}
+
+.zoomBtn {
+    width: 46px;
+    height: 46px;
+    background: var(--secondary-color);
+    border: none;
+    color: #fff;
+    font-size: 2.1em;
+    font-family: "Segoe UI", Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    box-shadow: var(--fourth-color-shadow);
+    cursor: pointer;
+    transition: background 0.15s, filter 0.15s;
+    outline: none;
+    user-select: none;
+    padding: 0;
+}
+
+.zoomBtn:focus {
+    filter: brightness(1.1);
+    outline: none !important;
+    box-shadow: 0 1.5px 5px #0004 !important; /* quita halo */
+    border: none !important;
+}
+
+.zoomBtn::-moz-focus-inner {
+    border: 0;
+}
+
+.iconSvg {
+    width: 24px;
+    height: 24px;
+    display: block;
+    pointer-events: none;
+}
+
+.resetIcon {
+    width: 24px;
+    height: 24px;
+    display: block;
+    pointer-events: none;
 }

@@ -82,9 +82,6 @@ public class MathAssignmentMemory {
             System.out.println(lhs + " = " + value);
             return lhs + " = " + value;
         }
-        for (String s : variableMap.keySet()) {
-            System.out.println(s + " + " + variableMap.get(s));
-        }
         return replaceVariables(expression);
     }
 
