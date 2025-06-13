@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "../../styles/modules/historyPanel.module.css";
 import AxiosConfig from "../../services/axiosService.ts";
 
@@ -49,6 +49,23 @@ export default function HistoryPanel({
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [history, setHistory] = useState<SimpleUserHistoryDto[]>([]);
+    const panelRef = useRef<HTMLDivElement>(null);
+    const [panelHeight, setPanelHeight] = useState<number>(0);
+    const [panelTop, setPanelTop] = useState<number>(0);
+
+    // Ajusta el tamaño y posición según el canvas.
+    useEffect(() => {
+        const resize = () => {
+            if (graphCanvasRef.current && panelRef.current) {
+                const canvasRect = graphCanvasRef.current.getBoundingClientRect();
+                setPanelHeight(canvasRect.height);
+                setPanelTop(canvasRect.top);
+            }
+        };
+        resize();
+        window.addEventListener("resize", resize);
+        return () => window.removeEventListener("resize", resize);
+    }, [graphCanvasRef, open]);
 
     useEffect(() => {
         if (!open) return;
@@ -59,8 +76,15 @@ export default function HistoryPanel({
             .finally(() => setLoading(false));
     }, [open]);
 
+    // Nueva función para saber si hay expresiones no vacías
+    const hasNonEmptyExpressions = expressions.some(expr => expr.trim() !== "");
+
     const handleSave = async () => {
         if (!graphCanvasRef.current) return;
+
+        // Si no hay expresiones válidas, no guardar (seguridad extra)
+        if (!hasNonEmptyExpressions) return;
+
         const rawSnapshot = graphCanvasRef.current.toDataURL("image/jpeg");
         const snapshot = rawSnapshot.replace(/^data:image\/jpeg;base64,/, "");
 
@@ -77,13 +101,14 @@ export default function HistoryPanel({
                 },
             }))
             .filter((e) => e.expression.trim() !== "");
-        const payload: UserHistoryCreationDto = { snapshot, mathExpressions };
+        const payload: UserHistoryCreationDto = {snapshot, mathExpressions};
         setLoading(true);
         try {
             await AxiosConfig.getInstance().post("/api/v1/math/history", payload);
             const res = await AxiosConfig.getInstance().get("/api/v1/math/history/summary");
             setHistory(res.data.content);
-        } catch (e) {}
+        } catch (e) {
+        }
         setLoading(false);
     };
 
@@ -92,7 +117,8 @@ export default function HistoryPanel({
         try {
             await AxiosConfig.getInstance().delete(`/api/v1/math/history/${id}`);
             setHistory((h) => h.filter((r) => r.id !== id));
-        } catch (e) {}
+        } catch (e) {
+        }
         setLoading(false);
     };
 
@@ -100,7 +126,6 @@ export default function HistoryPanel({
         setLoading(true);
         try {
             const res = await AxiosConfig.getInstance().get(`/api/v1/math/history/${id}`);
-            // ADAPTACIÓN: usa 'expressions' del backend
             const exprs = Array.from(res.data.content.expressions)
                 .sort((a: any, b: any) => a.indexOrder - b.indexOrder);
             const exp = exprs.map((e: any) => e.mathExpression.expression);
@@ -108,29 +133,55 @@ export default function HistoryPanel({
             const tys = exprs.map((e: any) => e.mathExpression.preferences.xprType);
             refreshExpressions(exp, cols, tys);
             setOpen(false);
-        } catch (e) {}
+        } catch (e) {
+        }
         setLoading(false);
     };
 
+    // Animación y visibilidad
+    const panelClass = [
+        styles.historyPanel,
+        open ? styles.historyPanelOpen : styles.historyPanelClosed,
+    ].join(" ");
+
     return (
-        <div className={styles.historyPanelWrapper}>
-            <button
-                className={styles.historyTab}
-                onClick={() => setOpen((v) => !v)}
-                aria-label="Mostrar historial"
+        <div
+            className={styles.historyPanelWrapper}
+            style={{
+                pointerEvents: "none",
+                height: panelHeight ? `${panelHeight}px` : undefined,
+                top: panelTop ? `${panelTop}px` : undefined,
+            }}
+        >
+            <div
+                ref={panelRef}
+                className={panelClass}
+                style={{
+                    pointerEvents: open ? "auto" : "none",
+                    height: panelHeight ? `${panelHeight}px` : undefined,
+                    top: 0,
+                    left: 0,
+                }}
             >
-                🕑
-            </button>
-            {open && (
-                <div className={styles.historyPanel}>
+                <div className={styles.historyContent}>
                     <div className={styles.historyPanelHeader}>
-                        <span>Historial</span>
-                        <button className={styles.saveBtn} onClick={handleSave} disabled={loading}>
-                            + Guardar lista actual
+                    <span className={styles.historyTitle}>
+                        🕓 Historial
+                    </span>
+                        <button
+                            className={styles.actionBtn}
+                            onClick={handleSave}
+                            disabled={loading || !hasNonEmptyExpressions}
+                        >
+                            💾 Guardar
                         </button>
                     </div>
                     <div className={styles.historyList}>
-                        {loading && <div style={{ textAlign: "center", color: "#888" }}>Cargando...</div>}
+                        {loading && (
+                            <div style={{textAlign: "center", color: "#888"}}>
+                                Cargando...
+                            </div>
+                        )}
                         {!loading &&
                             history.map((h) => (
                                 <div key={h.id} className={styles.historyRow}>
@@ -138,26 +189,48 @@ export default function HistoryPanel({
                                         src={h.snapshot}
                                         alt="snapshot"
                                         className={styles.snapshotThumb}
-                                        onClick={() => handleLoad(h.id)}
+                                        draggable={false}
                                     />
                                     <div className={styles.historyMeta}>
-                                        <span>
-                                            {new Date(h.createdAt).toLocaleString()}
-                                        </span>
-                                        <button
-                                            className={styles.deleteBtn}
-                                            title="Eliminar"
-                                            onClick={() => handleDelete(h.id)}
-                                            disabled={loading}
-                                        >
-                                            🗑️
-                                        </button>
+                                        {h.description && (
+                                            <div className={styles.description}>{h.description}</div>
+                                        )}
+                                        <div className={styles.updatedAt}>
+                                            Modificada: {new Date(h.updatedAt).toLocaleString()}
+                                        </div>
+                                        <div className={styles.buttonRow}>
+                                            <button
+                                                className={`${styles.actionBtn} ${styles.loadBtn}`}
+                                                onClick={() => handleLoad(h.id)}
+                                                disabled={loading}
+                                            >
+                                                🗂️ Cargar
+                                            </button>
+                                            <button
+                                                className={`${styles.actionBtn} ${styles.deleteBtn}`}
+                                                onClick={() => handleDelete(h.id)}
+                                                disabled={loading}
+                                            >
+                                                🗑️ Eliminar
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
                     </div>
                 </div>
-            )}
+                <button
+                    className={styles.historyTab}
+                    onClick={() => setOpen((v) => !v)}
+                    aria-label={open ? "Cerrar historial" : "Mostrar historial"}
+                    tabIndex={0}
+                >
+                    <div className={styles.tabLines}>
+                        <div/>
+                        <div/>
+                    </div>
+                </button>
+            </div>
         </div>
     );
 }
