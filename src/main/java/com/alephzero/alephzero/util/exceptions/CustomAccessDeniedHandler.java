@@ -1,8 +1,8 @@
 package com.alephzero.alephzero.util.exceptions;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.alephzero.alephzero.api.util.common.messages.ApiResponseFactory;
 import com.alephzero.alephzero.api.util.common.messages.dto.error.ErrorResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     private final ObjectMapper objectMapper;
-    private final ApiResponseFactory apiResponseFactory;
+    private final ApiResponseFactory apiResponseFactory; // to change.
 
     /**
      * Handles {@link AccessDeniedException} by sending a 403 Forbidden HTTP response

@@ -1,6 +1,7 @@
-package com.alephzero.alephzero.api.auth.validation;
+package com.alephzero.alephzero.api.auth.validation.validator;
 
 import com.alephzero.alephzero.api.auth.dto.RegistrationFormDto;
+import com.alephzero.alephzero.api.auth.validation.annotations.ValidRegisterForm;
 import com.alephzero.alephzero.api.user.service.UserService;
 import jakarta.validation.ConstraintValidator;
 

@@ -5,6 +5,9 @@ import com.alephzero.alephzero.api.util.common.mapper.BaseMapper;
 import com.alephzero.alephzero.db.models.UserRole;
 import org.mapstruct.Mapper;
 
+/**
+ * MapStruct mapper for {@link UserRole} ==> DTOs
+ */
 @Mapper(componentModel = "spring")
 public interface RoleMapper extends BaseMapper<UserRole, UserRoleDto> {
 }

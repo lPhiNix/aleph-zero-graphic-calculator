@@ -31,7 +31,7 @@ import java.util.Set;
 
 /**
  * Security configuration class for defining security filter chains and authentication mechanisms.
- * TODO: refactor this monstro.
+ * DO NOT TOUCH.
  */
 @Profile("default")
 @Configuration

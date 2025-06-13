@@ -7,7 +7,7 @@ import java.time.Instant;
 import java.util.Set;
 
 /**
- * DTO for {@link UserHistory}
+ * Basic response DTO for {@link UserHistory}
  */
 public record UserHistoryDto(
         Integer id,
