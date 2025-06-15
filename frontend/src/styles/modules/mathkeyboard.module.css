@@ -172,6 +172,9 @@
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--highlight-secondary-color) var(--mathkb-submenu-bg);
+    /* Añadido padding a los lados */
+    padding-left: 1rem;
+    padding-right: 1rem;
 }
 
 @keyframes fadeInMenu {
