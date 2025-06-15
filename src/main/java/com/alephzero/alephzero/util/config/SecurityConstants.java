@@ -36,10 +36,12 @@ public class SecurityConstants {
     Set<String> allowedStaticEndpoints() {
         return Set.of(
                 "/favicon.ico",
+                "/favicon.png",
                 "/favicons/**",
                 "/styles/**",
                 "/scripts/**",
-                "/snapshots/**"
+                "/snapshots/**",
+                "/img/**"
         );
     }
 }

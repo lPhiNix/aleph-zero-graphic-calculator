@@ -1,28 +1,26 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import * as React from "react";
 import { useEffect } from "react";
 import styles from "../styles/modules/dashboard.module.css";
+import dashboardImage from "../assets/logo/alephzeroLogo2.png";
 
 const Dashboard: React.FC = () => {
     const location = useLocation();
-    const navigate = useNavigate();
-
     const params = new URLSearchParams(location.search);
     const message = params.get("msg");
     const attempt = parseInt(params.get("attempt") || "0", 10);
 
     useEffect(() => {
-        // Si no hay token, redirige directamente a login
-
-        // Redirige a calculator y refresca la página
-        const targetUrl = `/calculator`;
-        // Usamos location.href para forzar reload completo
-        window.location.href = targetUrl;
-    }, [attempt, navigate]);
+        window.location.href = "/calculator";
+    }, [attempt]);
 
     return (
         <div className={styles.container}>
-            <h1>Aleph-Zero</h1>
+            <img
+                src={dashboardImage}
+                alt="Aleph-Zero"
+                className={styles.dashboardImage}
+            />
             {message && <p>{message}</p>}
         </div>
     );

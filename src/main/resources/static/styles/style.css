@@ -59,10 +59,17 @@
 .right {
     flex: 1.5;
     background-color: #2D2D2D;
-    //background-image: url('../../assets/react.svg');
-    background-size: contain;
+    background-size: 118%;
     background-position: center;
     background-repeat: no-repeat;
+}
+
+.right-login {
+    background-image: url("../img/loginIlu.png");
+}
+
+.right-register {
+    background-image: url("../img/registerIlu.png");
 }
 
 .title {

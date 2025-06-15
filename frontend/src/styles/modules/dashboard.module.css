@@ -1,8 +1,15 @@
 .container {
     display: flex;
+    flex-direction: column;
     height: 100vh;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(150deg, #ffffff,  #e88b7e);
+    background: linear-gradient(150deg, #ffffff, #e88b7e);
     color: var(--highlight-fourth-color);
+}
+
+.dashboardImage {
+    max-width: 700px;
+    width: 100%;
+    height: auto;
 }
