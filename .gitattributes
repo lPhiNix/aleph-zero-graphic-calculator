@@ -1,2 +1,5 @@
 /mvnw text eol=lf
 *.cmd text eol=crlf
+
+frontend/entrypoint.sh text eol=lf
+
