@@ -52,7 +52,6 @@ const Callback: React.FC = () => {
                 return res.json();
             })
             .then((data) => {
-                //
                 sessionStorage.setItem("access_token", data.access_token);
                 navigate("/");
             })

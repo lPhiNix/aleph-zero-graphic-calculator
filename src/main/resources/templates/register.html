@@ -4,6 +4,8 @@
     <title>Register</title>
     <link rel="stylesheet" th:href="@{/styles/style.css}" />
     <link rel="stylesheet" th:href="@{/styles/index.css}" />
+
+    <link rel="icon" href="/favicon.png" type="image/x-icon" />
 </head>
 <body>
 <div class="container">
@@ -51,12 +53,19 @@
                 <div class="formMain">
                     <button type="submit" class="button">Sign Up</button>
                 </div>
-
-                <div th:if="${message}" class="registerText" th:text="${message}"></div>
-                <div th:if="${error}" class="registerText" th:text="${error}"></div>
             </form>
         </div>
-        <div class="right"></div>
+        <!-- Success Message -->
+        <div th:if="${message}" class="toast toast-success">
+            <p th:text="${message}"></p>
+        </div>
+
+        <!-- Error Message -->
+        <div th:if="${error}" class="toast toast-error">
+            <p th:text="${error}"></p>
+        </div>
+
+        <div class="right right-register"></div>
     </div>
 </div>
 </body>

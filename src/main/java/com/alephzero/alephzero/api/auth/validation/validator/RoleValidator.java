@@ -1,8 +1,8 @@
-package com.alephzero.alephzero.api.user.validation.validator;
+package com.alephzero.alephzero.api.auth.validation.validator;
 
 import com.alephzero.alephzero.db.models.UserRole;
 import com.alephzero.alephzero.db.repositories.UserRoleRepository;
-import com.alephzero.alephzero.api.user.validation.annotations.ValidRole;
+import com.alephzero.alephzero.api.auth.validation.annotations.ValidRole;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Autowired;

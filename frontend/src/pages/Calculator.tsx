@@ -1,23 +1,19 @@
-import Header from '../components/App/Header';
+import { useRef } from 'react';
+import Header from '../components/App/Header/Header.tsx';
 import ExpressionList from '../components/App/ExpressionList';
 import GraphCanvas from '../components/App/Graph/GraphCanvas';
 import MathKeyboard from '../components/App/MathKeyboard';
-import { useCalculatorLogic } from '../hooks/useCalcLogic.tsx';
+import { useCalculatorLogic } from '../hooks/Math/useCalcLogic.tsx';
+import HistoryPanel from '../components/App/HistoryPanel';
 import styles from '../styles/modules/graphCanvas.module.css';
 
-/**
- * Now you can define all keys, including submenus, with all the same options as the main keyboard:
- *  - label
- *  - onClick (with insertIntoExpression and cursor/selection logic)
- *  - className (for optional wide keys, styles)
- *  - dataVirtualKey (for focus handling)
- */
 export default function Calculator() {
     const {
         expressions,
         setExpressions,
         results,
         colors,
+        setColors,
         disabledFlags,
         focusedIndex,
         setFocusedIndex,
@@ -36,55 +32,66 @@ export default function Calculator() {
         allDrawingSets
     } = useCalculatorLogic();
 
+    function insertRowBelow() {
+        if (focusedIndex === null) return;
+        setExpressions(prev => {
+            const u = [...prev];
+            u.splice(focusedIndex + 1, 0, '');
+            return u;
+        });
+        setTimeout(() => {
+            setFocusedIndex(focusedIndex + 1);
+            setCaretPosition(0);
+            setSelectionLength(0);
+        }, 0);
+    }
+
+    // Referencia para el canvas real para snapshot
+    const graphCanvasRef = useRef<HTMLCanvasElement>(null);
+
+    // Refrescar estado desde historial (tres argumentos, aunque solo uses dos)
+    function refreshExpressions(newExprs: string[], newColors: string[], _newTypes: string[]) {
+        setExpressions(() => [...newExprs, '']);
+        setColors(() => newColors);
+        // Si tienes setTypes, aquí podrías usar _newTypes
+    }
+
+    // ... (keys, configs y otros props como antes)
+
     // --- Math Functions (submenu) ---
     const mathFuncKeys = [
-        // Funciones definidas por el usuario
         { label: 'f',          onClick: () => insertIntoExpression('f()', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true, category: 'Genéricas', tooltip: "nose" },
         { label: 'g',          onClick: () => insertIntoExpression('g()', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true, category: 'Genéricas' },
         { label: 'h',          onClick: () => insertIntoExpression('h()', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true, category: 'Genéricas' },
-
-        // Variables paramétricas
         { label: 'x',          onClick: () => insertIntoExpression('x()', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true, category: 'Genéricas' },
         { label: 'y',          onClick: () => insertIntoExpression('y()', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true, category: 'Genéricas' },
         { label: 'z',          onClick: () => insertIntoExpression('z()', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true, category: 'Genéricas' },
-
-        // Funciones especiales
         { label: 'gamma',      onClick: () => insertIntoExpression('gamma()', { deltaCaret: 6, selectLength: 0 }), dataVirtualKey: true, category: 'Especiales' },
         { label: 'zeta',       onClick: () => insertIntoExpression('zeta()', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true, category: 'Especiales'},
         { label: 'erf',        onClick: () => insertIntoExpression('erf()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: 'Especiales' },
         { label: 'fresnelc',   onClick: () => insertIntoExpression('fresnelc()', { deltaCaret: 9, selectLength: 0 }), dataVirtualKey: true, category: 'Especiales' },
-
-        // Operaciones matemáticas básicas
         { label: 'exp',        onClick: () => insertIntoExpression('exp()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: 'Básicas' },
         { label: 'log10',      onClick: () => insertIntoExpression('log10()', { deltaCaret: 6, selectLength: 0 }), dataVirtualKey: true, category: 'Básicas' },
         { label: 'log2',       onClick: () => insertIntoExpression('log2()', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true, category: 'Básicas' },
         { label: 'abs',        onClick: () => insertIntoExpression('abs()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: 'Básicas' },
-
-        // Funciones trigonométricas
         { label: 'sin',        onClick: () => insertIntoExpression('sin()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: 'Trigonométricas' },
         { label: 'cos',        onClick: () => insertIntoExpression('cos()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: 'Trigonométricas' },
         { label: 'tan',        onClick: () => insertIntoExpression('tan()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: 'Trigonométricas' },
         { label: 'csc',        onClick: () => insertIntoExpression('csc()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: 'Trigonométricas' },
         { label: 'cot',        onClick: () => insertIntoExpression('cot()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: 'Trigonométricas' },
         { label: 'sec',        onClick: () => insertIntoExpression('sec()', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: 'Trigonométricas' },
-
-        // Funciones trigonométricas inversas
         { label: 'arcsin',     onClick: () => insertIntoExpression('arcsin()', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true, category: 'Trigonométricas de Arco' },
         { label: 'arccos',     onClick: () => insertIntoExpression('arccos()', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true, category: 'Trigonométricas de Arco' },
         { label: 'arctan',     onClick: () => insertIntoExpression('arctan()', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true, category: 'Trigonométricas de Arco' },
         { label: 'arccsc',     onClick: () => insertIntoExpression('arccsc()', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true, category: 'Trigonométricas de Arco' },
         { label: 'arccot',     onClick: () => insertIntoExpression('arccot()', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true, category: 'Trigonométricas de Arco' },
         { label: 'arcsec',     onClick: () => insertIntoExpression('arcsec()', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true, category: 'Trigonométricas de Arco' },
-
-        // Funciones hiperbólicas
         { label: 'sinh',       onClick: () => insertIntoExpression('sinh()', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true, category: 'Hiperbólicas' },
         { label: 'cosh',       onClick: () => insertIntoExpression('cosh()', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true, category: 'Hiperbólicas' },
         { label: 'tanh',       onClick: () => insertIntoExpression('tanh()', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true, category: 'Hiperbólicas' },
         { label: 'coth',       onClick: () => insertIntoExpression('coth()', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true, category: 'Hiperbólicas' },
         { label: 'sech',       onClick: () => insertIntoExpression('sech()', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true, category: 'Hiperbólicas' },
         { label: 'csch',       onClick: () => insertIntoExpression('csch()', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true, category: 'Hiperbólicas' },
-
-        // Funciones hiperbólicas inversas
         { label: 'arcsinh',    onClick: () => insertIntoExpression('arcsinh()', { deltaCaret: 8, selectLength: 0 }), dataVirtualKey: true, category: 'Hiperbólicas de Arco' },
         { label: 'arccosh',    onClick: () => insertIntoExpression('arccosh()', { deltaCaret: 8, selectLength: 0 }), dataVirtualKey: true, category: 'Hiperbólicas de Arco' },
         { label: 'arctanh',    onClick: () => insertIntoExpression('arctanh()', { deltaCaret: 8, selectLength: 0 }), dataVirtualKey: true, category: 'Hiperbólicas de Arco' },
@@ -93,42 +100,29 @@ export default function Calculator() {
         { label: 'arccsch',    onClick: () => insertIntoExpression('arccsch()', { deltaCaret: 8, selectLength: 0 }), dataVirtualKey: true, category: 'Hiperbólicas de Arco' }
     ];
 
-    // --- Symja Functions (submenu) ---
     const symjaKeys = [
-        // Derivadas y cálculo
         { label: 'D',          onClick: () => insertIntoExpression('D[, ]', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true, category: "Cálculo" },
         { label: 'Diff',       onClick: () => insertIntoExpression('Diff[, ]', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true, category: "Cálculo" },
         { label: 'Integrate',  onClick: () => insertIntoExpression('Integrate[, ]', { deltaCaret: 10, selectLength: 0 }), dataVirtualKey: true, category: "Cálculo" },
         { label: 'Taylor',     onClick: () => insertIntoExpression('Taylor[, ]', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true, category: "Cálculo" },
         { label: 'Limit',      onClick: () => insertIntoExpression('Limit[, ]', { deltaCaret: 6, selectLength: 0 }), dataVirtualKey: true, category: "Cálculo" },
-
-
         { label: 'Solve',      onClick: () => insertIntoExpression('Solve[, ]', { deltaCaret: 6, selectLength: 0 }), dataVirtualKey: true, category: "Análisis" },
         { label: 'DSolve',     onClick: () => insertIntoExpression('DSolve[, ]', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true, category: "Análisis" },
-
-        // Álgebra y simplificación
         { label: 'Simplify',   onClick: () => insertIntoExpression('Simplify[]', { deltaCaret: 9, selectLength: 0 }), dataVirtualKey: true, category: "Álgebra" },
         { label: 'Expand',     onClick: () => insertIntoExpression('Expand[]', { deltaCaret: 7, selectLength: 0 }), dataVirtualKey: true, category: "Álgebra"},
-
-        // Funciones aritméticas
         { label: 'GCD',        onClick: () => insertIntoExpression('GCD[]', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: "Aritmética" },
         { label: 'LCM',        onClick: () => insertIntoExpression('LCM[]', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: "Aritmética" },
-
-        // Operaciones vectoriales y matrices
         { label: 'Dot',        onClick: () => insertIntoExpression('Dot[,]', { deltaCaret: 4, selectLength: 0 }), dataVirtualKey: true, category: "Operaciones Vectoriales" },
         { label: 'Cross',      onClick: () => insertIntoExpression('Cross[,]', { deltaCaret: 6, selectLength: 0 }), dataVirtualKey: true, category: "Operaciones Vectoriales" },
         { label: 'Norm',       onClick: () => insertIntoExpression('Norm[]', { deltaCaret: 5, selectLength: 0 }), dataVirtualKey: true, category: "Operaciones Vectoriales" },
         { label: 'Normalize',  onClick: () => insertIntoExpression('Normalize[]', { deltaCaret: 10, selectLength: 0 }), dataVirtualKey: true, category: "Operaciones Vectoriales" },
         { label: 'Vectorangle',onClick: () => insertIntoExpression('Vectorangle[,]', { deltaCaret: 11, selectLength: 0 }), dataVirtualKey: true, category: "Operaciones Vectoriales" },
-
-
         { label: 'Projection', onClick: () => insertIntoExpression('Projection[]', { deltaCaret: 11, selectLength: 0 }), dataVirtualKey: true, category: "Matrices" },
         { label: 'Eigenvalues',onClick: () => insertIntoExpression('Eigenvalues[]', { deltaCaret: 12, selectLength: 0 }), dataVirtualKey: true, category: "Matrices" },
         { label: 'Inverse',    onClick: () => insertIntoExpression('Inverse[]', { deltaCaret: 8, selectLength: 0 }), dataVirtualKey: true, category: "Matrices" },
         { label: 'Transpose',  onClick: () => insertIntoExpression('Transpose[]', { deltaCaret: 10, selectLength: 0 }), dataVirtualKey: true, category: "Matrices" },
     ];
 
-    // --- Constants (submenu) ---
     const constantKeys = [
         { label: 'Pi',               onClick: () => insertIntoExpression('Pi', { deltaCaret: 2, selectLength: 0 }), dataVirtualKey: true, category: 'Constantes' },
         { label: 'E',                onClick: () => insertIntoExpression('E', { deltaCaret: 1, selectLength: 0 }), dataVirtualKey: true, category: 'Constantes' },
@@ -144,7 +138,6 @@ export default function Calculator() {
         { label: 'Khinchin',         onClick: () => insertIntoExpression('Khinchin', { deltaCaret: 8, selectLength: 0 }), dataVirtualKey: true, category: 'Constantes' },
     ];
 
-    // --- Main Keyboard Keys (all properties are configurable) ---
     const keys = [
         { label: 'x²', onClick: () => insertIntoExpression('()^2', { deltaCaret: 1, selectLength: 0 }), dataVirtualKey: true },
         { label: '1/x', onClick: () => insertIntoExpression('1/()', { deltaCaret: 3, selectLength: 0 }), dataVirtualKey: true },
@@ -204,28 +197,23 @@ export default function Calculator() {
         { name: "Constantes", columns: 2 },
     ];
 
-    function insertRowBelow() {
-        if (focusedIndex === null) return;
-        setExpressions(prev => {
-            const u = [...prev];
-            u.splice(focusedIndex + 1, 0, '');
-            return u;
-        });
-        setTimeout(() => {
-            setFocusedIndex(focusedIndex + 1);
-            setCaretPosition(0);
-            setSelectionLength(0);
-        }, 0);
-    }
-
     return (
         <div className={styles.pageContainer}>
             <Header title="Aleph-Zero" />
             <div className={styles.mainArea}>
+                <HistoryPanel
+                    expressions={expressions}
+                    results={results}
+                    colors={colors}
+                    types={results.map((r) => r.exprType || 'UNKNOWN')}
+                    graphCanvasRef={graphCanvasRef}
+                    refreshExpressions={refreshExpressions}
+                />
                 <div className={styles.canvasWrapper}>
                     <GraphCanvas
                         drawingSets={allDrawingSets}
                         onViewChange={handleViewChange}
+                        canvasRef={graphCanvasRef}
                     />
                 </div>
                 <div className={styles.expressionsWrapper}>

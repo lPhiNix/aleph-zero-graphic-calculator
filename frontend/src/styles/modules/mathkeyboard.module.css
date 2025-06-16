@@ -167,10 +167,14 @@
     z-index: 20;
     border-radius: 0 0 10px 10px;
     box-shadow: var(--mathkb-submenu-shadow);
-    padding: 0.5rem 1rem 0.7rem 1rem;
     animation: fadeInMenu 0.15s;
-    max-height: 45.5vh;
+    max-height: 45.9vh;
     overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--highlight-secondary-color) var(--mathkb-submenu-bg);
+    /* Añadido padding a los lados */
+    padding-left: 1rem;
+    padding-right: 1rem;
 }
 
 @keyframes fadeInMenu {

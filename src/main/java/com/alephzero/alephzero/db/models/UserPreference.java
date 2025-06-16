@@ -13,7 +13,7 @@ import java.util.Map;
 @Setter
 @NoArgsConstructor
 @Entity
-@Deprecated
+@Deprecated(since = "NOT YET IMPLEMENTED")
 @Table(name = "user_preferences", schema = "mysqldb")
 public class UserPreference {
     @Id

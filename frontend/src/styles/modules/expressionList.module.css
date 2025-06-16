@@ -25,6 +25,9 @@
     overflow-y: auto;
     box-shadow: var(--expr-row-shadow);
     overflow-x: hidden;
+    /* --- Scrollbar personalizado igual que historyPanel --- */
+    scrollbar-width: thin;
+    scrollbar-color: var(--highlight-secondary-color) var(--mathkb-bg);
 }
 
 .inputWrapper {

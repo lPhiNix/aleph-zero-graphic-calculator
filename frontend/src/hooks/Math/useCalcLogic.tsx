@@ -1,10 +1,10 @@
 import {useRef, useCallback, useEffect, useState} from 'react';
 import { useExpressionsState } from './useExpressionState.tsx';
-import { useCaretSelection } from './useCaretSelection';
+import { useCaretSelection } from './useCaretSelection.tsx';
 import {
     evaluateSingleExpression,
     evaluateBatchExpressions,
-} from '../services/mathService';
+} from '../../services/mathService.ts';
 
 interface ViewWindow {
     origin: number;

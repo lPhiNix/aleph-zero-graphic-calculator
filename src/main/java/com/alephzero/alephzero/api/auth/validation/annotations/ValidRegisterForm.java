@@ -1,5 +1,6 @@
-package com.alephzero.alephzero.api.auth.validation;
+package com.alephzero.alephzero.api.auth.validation.annotations;
 
+import com.alephzero.alephzero.api.auth.validation.validator.ValidRegisterFormValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 import java.lang.annotation.*;

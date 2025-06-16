@@ -1,5 +1,6 @@
 package com.alephzero.alephzero.api.util.common.messages;
 
+import com.alephzero.alephzero.api.util.common.messages.dto.error.details.ApiErrorDetail;
 import org.springframework.stereotype.Component;
 
 

@@ -17,5 +17,5 @@ import java.util.List;
 public record ErrorResponse(
         String title,
         String summary,
-        List<ApiErrorDetail> errors
+        List<? extends ApiErrorDetail> errors
 ) implements Serializable { }

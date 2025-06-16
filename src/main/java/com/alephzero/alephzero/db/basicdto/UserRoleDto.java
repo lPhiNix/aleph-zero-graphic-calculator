@@ -3,7 +3,7 @@ package com.alephzero.alephzero.db.basicdto;
 import java.io.Serializable;
 
 /**
- * dto for {@link com.alephzero.alephzero.db.models.UserRole}
+ * Basic response DTO for {@link com.alephzero.alephzero.db.models.UserRole}
  */
 public record UserRoleDto(
         Integer id,

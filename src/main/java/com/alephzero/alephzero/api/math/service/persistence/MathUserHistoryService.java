@@ -1,6 +1,6 @@
 package com.alephzero.alephzero.api.math.service.persistence;
 
-import com.alephzero.alephzero.api.auth.service.SquipUserDetailService;
+import com.alephzero.alephzero.api.auth.service.AlephzeroUserDetailService;
 import com.alephzero.alephzero.api.math.dto.request.history.UserHistoryCreationDto;
 import com.alephzero.alephzero.api.util.common.mapper.MappingContext;
 import com.alephzero.alephzero.api.util.common.service.AbstractCrudService;
@@ -22,18 +22,18 @@ public class MathUserHistoryService extends AbstractCrudService<UserHistory, Int
 
     private final UserHistoryMapper userHistoryMapper;
     private final MathExpressionMapper mathExpressionMapper;
-    private final SquipUserDetailService squipUserDetailService;
+    private final AlephzeroUserDetailService alephzeroUserDetailService;
 
-    public MathUserHistoryService(UserHistoryRepository repository, UserHistoryMapper userHistoryMapper, MathExpressionMapper mathExpressionMapper, SquipUserDetailService squipUserDetailService) {
+    public MathUserHistoryService(UserHistoryRepository repository, UserHistoryMapper userHistoryMapper, MathExpressionMapper mathExpressionMapper, AlephzeroUserDetailService alephzeroUserDetailService) {
         super(repository);
         this.userHistoryMapper = userHistoryMapper;
         this.mathExpressionMapper = mathExpressionMapper;
-        this.squipUserDetailService = squipUserDetailService;
+        this.alephzeroUserDetailService = alephzeroUserDetailService;
     }
 
     @Transactional
     public UserHistory createUserHistory(UserHistoryCreationDto request) {
-        User owner = squipUserDetailService.getCurrentUser();
+        User owner = alephzeroUserDetailService.getCurrentUser();
         String snapshotUUid = UUID.randomUUID().toString();
         MappingContext context = MappingContext.builder().withAny(owner, snapshotUUid, mathExpressionMapper).build();
 
@@ -48,7 +48,7 @@ public class MathUserHistoryService extends AbstractCrudService<UserHistory, Int
 
     @Transactional(readOnly = true)
     public List<UserHistory> findAllByCurrentUserReadOnly() {
-        User currentUser = squipUserDetailService.getCurrentUser();
+        User currentUser = alephzeroUserDetailService.getCurrentUser();
         List<UserHistory> elements = repository.findAllByUser(currentUser);
         logger.info("Finding all user history for user: {}, found {} elements", currentUser.getUsername(), elements.size());
         return elements;

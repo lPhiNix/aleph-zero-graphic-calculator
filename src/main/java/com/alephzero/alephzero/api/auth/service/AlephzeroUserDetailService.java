@@ -20,8 +20,8 @@ import org.springframework.security.core.Authentication;
  */
 @Service
 @RequiredArgsConstructor
-public class SquipUserDetailService implements UserDetailsService {
-    private static final Logger logger = LoggerFactory.getLogger(SquipUserDetailService.class);
+public class AlephzeroUserDetailService implements UserDetailsService {
+    private static final Logger logger = LoggerFactory.getLogger(AlephzeroUserDetailService.class);
 
     private final UserService userService;
 
@@ -34,7 +34,7 @@ public class SquipUserDetailService implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws EntityNotFoundException {
-        com.alephzero.alephzero.db.models.User user = userService.findUserByIdentifier(username);
+        com.alephzero.alephzero.db.models.User user = userService.findUserByIdentifierReadOnly(username);
         UserRole role = user.getRole();
 
         return User.withUsername(user.getUsername())
@@ -45,17 +45,18 @@ public class SquipUserDetailService implements UserDetailsService {
 
 
     /**
-     * Retrieves the currently authenticated user from the authorization context (JWT token).
+     * Retrieves the authenticated user based on the JWT token stored in the security context.
      *
-     * <p>This method extracts the user information from the JWT stored in the {@link SecurityContextHolder},
-     * using the {@code preferred_username} claim to identify the user in the database.</p>
+     * <p>This method performs the following steps:
+     * <ul>
+     *   <li>Extracts the authentication object from the {@link SecurityContextHolder}.</li>
+     *   <li>Verifies that the authentication is based on a valid {@link Jwt} token.</li>
+     *   <li>Extracts the username from the <code>preferred_username</code> claim.</li>
+     *   <li>Loads the user from the database using the extracted username.</li>
+     * </ul>
      *
-     * <p><b>Note:</b> This method assumes that the authentication principal is a {@link Jwt} token
-     * and that it contains a {@code preferred_username} claim. If the JWT is missing or invalid,
-     * or if the user is not found in the database, it throws an {@link IllegalStateException}.</p>
-     *
-     * @return the {@link com.alephzero.alephzero.db.models.User} associated with the JWT
-     * @throws IllegalStateException if no valid JWT is found or the user does not exist in the database
+     * @return the authenticated {@link com.alephzero.alephzero.db.models.User} from the database
+     * @throws IllegalStateException if the authentication is missing, invalid, or the user is not found
      */
     public com.alephzero.alephzero.db.models.User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -74,7 +75,7 @@ public class SquipUserDetailService implements UserDetailsService {
 
         logger.info("Extracted username from token: {}", username);
 
-        var user = userService.findUserByIdentifier(username);
+        var user = userService.findUserByIdentifierReadOnly(username);
         if (user == null) {
             logger.error("No user found with identifier: {}", username);
             throw new IllegalStateException("Authenticated user not found in database");
@@ -83,6 +84,4 @@ public class SquipUserDetailService implements UserDetailsService {
         logger.info("Authenticated user loaded: {}", user);
         return user;
     }
-
-
 }

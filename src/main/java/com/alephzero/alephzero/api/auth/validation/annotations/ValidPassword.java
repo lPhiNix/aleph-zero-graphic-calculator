@@ -1,6 +1,6 @@
-package com.alephzero.alephzero.api.user.validation.annotations;
+package com.alephzero.alephzero.api.auth.validation.annotations;
 
-import com.alephzero.alephzero.api.user.validation.validator.RoleValidator;
+import com.alephzero.alephzero.api.auth.validation.validator.PasswordValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
@@ -12,25 +12,28 @@ import java.lang.annotation.Target;
 
 /**
  * Custom Jakarta Bean Validation annotation used to validate if a string value
- * represents a valid user role.
+ * represents a valid user password according to defined rules.
  * <p>
- * This annotation is processed by the associated {@link RoleValidator} class, which checks if the
- * annotated field's value exists in the database.
+ * This annotation is processed by the associated {@link PasswordValidator} class, which enforces rules such as:
+ * <ul>
+ *     <li>TODO: VALID PASSWORD CONDITION LIST</li>
+ * </ul>
  * </p>
  */
 @Documented
-@Constraint(validatedBy = RoleValidator.class)
+@Constraint(validatedBy = PasswordValidator.class)
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ValidRole {
+public @interface ValidPassword {
 
     /**
      * Defines the default error message that will be generated if the validation performed by
-     * {@link RoleValidator} fails.
+     * {@link PasswordValidator} fails.
+     * This message informs the user that the password does not meet the required criteria.
      *
-     * @return The error message indicating that the role does not exist.
+     * @return The error message indicating that the password is not valid.
      */
-    String message() default "Role does not exist";
+    String message() default "Password is not valid. Please meet all the criteria.";
 
     /**
      * Specifies the validation groups to which this constraint belongs.

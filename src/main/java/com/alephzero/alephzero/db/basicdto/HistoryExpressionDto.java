@@ -5,7 +5,7 @@ import com.alephzero.alephzero.db.models.HistoryExpression;
 import java.io.Serializable;
 
 /**
- * DTO for {@link HistoryExpression}
+ * Basic response DTO for {@link HistoryExpression}
  */
 public record HistoryExpressionDto(
         Integer id,

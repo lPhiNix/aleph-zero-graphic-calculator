@@ -1,10 +1,29 @@
 import * as React from "react";
-import {useEffect} from "react";
+import { useEffect } from "react";
 import pkceChallenge from "pkce-challenge";
-
+import { useNavigate } from "react-router-dom";
 
 const Login: React.FC = () => {
+    const navigate = useNavigate();
+
+    function isTokenExpired(token: string) {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            // exp está en segundos, Date.now() en milisegundos
+            return payload.exp * 1000 < Date.now();
+        } catch (e) {
+            return true; // Si falla la decodificación, lo consideramos caducado
+        }
+    }
+
     useEffect(() => {
+        const token = sessionStorage.getItem("access_token");
+        if (token && !isTokenExpired(token)) {
+            // Solo redirige si el token existe y NO está caducado
+            navigate("/calculator", { replace: true });
+            return;
+        }
+
         async function generatePkce() {
             const { code_verifier, code_challenge } = await pkceChallenge();
 
@@ -25,7 +44,7 @@ const Login: React.FC = () => {
         }
 
         generatePkce();
-    }, []);
+    }, [navigate]);
 
     return null;
 };

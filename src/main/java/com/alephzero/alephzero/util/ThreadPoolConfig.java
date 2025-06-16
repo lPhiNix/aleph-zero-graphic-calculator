@@ -9,6 +9,23 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Configuration
 public class ThreadPoolConfig {
+    /**
+     * The number of threads to keep in the pool, even if they are idle.
+     * Set to the number of available processors.
+     */
+    private static final int CORE_POOL_SIZE = Runtime.getRuntime().availableProcessors();
+
+    /**
+     * The maximum number of threads allowed in the pool.
+     * Set to the number of available processors.
+     */
+    private static final int MAXIMUM_POOL_SIZE = Runtime.getRuntime().availableProcessors();
+
+    /**
+     * The maximum time that excess idle threads will wait for new tasks before terminating.
+     * Measured in seconds.
+     */
+    private static final long KEEP_ALIVE_TIME = 60L;
 
     /**
      * Creates a thread pool for executing mathematical evaluations.
@@ -21,11 +38,6 @@ public class ThreadPoolConfig {
      */
     @Bean(destroyMethod = "shutdown")
     public ExecutorService mathThreadPool() {
-        int cpuCores = Runtime.getRuntime().availableProcessors();
-
-        int corePoolSize = cpuCores;
-        int maxPoolSize = cpuCores;
-        long keepAliveTime = 60L;
         BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(100);
 
         ThreadFactory namedThreadFactory = new ThreadFactory() {
@@ -38,10 +50,11 @@ public class ThreadPoolConfig {
             }
         };
 
+        // thread pool executor.
         return new ThreadPoolExecutor(
-                corePoolSize,
-                maxPoolSize,
-                keepAliveTime,
+                CORE_POOL_SIZE,
+                MAXIMUM_POOL_SIZE,
+                KEEP_ALIVE_TIME,
                 TimeUnit.SECONDS,
                 queue,
                 namedThreadFactory,

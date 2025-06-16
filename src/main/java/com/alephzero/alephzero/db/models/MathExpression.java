@@ -31,4 +31,13 @@ public class MathExpression {
     @JdbcTypeCode(SqlTypes.JSON)
     private MathExpressionPreferences preferences;
 
+
+    @Lob
+    @Column(name = "evaluation")
+    private String evaluation;
+
+    @Lob
+    @Column(name = "calculation")
+    private String calculation;
+
 }

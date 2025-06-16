@@ -46,6 +46,8 @@ CREATE TABLE IF NOT EXISTS math_expression
 (
     id              INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
     expression      VARCHAR(255)        NOT NULL,
+    evaluation      LONGTEXT,
+    calculation     LONGTEXT,
     points          LONGTEXT, -- Points in the expression
     preferences     LONGTEXT -- Preferences in the expression as JSON (color, bound, origin, etc.)
 );

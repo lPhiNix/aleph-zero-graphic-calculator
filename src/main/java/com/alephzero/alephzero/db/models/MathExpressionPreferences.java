@@ -1,10 +1,10 @@
 package com.alephzero.alephzero.db.models;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-
+/**
+ * Model representing the preferences of a {@link MathExpression}
+ * @param color color in hexadecimal.
+ * @param xprType expression type.
+ */
 public record MathExpressionPreferences(
         String color,
         String xprType
