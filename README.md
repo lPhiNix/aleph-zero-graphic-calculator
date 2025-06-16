@@ -9,12 +9,12 @@ para empresas que posean servidores con una alta capacidad de cómputo.
 La aplicación ha sido construida usando [Spring Boot](https://spring.io/projects/spring-boot) para el backend y [React](https://es.react.dev/) + [Vite](https://vite.dev/) para la interfaz web.    
 
 ## Características principales
-La Calculadora Gráfica Aleph-Zero ofrece un conjunto de características avanzadas e innovadoras orientadas al sector científico y educativo.
+La Calculadora Gráfica Aleph-Zero ofrece un conjunto de características avanzadas e innovadoras orientadas al sector científico y educativo:
 
-Cálculo simbólico avanzado (derivadas, integrales, ecuaciones, funciones trascendentales, álgebra, matrices y más)
-Gráficas interactivas con zoom infinito y desplazamiento libre
-Historial visual y recuperable de expresiones matemáticas
-Gestión segura de usuarios y persistencia de sesión
+* Cálculo simbólico avanzado (derivadas, integrales, ecuaciones, funciones trascendentales, álgebra, matrices y más)
+* Gráficas interactivas con zoom infinito y desplazamiento libre
+* Historial visual y recuperable de expresiones matemáticas
+* Gestión segura de usuarios y persistencia de sesión
 
 ## Despliegue y uso
 Para más información para el despliegue de la aplicación, carasterísticas detalladas y manual de uso, revisa la [wiki oficial](/../../wiki/) de la aplicación.
