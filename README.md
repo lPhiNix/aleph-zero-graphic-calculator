@@ -3,7 +3,6 @@
 ![image](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E)
 ![image](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white)
 ![image](https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white)
-![License](https://img.shields.io/github/license/iesgrancapitan-proyectos/202425dam-junio-alephzero-graphic-calculator)
 # Aleph-Zero
 ![455264535-d0759a0f-80d6-4456-950e-ad3fcf28afe8](https://github.com/user-attachments/assets/19d67ed8-9548-4828-b2a9-656fdbf94395)
 
