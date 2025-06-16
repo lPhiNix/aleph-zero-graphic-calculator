@@ -27,3 +27,8 @@ Para más información para el despliegue de la aplicación, carasterísticas de
 ## Autores
 - Rafael Francisco Jiménez Rayo: [GitHub](https://github.com/Sinbelisk)
 - Pablo Martinez Pedrosa: [GitHub](https://github.com/lPhiNix)
+
+---
+
+![455270960-e80abc3d-ac13-4b17-b85b-867f9c6e87d0](https://github.com/user-attachments/assets/a525fdc6-7f4f-4c12-adf0-15d32941e1d5)
+
