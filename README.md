@@ -6,29 +6,27 @@
 # Aleph-Zero
 ![455264535-d0759a0f-80d6-4456-950e-ad3fcf28afe8](https://github.com/user-attachments/assets/19d67ed8-9548-4828-b2a9-656fdbf94395)
 
-Aleph-Zero es una calculadora gráfica web de código abierto que permite representar expresiones matemáticas de forma simple y cómoda.  
- 
-Todos los cálculos se realizan a nivel de servidor, esta aplicación es perfecta para usuarios que quieran una self-hosted de código abierto para representar funciones o 
-para empresas que posean servidores con una alta capacidad de cómputo.  
+Aleph-Zero is an open-source web graphing calculator that allows you to represent mathematical expressions in a simple and convenient way.
 
-La aplicación ha sido construida usando [Spring Boot](https://spring.io/projects/spring-boot) para el backend y [React](https://es.react.dev/) + [Vite](https://vite.dev/) para la interfaz web.    
+All calculations are performed server-side, making this application perfect for users who want a self-hosted open-source solution for plotting functions or for companies with high-computing-capacity servers.
 
-## Características principales
-La Calculadora Gráfica Aleph-Zero ofrece un conjunto de características avanzadas e innovadoras orientadas al sector científico y educativo:
+The application has been built using [Spring Boot](https://spring.io/projects/spring-boot) for the backend and [React](https://es.react.dev/) + [Vite](https://vite.dev/) for the web interface.
 
-* Cálculo simbólico avanzado (derivadas, integrales, ecuaciones, funciones trascendentales, álgebra, matrices y más)
-* Gráficas interactivas con zoom infinito y desplazamiento libre
-* Historial visual y recuperable de expresiones matemáticas
-* Gestión segura de usuarios y persistencia de sesión
+## Main Features
+The Aleph-Zero Graphing Calculator offers a set of advanced and innovative features aimed at the scientific and educational sectors:
 
-## Despliegue y uso
-Para más información para el despliegue de la aplicación, carasterísticas detalladas y manual de uso, revisa la [wiki oficial](/../../wiki/) de la aplicación.
+* Advanced symbolic computation (derivatives, integrals, equations, transcendental functions, algebra, matrices, and more)
+* Interactive graphs with infinite zoom and free panning
+* Visual and recoverable history of mathematical expressions
+* Secure user management and session persistence
 
-## Autores
+## Deployment and Usage
+For more information on deploying the application, detailed features, and user manual, check the application's [official wiki](/../../wiki/).
+
+## Authors
 - Rafael Francisco Jiménez Rayo: [GitHub](https://github.com/Sinbelisk)
 - Pablo Martinez Pedrosa: [GitHub](https://github.com/lPhiNix)
 
 ---
 
 ![455270960-e80abc3d-ac13-4b17-b85b-867f9c6e87d0](https://github.com/user-attachments/assets/a525fdc6-7f4f-4c12-adf0-15d32941e1d5)
-
