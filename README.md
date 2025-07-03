@@ -25,7 +25,7 @@ For more information on deploying the application, detailed features, and user m
 
 ## Authors
 - Rafael Francisco Jiménez Rayo: [@Sinbelisk](https://github.com/Sinbelisk)
-- Pablo Martinez Pedrosa: [PhiNix](https://github.com/lPhiNix)
+- Pablo Martinez Pedrosa: [@PhiNix](https://github.com/lPhiNix)
 
 ---
 
