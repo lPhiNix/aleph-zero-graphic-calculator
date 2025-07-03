@@ -1,29 +1,50 @@
-import React, { useRef, useEffect, useCallback, RefObject, JSX } from "react";
-import styles from "../../../styles/modules/graphCanvas.module.css";
+import React, { useRef, useEffect, useCallback, RefObject, JSX } from "react"; // Import React and relevant hooks for state, side-effects, and references
+import styles from "../../../styles/modules/graphCanvas.module.css"; // Import CSS module for styling
 
+/**
+ * Offset interface for translation of the view window in the graph.
+ */
 interface Offset {
-    x: number;
-    y: number;
+    x: number; // Horizontal offset in world coordinates
+    y: number; // Vertical offset in world coordinates
 }
 
+/**
+ * ViewWindow interface represents the current visible region of the graph in world coordinates.
+ */
 interface ViewWindow {
-    origin: number;
-    bound: number;
-    bottom: number;
-    top: number;
+    origin: number; // Leftmost visible x value
+    bound: number;  // Rightmost visible x value
+    bottom: number; // Lowest visible y value
+    top: number;    // Highest visible y value
 }
 
+/**
+ * DrawingSet interface contains an array of points and a color for each curve to be drawn.
+ */
 interface DrawingSet {
-    points: Array<{ x: number; y: number }>;
-    color: string;
+    points: Array<{ x: number; y: number }>; // Points to be drawn for the curve
+    color: string; // Color of the curve
 }
 
+/**
+ * Props for the GraphCanvas component.
+ * @property {DrawingSet[]} drawingSets - Array of sets of points to be drawn.
+ * @property {function} [onViewChange] - Optional callback when the view window changes.
+ * @property {RefObject<HTMLCanvasElement | null>} canvasRef - Ref to the canvas element.
+ */
 interface GraphCanvasProps {
     drawingSets: DrawingSet[];
     onViewChange?: (vw: ViewWindow) => void;
     canvasRef: RefObject<HTMLCanvasElement | null>;
 }
 
+/**
+ * Utility to safely get a CSS variable value, with a fallback if not defined.
+ * @param {string} name - CSS variable name.
+ * @param {string} fallback - Fallback value if variable is not found.
+ * @returns {string} The value of the CSS variable or the fallback.
+ */
 function getCSSVar(name: string, fallback: string) {
     return (
         getComputedStyle(document.documentElement).getPropertyValue(name).trim() ||
@@ -31,6 +52,13 @@ function getCSSVar(name: string, fallback: string) {
     );
 }
 
+/**
+ * Computes the step size for grid lines in world coordinates, given a desired pixel spacing.
+ * Rounds to a "nice" number for readability (1, 2, 5, or 10 * 10^n).
+ * @param {number} desiredPxBetween - Desired pixels between grid lines.
+ * @param {number} scale - Current pixels-per-unit scale.
+ * @returns {number} Grid step size in world coordinates.
+ */
 function computeGridStep(desiredPxBetween: number, scale: number): number {
     const rawStep = desiredPxBetween / scale;
     const exponent = Math.floor(Math.log10(rawStep));
@@ -43,6 +71,11 @@ function computeGridStep(desiredPxBetween: number, scale: number): number {
     return 10 * base;
 }
 
+/**
+ * Formats a number for axis/grid labels, using exponential if very large/small, otherwise with up to 3 decimals.
+ * @param {number} value - The value to format.
+ * @returns {string} The formatted string.
+ */
 function formatLabel(value: number): string {
     const absVal = Math.abs(value);
     if (absVal >= 10000 || (absVal <= 0.001 && absVal !== 0)) {
@@ -57,22 +90,44 @@ function formatLabel(value: number): string {
         .replace(/\.?0+$/, "");
 }
 
+// Default offset for the graph view (centered at origin)
 const DEFAULT_OFFSET = { x: 0, y: 0 };
+// Default scale (pixels per world unit)
 const DEFAULT_SCALE = 40;
 
+/**
+ * GraphCanvas component.
+ * Renders a zoomable, pannable graph canvas with grid, axes, and one or more curves.
+ * @param {GraphCanvasProps} props - The props for the component.
+ * @returns {JSX.Element} The rendered graph canvas and controls.
+ */
 export default function GraphCanvas({
-                                        drawingSets,
-                                        onViewChange,
-                                        canvasRef,
+                                        drawingSets,         // Array of DrawingSet objects to render
+                                        onViewChange,        // Optional callback when the view window changes
+                                        canvasRef,           // Ref to the canvas element (external or internal)
                                     }: GraphCanvasProps): JSX.Element {
+    // Local fallback ref in case canvasRef is not provided
     const localCanvasRef = useRef<HTMLCanvasElement>(null);
+    // The actual ref to use (prefer external, fallback to local)
     const actualRef = canvasRef ?? localCanvasRef;
+    // Ref to track the last mouse position for panning
     const lastMousePos = useRef<{ x: number; y: number } | null>(null);
 
+    // State: current offset (translation) of the view in world coordinates
     const [offset, setOffset] = React.useState<Offset>(DEFAULT_OFFSET);
+    // State: current scale (pixels per world unit)
     const [scale, setScale] = React.useState<number>(DEFAULT_SCALE);
+    // Ref for debouncing view change events
     const debounceTimer = useRef<number | null>(null);
 
+    /**
+     * Converts world coordinates to canvas coordinates.
+     * @param {number} wx - X in world coordinates.
+     * @param {number} wy - Y in world coordinates.
+     * @param {number} cw - Canvas width in px.
+     * @param {number} ch - Canvas height in px.
+     * @returns {{cx: number, cy: number}} Canvas coordinates.
+     */
     const worldToCanvas = useCallback(
         (wx: number, wy: number, cw: number, ch: number) => {
             return {
@@ -83,6 +138,14 @@ export default function GraphCanvas({
         [offset, scale]
     );
 
+    /**
+     * Converts canvas coordinates to world coordinates.
+     * @param {number} cx - X in canvas coordinates.
+     * @param {number} cy - Y in canvas coordinates.
+     * @param {number} cw - Canvas width in px.
+     * @param {number} ch - Canvas height in px.
+     * @returns {{x: number, y: number}} World coordinates.
+     */
     const canvasToWorld = useCallback(
         (cx: number, cy: number, cw: number, ch: number) => {
             return {
@@ -93,13 +156,19 @@ export default function GraphCanvas({
         [offset, scale]
     );
 
+    /**
+     * Draws the X and Y axes on the canvas using the current view transform.
+     * @param {CanvasRenderingContext2D} ctx - 2D canvas context.
+     * @param {number} cw - Canvas width.
+     * @param {number} ch - Canvas height.
+     */
     const drawAxes = useCallback(
         (ctx: CanvasRenderingContext2D, cw: number, ch: number) => {
             const { cx: x0 } = worldToCanvas(0, 0, cw, ch);
             const { cy: y0 } = worldToCanvas(0, 0, cw, ch);
 
             ctx.beginPath();
-            ctx.strokeStyle = getCSSVar("--gc-axis", "#444");
+            ctx.strokeStyle = getCSSVar("--gc-axis", "#444"); // Use CSS variable for axis color
             ctx.lineWidth = 2;
             ctx.moveTo(x0, 0);
             ctx.lineTo(x0, ch);
@@ -111,28 +180,39 @@ export default function GraphCanvas({
         [worldToCanvas]
     );
 
+    /**
+     * Draws the grid lines (major and minor) and axis labels on the canvas.
+     * All grid colors and label styles use CSS variables.
+     * @param {CanvasRenderingContext2D} ctx - 2D canvas context.
+     * @param {number} cw - Canvas width.
+     * @param {number} ch - Canvas height.
+     */
     const drawGrid = useCallback(
         (ctx: CanvasRenderingContext2D, cw: number, ch: number) => {
-            const gridStepWorld = computeGridStep(80, scale);
-            const minorStepWorld = gridStepWorld / 5;
+            const gridStepWorld = computeGridStep(80, scale); // Major grid step in world units
+            const minorStepWorld = gridStepWorld / 5; // Minor grid step (finer lines)
 
+            // Compute the visible world bounds for grid drawing
             const left = canvasToWorld(0, ch / 2, cw, ch).x;
             const right = canvasToWorld(cw, ch / 2, cw, ch).x;
             const top = canvasToWorld(cw / 2, 0, cw, ch).y;
             const bottom = canvasToWorld(cw / 2, ch, cw, ch).y;
 
+            // Compute where the axes cross the canvas
             const zeroPos = worldToCanvas(0, 0, cw, ch);
             const zeroX = zeroPos.cx;
             const zeroY = zeroPos.cy;
 
+            // Flags: is the x or y axis visible within the current view?
             const axisVisibleX = zeroY >= 0 && zeroY <= ch;
             const axisVisibleY = zeroX >= 0 && zeroX <= cw;
 
-            // ─── Líneas menores ─────────────────────────────────────────────
+            // --- Minor grid lines ---
             ctx.beginPath();
-            ctx.strokeStyle = getCSSVar("--gc-grid-minor", "#e0e0e0");
+            ctx.strokeStyle = getCSSVar("--gc-grid-minor", "#e0e0e0"); // Minor grid line color
             ctx.lineWidth = 1;
 
+            // Vertical minor grid lines
             let x = Math.floor(left / minorStepWorld) * minorStepWorld;
             while (x <= right) {
                 const { cx } = worldToCanvas(x, 0, cw, ch);
@@ -141,6 +221,7 @@ export default function GraphCanvas({
                 x += minorStepWorld;
             }
 
+            // Horizontal minor grid lines
             let y = Math.floor(bottom / minorStepWorld) * minorStepWorld;
             while (y <= top) {
                 const { cy } = worldToCanvas(0, y, cw, ch);
@@ -152,13 +233,14 @@ export default function GraphCanvas({
             ctx.stroke();
             ctx.closePath();
 
-            // ─── Líneas mayores y etiquetas ──────────────────────────────────
+            // --- Major grid lines and labels ---
             ctx.beginPath();
-            ctx.strokeStyle = getCSSVar("--gc-grid-major", "#cccccc");
+            ctx.strokeStyle = getCSSVar("--gc-grid-major", "#cccccc"); // Major grid line color
             ctx.lineWidth = 1.5;
-            ctx.fillStyle = getCSSVar("--gc-grid-label", "#333");
+            ctx.fillStyle = getCSSVar("--gc-grid-label", "#333"); // Label color
             ctx.font = "12px sans-serif";
 
+            // Draw vertical major lines and X labels
             const iMinX = Math.ceil(left / gridStepWorld);
             const iMaxX = Math.floor(right / gridStepWorld);
             for (let i = iMinX; i <= iMaxX; i++) {
@@ -177,11 +259,13 @@ export default function GraphCanvas({
                 } else {
                     labelY = ch - 4;
                 }
+                // Do not draw "0" label on the axis if axis is visible (handled separately)
                 if (i !== 0 || !axisVisibleX) {
                     ctx.fillText(label, cx + 2, labelY);
                 }
             }
 
+            // Draw horizontal major lines and Y labels
             const iMinY = Math.ceil(bottom / gridStepWorld);
             const iMaxY = Math.floor(top / gridStepWorld);
             for (let j = iMinY; j <= iMaxY; j++) {
@@ -200,6 +284,7 @@ export default function GraphCanvas({
                 } else {
                     labelX = cw - label.length * 7 - 4;
                 }
+                // Do not draw "0" label on the axis if axis is visible (handled separately)
                 if (j !== 0 || !axisVisibleY) {
                     ctx.fillText(label, labelX, cy - 2);
                 }
@@ -208,6 +293,7 @@ export default function GraphCanvas({
             ctx.stroke();
             ctx.closePath();
 
+            // Draw the "0" label at the intersection of axes, if both axes are visible
             if (axisVisibleX && axisVisibleY) {
                 ctx.fillStyle = getCSSVar("--gc-grid-label", "#333");
                 ctx.font = "12px sans-serif";
@@ -217,8 +303,16 @@ export default function GraphCanvas({
         [canvasToWorld, scale, worldToCanvas]
     );
 
+    /**
+     * Draws all the curves provided in drawingSets on the canvas.
+     * Each curve can be a different color.
+     * @param {CanvasRenderingContext2D} ctx - 2D canvas context.
+     * @param {number} cw - Canvas width.
+     * @param {number} ch - Canvas height.
+     */
     const drawAllCurves = useCallback(
         (ctx: CanvasRenderingContext2D, cw: number, ch: number) => {
+            // Compute visible world bounds (for clipping)
             const left = canvasToWorld(0, ch / 2, cw, ch).x;
             const right = canvasToWorld(cw, ch / 2, cw, ch).x;
             const top = canvasToWorld(cw / 2, 0, cw, ch).y;
@@ -238,6 +332,7 @@ export default function GraphCanvas({
                     const p1 = points[i];
                     const p2 = points[i + 1];
 
+                    // Skip segments that are entirely outside the visible area
                     if (
                         (p1.x < left && p2.x < left) ||
                         (p1.x > right && p2.x > right) ||
@@ -264,21 +359,29 @@ export default function GraphCanvas({
         [drawingSets, canvasToWorld]
     );
 
+    /**
+     * Redraws everything on the canvas: grid, axes, and all curves.
+     * Should be called whenever the view or data changes.
+     */
     const redrawAll = useCallback(() => {
         const canvas = actualRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
         const { width: cw, height: ch } = canvas;
-        ctx.clearRect(0, 0, cw, ch);
-        ctx.fillStyle = getCSSVar("--gc-background", "#fff");
+        ctx.clearRect(0, 0, cw, ch); // Clear previous drawing
+        ctx.fillStyle = getCSSVar("--gc-background", "#fff"); // Background color
         ctx.fillRect(0, 0, cw, ch);
 
-        drawGrid(ctx, cw, ch);
-        drawAxes(ctx, cw, ch);
-        drawAllCurves(ctx, cw, ch);
+        drawGrid(ctx, cw, ch);        // Draw grid first (under everything)
+        drawAxes(ctx, cw, ch);        // Draw axes next
+        drawAllCurves(ctx, cw, ch);   // Draw all function curves on top
     }, [drawAxes, drawGrid, drawAllCurves, actualRef]);
 
+    /**
+     * Effect: when the view window changes, call the onViewChange callback (debounced).
+     * Provides the current visible world region (origin, bound, bottom, top), rounded to 6 decimals.
+     */
     useEffect(() => {
         if (!onViewChange) return;
         const canvas = actualRef.current;
@@ -313,6 +416,10 @@ export default function GraphCanvas({
         };
     }, [offset, scale, canvasToWorld, onViewChange, actualRef]);
 
+    /**
+     * Effect: Resizes the canvas to match its parent container whenever the parent resizes.
+     * Uses ResizeObserver for responsive sizing. Calls redrawAll after resizing.
+     */
     useEffect(() => {
         const canvas = actualRef.current;
         if (!canvas) return;
@@ -329,6 +436,10 @@ export default function GraphCanvas({
         return () => observer.disconnect();
     }, [redrawAll, actualRef]);
 
+    /**
+     * Handles the mouse wheel event for zooming in/out on the canvas.
+     * Zooms about the mouse location, preserving the world coord under the pointer.
+     */
     const handleWheel = useCallback(
         (e: WheelEvent) => {
             e.preventDefault();
@@ -364,11 +475,18 @@ export default function GraphCanvas({
         [canvasToWorld, offset, scale, actualRef]
     );
 
+    /**
+     * Handler for mouse down event (start panning).
+     */
     const handleMouseDown = useCallback((e: React.MouseEvent) => {
         e.preventDefault();
         lastMousePos.current = { x: e.clientX, y: e.clientY };
     }, []);
 
+    /**
+     * Handler for mouse move event (panning).
+     * Only triggers if mouse was previously pressed.
+     */
     const handleMouseMove = useCallback(
         (e: React.MouseEvent) => {
             if (!lastMousePos.current) return;
@@ -384,10 +502,16 @@ export default function GraphCanvas({
         [scale]
     );
 
+    /**
+     * Handler for mouse up event (end panning).
+     */
     const handleMouseUp = useCallback(() => {
         lastMousePos.current = null;
     }, []);
 
+    /**
+     * Effect: attaches and detaches the wheel event handler for zooming on the canvas.
+     */
     useEffect(() => {
         const canvas = actualRef.current;
         if (!canvas) return;
@@ -397,27 +521,43 @@ export default function GraphCanvas({
         };
     }, [handleWheel, actualRef]);
 
+    /**
+     * Effect: redraws the canvas whenever the offset or scale changes.
+     */
     useEffect(() => {
         redrawAll();
     }, [offset, scale, redrawAll]);
 
     // --- BUTTONS LOGIC ---
+
+    /**
+     * Handler for zoom-in button. Increases the scale by 20%.
+     */
     const handleZoomIn = () => setScale((prev) => prev * 1.2);
+
+    /**
+     * Handler for zoom-out button. Decreases the scale by ~16.7%.
+     */
     const handleZoomOut = () => setScale((prev) => prev / 1.2);
+
+    /**
+     * Handler for reset view button. Restores the scale and offset to their defaults.
+     */
     const handleResetView = () => {
         setScale(DEFAULT_SCALE);
         setOffset(DEFAULT_OFFSET);
     };
 
+    // Render the graph canvas and zoom controls
     return (
         <div className={styles.canvasContainer}>
             <canvas
                 ref={actualRef}
                 className={styles.canvas}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
+                onMouseDown={handleMouseDown} // Start panning
+                onMouseMove={handleMouseMove} // Pan view
+                onMouseUp={handleMouseUp}     // End panning
+                onMouseLeave={handleMouseUp}  // End panning if mouse leaves canvas
             />
             <div className={styles.zoomControls}>
                 <button

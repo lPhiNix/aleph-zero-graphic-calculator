@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { ExpressionResult } from '../../types/math';
 
-// Tu paleta de colores pastel como variables CSS
+// Your pastel color palette as CSS variables
 const DEFAULT_COLORS = [
     'var(--color-blue-pastel)',
     'var(--color-yellow-pastel)',
@@ -14,21 +14,21 @@ const DEFAULT_COLORS = [
     'var(--color-beige-pastel)',
 ];
 
-// Función para resolver la variable CSS a su valor real (hex/rgb)
+// Resolves a CSS color variable to its actual value (hex/rgb)
 function resolveCSSColor(cssVar: string): string {
-    // Si es hex/rgb, devuélvelo directo
+    // If already a hex/rgb color, return directly
     if (/^#([0-9a-f]{3,8})$/i.test(cssVar) || cssVar.startsWith('rgb')) return cssVar;
-    // Si es variable css tipo var(--xxx)
+    // If it's a CSS variable like var(--xxx)
     if (cssVar.startsWith('var(')) {
         const match = cssVar.match(/^var\((--[a-zA-Z0-9\-]+)\)/);
         if (match) {
             const varName = match[1];
             const value = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
-            // Si por cualquier motivo la variable no existe, retorna negro
+            // If variable not found, fall back to black
             return value || '#000000';
         }
     }
-    // Si todo falla, negro
+    // Default fallback is black
     return '#000000';
 }
 
@@ -38,18 +38,22 @@ type IntervalData = {
     points: Array<{ x: number; y: number }>;
 };
 
+/**
+ * Hook to manage the state of expressions, results, colors, disables, and drawing cache.
+ * Used in calculator panels and math input areas.
+ */
 export function useExpressionsState() {
     const [expressions, setExpressions] = useState<string[]>(['']);
     const [results, setResults] = useState<ExpressionResult[]>(() =>
         expressions.map(() => ({}))
     );
-    // Colores: inicializa tras primer render para que haya acceso a CSS
+    // Colors: initialize after first render to access CSS
     const [colors, setColors] = useState<string[]>([]);
 
     const [disabledFlags, setDisabledFlags] = useState<boolean[]>([false]);
     const cacheRef = useRef<Record<number, IntervalData[]>>({});
 
-    // Inicializa los colores tras el primer render (cuando ya se puede leer CSS)
+    // Initialize colors after first render (when CSS is available)
     useEffect(() => {
         if (colors.length === 0) {
             setColors([
@@ -59,6 +63,7 @@ export function useExpressionsState() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // Whenever expressions change, ensure parallel arrays (results, colors, disables, cache) are in sync
     useEffect(() => {
         setResults(prev => {
             const upd = [...prev];
@@ -90,6 +95,11 @@ export function useExpressionsState() {
         });
     }, [expressions]);
 
+    /**
+     * Removes a row (expression, result, color, disables) and shifts cache.
+     * Ensures there's always at least one row.
+     * @param {number} idx - Index to delete
+     */
     const deleteRow = (idx: number) => {
         setExpressions(prev => {
             const u = [...prev];
@@ -111,6 +121,7 @@ export function useExpressionsState() {
             u.splice(idx, 1);
             return u.length > 0 ? u : [{}];
         });
+        // Rebuild cacheRef, shifting keys as needed
         const newCache: typeof cacheRef.current = {};
         Object.entries(cacheRef.current).forEach(([key, val]) => {
             const k = Number(key);
@@ -120,6 +131,7 @@ export function useExpressionsState() {
         cacheRef.current = newCache;
     };
 
+    // Return all state and setters for external use
     return {
         expressions,
         setExpressions,

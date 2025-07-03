@@ -1,6 +1,25 @@
-import React, {useEffect, useRef, useState} from 'react';
-import styles from '../../styles/modules/expressionList.module.css';
+import React, {useEffect, useRef, useState} from 'react'; // Import React and React hooks for side effects, refs, and state management
+import styles from '../../styles/modules/expressionList.module.css'; // Import styles from CSS module for the expression list
 
+/**
+ * Interface defining the props expected by the ExpressionList component.
+ * @property {string[]} expressions - Array of user expressions (each row in the list).
+ * @property {(updater: (prev: string[]) => string[]) => void} onExpressionsChange - Callback to update expressions.
+ * @property {(index: number, expr: string) => void} onExpressionBlur - Callback for blur event on row input.
+ * @property {string[]} colors - Array of color strings for each expression.
+ * @property {(index: number, newColor: string) => void} onColorChange - Callback to update the color of a row.
+ * @property {boolean[]} disabledFlags - Boolean flags for row enabled/disabled state.
+ * @property {(index: number) => void} onToggleDisabled - Callback to toggle row enabled/disabled.
+ * @property {(index: number) => void} onDeleteRow - Callback to delete a row.
+ * @property {Array<string | undefined>} expressionTypes - Array of types, one for each row.
+ * @property {Array<{evaluation?: string; calculation?: string; errors?: string[]; warnings?: string[]}>} results - Result objects for each row.
+ * @property {number | null} focusedIndex - Index of the currently focused row, or null if none.
+ * @property {(i: number | null) => void} setFocusedIndex - Setter for focusedIndex.
+ * @property {number} caretPosition - Current caret position within the input.
+ * @property {(pos: number) => void} setCaretPosition - Setter for caretPosition.
+ * @property {number} selectionLength - Current selection length in the input.
+ * @property {(len: number) => void} setSelectionLength - Setter for selectionLength.
+ */
 interface ExpressionListProps {
     expressions: string[];
     onExpressionsChange: (updater: (prev: string[]) => string[]) => void;
@@ -25,8 +44,18 @@ interface ExpressionListProps {
     setSelectionLength: (len: number) => void;
 }
 
+/**
+ * The maximum number of usable rows allowed in the list.
+ * Any more are prevented from being added.
+ */
 const MAX_ROWS = 10;
 
+/**
+ * ExpressionList component renders a dynamic list of editable expressions for the user.
+ * It supports per-row color selection, enable/disable, evaluation, sliders for numeric assignments, and error/warning display.
+ * @param {ExpressionListProps} props - All props required for controlling the list and its state.
+ * @returns {JSX.Element} The rendered list of expression input rows and controls.
+ */
 export default function ExpressionList({
                                            expressions,
                                            onExpressionsChange,
@@ -45,16 +74,45 @@ export default function ExpressionList({
                                            selectionLength,
                                            setSelectionLength,
                                        }: ExpressionListProps) {
+    /**
+     * Ref to the main container div, used for scrolling to bottom on changes.
+     */
     const containerRef = useRef<HTMLDivElement>(null);
+
+    /**
+     * Ref array to each input element for focus and selection manipulation.
+     */
     const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+
+    /**
+     * Ref array to each color input element for programmatic color chooser opening.
+     */
     const colorInputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
+    /**
+     * State for the index of the row currently hovered by the mouse.
+     */
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+    /**
+     * State for slider configuration (min, max, step) per row.
+     * Used for numeric assignment rows.
+     */
     const [sliderConfigs, setSliderConfigs] = useState<{ min: number; max: number; step: number }[]>([]);
 
-    // Count only non-empty lines (excluding the last gap row)
-    const usableRows = expressions.filter((expr, idx) => idx !== expressions.length - 1 && expr.trim() !== '').length;
+    /**
+     * Computes the number of non-empty, usable rows in the list (excluding the last empty gap row).
+     * This is used to enforce the maximum row count.
+     */
+    const usableRows = expressions.filter(
+        (expr, idx) => idx !== expressions.length - 1 && expr.trim() !== ''
+    ).length;
 
+    /**
+     * Ensures the sliderConfigs array has the same length as the expressions array.
+     * Adds default config objects as needed or trims if necessary.
+     * Runs on every change to expressions.
+     */
     useEffect(() => {
         setSliderConfigs(prev => {
             const updated = [...prev];
@@ -66,11 +124,19 @@ export default function ExpressionList({
         });
     }, [expressions]);
 
+    /**
+     * Scrolls the container to the bottom every time the expressions array changes.
+     * Ensures the user always sees the most recently added/modified row.
+     */
     useEffect(() => {
         const el = containerRef.current;
         if (el) el.scrollTop = el.scrollHeight;
     }, [expressions]);
 
+    /**
+     * Focuses the correct input and restores the caret and selection when focusedIndex/caretPosition/selectionLength changes.
+     * This allows for seamless keyboard/mouse navigation and virtual keyboard integration.
+     */
     useEffect(() => {
         if (
             focusedIndex !== null &&
@@ -84,14 +150,19 @@ export default function ExpressionList({
         }
     }, [focusedIndex, caretPosition, selectionLength, expressions]);
 
+    /**
+     * Adds a new blank row when appropriate:
+     * - If the last row is not blank, and
+     * - Usable rows are less than the maximum.
+     * Does not remove empty rows automatically.
+     * Runs on changes to expressions, onExpressionsChange, or usableRows.
+     */
     useEffect(() => {
-        // Only allow adding a new row if the usableRows is less than MAX_ROWS
         if (
             (expressions.length === 0 || expressions[expressions.length - 1].trim() !== '') &&
             usableRows < MAX_ROWS
         ) {
             onExpressionsChange(prev => {
-                // Only add blank if not already blank and not exceeding max usable rows
                 const usable = prev.filter((expr, idx) => idx !== prev.length - 1 && expr.trim() !== '').length;
                 if ((prev.length === 0 || prev[prev.length - 1].trim() !== '') && usable < MAX_ROWS) {
                     return [...prev, ''];
@@ -99,12 +170,18 @@ export default function ExpressionList({
                 return prev;
             });
         }
-        // Ya no eliminamos filas vacías automáticamente aquí
+        // No longer automatically removing empty rows here.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [expressions, onExpressionsChange, usableRows]);
 
+    /**
+     * Handles input changes for any row.
+     * Prevents typing in the last gap row if at max rows.
+     * Calls the expressions updater with the new value.
+     * @param {number} index - Row index being changed.
+     * @param {string} value - New value for the row.
+     */
     const handleChange = (index: number, value: string) => {
-        // Prevent adding new content if max rows reached and the row is the last blank
         if (usableRows >= MAX_ROWS &&
             index === expressions.length - 1 &&
             expressions[index].trim() === '' &&
@@ -119,11 +196,25 @@ export default function ExpressionList({
         });
     };
 
+    // Render the main container and each row in the expressions list
     return (
         <div className={styles.listContainer} ref={containerRef}>
+            {/* Map each expression to a row of UI controls */}
             {expressions.map((expr, idx) => {
+                /**
+                 * Whether this row is the last row and is blank (the "gap" row for appending).
+                 */
                 const isLastGap = idx === expressions.length - 1 && expr.trim() === '';
+
+                /**
+                 * Type of the expression in this row, undefined for last gap.
+                 */
                 const tipo = isLastGap ? undefined : expressionTypes[idx];
+
+                /**
+                 * Label for the function type, based on expression type.
+                 * All labels are single-letter or short English abbreviations.
+                 */
                 let etiqueta: string;
                 switch (tipo) {
                     case 'FUNCTION':
@@ -150,25 +241,54 @@ export default function ExpressionList({
                     default:
                         etiqueta = 'Ex';
                 }
+
+                /**
+                 * Whether the row is disabled.
+                 */
                 const isDisabled = disabledFlags[idx];
+
+                /**
+                 * The color to use for the row, defaulting to the first color if none set or if last gap.
+                 */
                 const originalColor = isLastGap ? 'var(--expr-first-color)' : colors[idx] || 'var(--expr-first-color)';
+
+                /**
+                 * The effective color for the row, using the disabled color if disabled.
+                 */
                 const functionColor = isDisabled ? 'var(--expr-disabled-color)' : originalColor;
 
+                /**
+                 * Subindex for the label, counting same-type rows before this one.
+                 */
                 const countSameTypeBefore = expressionTypes.slice(0, idx).filter(t => t === tipo).length;
                 const subIndex = isLastGap ? '' : String(countSameTypeBefore + 1);
 
+                /**
+                 * Extract evaluation/calculation/errors for this row from results.
+                 */
                 const {evaluation, calculation, errors} = results[idx] || {};
+
+                /**
+                 * Lines to display as results below the input.
+                 */
                 const lines: string[] = [];
                 if (evaluation && evaluation !== expr) lines.push(`= ${evaluation}`);
                 if (calculation && calculation !== expr && calculation !== evaluation)
                     lines.push(`= ${calculation}`);
 
+                /**
+                 * Detect if the row is a numeric assignment, e.g., x = 2.1
+                 * Used for showing a slider.
+                 */
                 const assignMatch = expr.match(/^\s*([a-zA-Z]+)\s*=\s*([-+]?\d+(?:\.\d+)?)\s*$/);
                 const isNumericAssign = !!assignMatch;
                 const varName = assignMatch?.[1] || '';
                 const currentValue = assignMatch ? parseFloat(assignMatch[2]) : 0;
                 const {min, max, step} = sliderConfigs[idx] || {min: 0, max: 1, step: 0.1};
 
+                /**
+                 * Number of icons/buttons in the row, used for dynamic padding.
+                 */
                 const iconCount =
                     (errors && errors.length > 0 ? 1 : 0) +
                     (results[idx]?.warnings?.length ? 1 : 0) +
@@ -176,6 +296,9 @@ export default function ExpressionList({
                     1 +
                     1;
 
+                /**
+                 * Dynamic padding for the input, increased if row is hovered and not focused or last gap.
+                 */
                 const dynamicPadding = hoveredIndex === idx && focusedIndex !== idx && !isLastGap
                     ? `calc(2.35rem + ${iconCount} * 2.35rem)`
                     : '2.5rem';
@@ -185,6 +308,7 @@ export default function ExpressionList({
                     return null;
                 }
 
+                // Render all controls for this row
                 return (
                     <div
                         key={idx}
@@ -194,6 +318,7 @@ export default function ExpressionList({
                         onMouseLeave={() => setHoveredIndex(prev => (prev === idx ? null : prev))}
                     >
                         <div className={styles.inputRow}>
+                            {/* Function type label with enable/disable toggle */}
                             <div
                                 className={styles.functionLabel}
                                 style={{
@@ -208,11 +333,12 @@ export default function ExpressionList({
                                 {!isLastGap && <sub className={styles.fSubscript}>{subIndex}</sub>}
                             </div>
 
+                            {/* Input for editing the expression */}
                             <input
                                 type="text"
                                 style={{ paddingRight: dynamicPadding }}
                                 className={`${styles.exprInput} ${(hoveredIndex === idx && focusedIndex !== idx && !isLastGap) ? styles.hasButtons : ''}`}
-                                placeholder={isLastGap ? (usableRows >= MAX_ROWS ? 'Máximo 10 filas' : 'Escribir una expresión') : ''}
+                                placeholder={isLastGap ? (usableRows >= MAX_ROWS ? 'Max 10 rows' : 'Write an expression') : ''}
                                 value={expr}
                                 ref={el => {
                                     inputRefs.current[idx] = el
@@ -246,6 +372,7 @@ export default function ExpressionList({
                                     );
                                 }}
                                 onBlur={e => {
+                                    // If blur is to a virtual keyboard button, refocus input
                                     if (
                                         e.relatedTarget &&
                                         (e.relatedTarget as HTMLElement).dataset &&
@@ -264,31 +391,37 @@ export default function ExpressionList({
                                     setSelectionLength(0);
                                     onExpressionBlur(idx, expr);
                                 }}
-                                aria-label={`Expresión ${idx + 1}`}
+                                aria-label={`Expression ${idx + 1}`}
                                 disabled={isLastGap && usableRows >= MAX_ROWS}
                             />
 
+                            {/* Row action buttons, shown on hover if not focused or last gap */}
                             {hoveredIndex === idx && focusedIndex !== idx && !isLastGap && (
                                 <div className={styles.buttonsContainer}>
+                                    {/* Error icon if there are errors */}
                                     {errors && errors.length > 0 &&
                                         <span className={styles.errorIcon} title={errors.join('\n')}
-                                              aria-label="Errores">❌</span>}
+                                              aria-label="Errors">❌</span>}
+                                    {/* Warning icon if there are warnings */}
                                     {results[idx]?.warnings && results[idx].warnings.length > 0 &&
                                         <span className={styles.warningIcon} title={results[idx].warnings.join('\n')}
-                                              aria-label="Advertencias">⚠️</span>}
-                                    {!isDisabled && <button type="button" aria-label={`Evaluar fila ${idx + 1}`}
+                                              aria-label="Warnings">⚠️</span>}
+                                    {/* Evaluate icon if row is enabled */}
+                                    {!isDisabled && <button type="button" aria-label={`Evaluate row ${idx + 1}`}
                                                             className={styles.iconButton}
                                                             style={{'--button-color': functionColor} as React.CSSProperties}
                                                             onMouseDown={e => {
                                                                 e.preventDefault();
                                                                 onExpressionBlur(idx, expr);
                                                             }}>⚡</button>}
-                                    <button type="button" aria-label={`Cambiar color fila ${idx + 1}`}
+                                    {/* Color picker button */}
+                                    <button type="button" aria-label={`Change row color ${idx + 1}`}
                                             className={styles.iconButton}
                                             style={{'--button-color': functionColor} as React.CSSProperties}
                                             onClick={() => colorInputRefs.current[idx]?.click()}>🎨
                                     </button>
-                                    <button type="button" aria-label={`Borrar fila ${idx + 1}`}
+                                    {/* Delete row button */}
+                                    <button type="button" aria-label={`Delete row ${idx + 1}`}
                                             className={styles.iconButton}
                                             style={{'--button-color': functionColor} as React.CSSProperties}
                                             onClick={e => {
@@ -305,8 +438,9 @@ export default function ExpressionList({
                                 </div>
                             )}
 
+                            {/* Clear button for focused, non-empty row */}
                             {focusedIndex === idx && expr.trim() !== '' && (
-                                <button type="button" aria-label={`Limpiar fila ${idx + 1}`}
+                                <button type="button" aria-label={`Clear row ${idx + 1}`}
                                         className={styles.clearButton} onMouseDown={e => {
                                     e.preventDefault();
                                     onExpressionsChange(prev => {
@@ -319,11 +453,13 @@ export default function ExpressionList({
                                 }}>×</button>
                             )}
 
+                            {/* Hidden input for color selection, opened programmatically */}
                             <input type="color" ref={el => {
                                 colorInputRefs.current[idx] = el
                             }} value={functionColor} onChange={e => onColorChange(idx, e.target.value)} className={styles.colorInput}/>
                         </div>
 
+                        {/* Slider for rows that are numeric assignments */}
                         {isNumericAssign && (
                             <div className={styles.sliderRow}>
                                 <input
@@ -370,6 +506,7 @@ export default function ExpressionList({
                             </div>
                         )}
 
+                        {/* Render evaluation/calculation result lines if any */}
                         <div className={styles.resultLines}>
                             {lines.map((line, i) => (
                                 <div key={i} className={styles.resultLine}>{line}</div>

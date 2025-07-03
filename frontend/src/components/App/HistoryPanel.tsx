@@ -1,34 +1,55 @@
-import React, { useEffect, useRef, useState } from "react";
-import styles from "../../styles/modules/historyPanel.module.css";
-import AxiosConfig from "../../services/axiosService.ts";
+import React, { useEffect, useRef, useState } from "react"; // Import React and hooks for state, refs, and effects
+import styles from "../../styles/modules/historyPanel.module.css"; // Import CSS module for styling the panel
+import AxiosConfig from "../../services/axiosService.ts"; // Import Axios singleton for API requests
 
+/**
+ * Data Transfer Object for a single history entry, simplified for listing.
+ */
 interface SimpleUserHistoryDto {
-    id: number;
-    createdAt: string;
-    updatedAt: string;
-    snapshot: string;
-    description: string;
+    id: number; // Unique identifier for the history entry
+    createdAt: string; // Creation timestamp
+    updatedAt: string; // Last update timestamp
+    snapshot: string; // Snapshot image as a data URL (base64)
+    description: string; // Optional textual description
 }
 
+/**
+ * Preferences for a math expression, like color and type.
+ */
 interface MathExpressionPreferences {
-    color: string;
-    xprType: string;
+    color: string; // Color string (e.g. hex code)
+    xprType: string; // Expression type (e.g. "FUNCTION", "ASSIGNMENT")
 }
 
+/**
+ * Data Transfer Object for creating a math expression in history.
+ */
 interface MathExpressionCreationDto {
-    expression: string;
-    orderIndex: number;
-    points: string;
-    evaluation: string;
-    calculation: string;
-    preferences: MathExpressionPreferences;
+    expression: string; // The expression string
+    orderIndex: number; // The order of the expression in the list
+    points: string; // Serialized drawing points as string
+    evaluation: string; // Evaluated result
+    calculation: string; // Calculation details
+    preferences: MathExpressionPreferences; // Color and type
 }
 
+/**
+ * Data Transfer Object for creating a new user history record.
+ */
 interface UserHistoryCreationDto {
-    snapshot: string;
-    mathExpressions: MathExpressionCreationDto[];
+    snapshot: string; // Snapshot image as base64 (no data URL header)
+    mathExpressions: MathExpressionCreationDto[]; // Array of expressions in this snapshot
 }
 
+/**
+ * Props for the HistoryPanel component.
+ * @property {string[]} expressions - Current expressions in the editor
+ * @property {any[]} results - Results for each expression (evaluation, calculation, etc)
+ * @property {string[]} colors - Array of colors for each expression
+ * @property {string[]} types - Array of types for each expression
+ * @property {React.RefObject<HTMLCanvasElement | null>} graphCanvasRef - Ref to the graph canvas
+ * @property {(exprs: string[], colors: string[], types: string[]) => void} refreshExpressions - Callback to update the current expressions/colors/types in the main app
+ */
 interface HistoryPanelProps {
     expressions: string[];
     results: any[];
@@ -38,6 +59,13 @@ interface HistoryPanelProps {
     refreshExpressions: (exprs: string[], colors: string[], types: string[]) => void;
 }
 
+/**
+ * HistoryPanel component.
+ * Shows a side panel with saved history entries (snapshots of expressions and calculations).
+ * Allows saving, deleting, and loading entries.
+ * @param {HistoryPanelProps} props - Panel props for controlling expressions, results, colors, etc.
+ * @returns {JSX.Element} The rendered panel.
+ */
 export default function HistoryPanel({
                                          expressions,
                                          results,
@@ -46,14 +74,40 @@ export default function HistoryPanel({
                                          graphCanvasRef,
                                          refreshExpressions,
                                      }: HistoryPanelProps) {
+    /**
+     * State for open/closed state of history panel.
+     */
     const [open, setOpen] = useState(false);
+
+    /**
+     * State for loading spinner (while saving, deleting, or loading).
+     */
     const [loading, setLoading] = useState(false);
+
+    /**
+     * State for list of saved history records fetched from backend.
+     */
     const [history, setHistory] = useState<SimpleUserHistoryDto[]>([]);
+
+    /**
+     * Ref for the panel div (used for resizing and animation).
+     */
     const panelRef = useRef<HTMLDivElement>(null);
+
+    /**
+     * State for dynamically calculated height of the panel (matches canvas).
+     */
     const [panelHeight, setPanelHeight] = useState<number>(0);
+
+    /**
+     * State for dynamically calculated top offset of the panel (matches canvas).
+     */
     const [panelTop, setPanelTop] = useState<number>(0);
 
-    // Ajusta el tamaño y posición según el canvas.
+    /**
+     * Adjusts the panel's size and position to match the graph canvas.
+     * Runs on mount and whenever the canvas ref or open state changes.
+     */
     useEffect(() => {
         const resize = () => {
             if (graphCanvasRef.current && panelRef.current) {
@@ -67,6 +121,10 @@ export default function HistoryPanel({
         return () => window.removeEventListener("resize", resize);
     }, [graphCanvasRef, open]);
 
+    /**
+     * Loads the user's history entries whenever the panel is opened.
+     * Sets loading spinner and fetches the summary from backend API.
+     */
     useEffect(() => {
         if (!open) return;
         setLoading(true);
@@ -76,18 +134,27 @@ export default function HistoryPanel({
             .finally(() => setLoading(false));
     }, [open]);
 
-    // Nueva función para saber si hay expresiones no vacías
+    /**
+     * Checks if there is at least one non-empty expression in the list.
+     * Used to enable/disable the save button.
+     */
     const hasNonEmptyExpressions = expressions.some(expr => expr.trim() !== "");
 
+    /**
+     * Handles saving the current state as a new history entry.
+     * Takes a snapshot of the canvas, serializes expressions, and posts to backend.
+     * Updates the history list after saving.
+     */
     const handleSave = async () => {
         if (!graphCanvasRef.current) return;
-
-        // Si no hay expresiones válidas, no guardar (seguridad extra)
+        // Extra guard: do not save if all expressions are empty.
         if (!hasNonEmptyExpressions) return;
 
+        // Get canvas as base64 string (remove the data URL header)
         const rawSnapshot = graphCanvasRef.current.toDataURL("image/jpeg");
         const snapshot = rawSnapshot.replace(/^data:image\/jpeg;base64,/, "");
 
+        // Serialize all non-empty expressions with their info
         const mathExpressions = expressions
             .map((expr, idx) => ({
                 expression: expr,
@@ -108,20 +175,32 @@ export default function HistoryPanel({
             const res = await AxiosConfig.getInstance().get("/api/v1/math/history/summary");
             setHistory(res.data.content);
         } catch (e) {
+            // Optionally handle error here (e.g. show notification)
         }
         setLoading(false);
     };
 
+    /**
+     * Handles deleting a history entry by ID.
+     * Removes from backend and updates local state.
+     * @param {number} id - The ID of the entry to delete.
+     */
     const handleDelete = async (id: number) => {
         setLoading(true);
         try {
             await AxiosConfig.getInstance().delete(`/api/v1/math/history/${id}`);
             setHistory((h) => h.filter((r) => r.id !== id));
         } catch (e) {
+            // Optionally handle error here
         }
         setLoading(false);
     };
 
+    /**
+     * Handles loading a history entry by ID.
+     * Fetches the expressions/colors/types and loads them into the main app.
+     * @param {number} id - The ID of the entry to load.
+     */
     const handleLoad = async (id: number) => {
         setLoading(true);
         try {
@@ -134,23 +213,27 @@ export default function HistoryPanel({
             refreshExpressions(exp, cols, tys);
             setOpen(false);
         } catch (e) {
+            // Optionally handle error here
         }
         setLoading(false);
     };
 
-    // Animación y visibilidad
+    /**
+     * CSS class for the panel, based on open/closed state, to trigger animations.
+     */
     const panelClass = [
         styles.historyPanel,
         open ? styles.historyPanelOpen : styles.historyPanelClosed,
     ].join(" ");
 
+    // Render the panel and its controls
     return (
         <div
             className={styles.historyPanelWrapper}
             style={{
-                pointerEvents: "none",
-                height: panelHeight ? `${panelHeight}px` : undefined,
-                top: panelTop ? `${panelTop}px` : undefined,
+                pointerEvents: "none", // Prevents interaction unless panel is open
+                height: panelHeight ? `${panelHeight}px` : undefined, // Dynamic height
+                top: panelTop ? `${panelTop}px` : undefined, // Dynamic top position
             }}
         >
             <div
@@ -164,27 +247,30 @@ export default function HistoryPanel({
                 }}
             >
                 <div className={styles.historyContent}>
+                    {/* Header row with title and save button */}
                     <div className={styles.historyPanelHeader}>
-                    <span className={styles.historyTitle}>
-                        🕓 Historial
-                    </span>
+                        <span className={styles.historyTitle}>
+                            🕓 History
+                        </span>
                         <button
                             className={styles.actionBtn}
                             onClick={handleSave}
                             disabled={loading || !hasNonEmptyExpressions}
                         >
-                            💾 Guardar
+                            💾 Save
                         </button>
                     </div>
+                    {/* List of history entries and loading spinner */}
                     <div className={styles.historyList}>
                         {loading && (
                             <div style={{textAlign: "center", color: "#888"}}>
-                                Cargando...
+                                Loading...
                             </div>
                         )}
                         {!loading &&
                             history.map((h) => (
                                 <div key={h.id} className={styles.historyRow}>
+                                    {/* Thumbnail of the snapshot */}
                                     <img
                                         src={h.snapshot}
                                         alt="snapshot"
@@ -192,26 +278,29 @@ export default function HistoryPanel({
                                         draggable={false}
                                     />
                                     <div className={styles.historyMeta}>
+                                        {/* Optional description */}
                                         {h.description && (
                                             <div className={styles.description}>{h.description}</div>
                                         )}
+                                        {/* Last updated date */}
                                         <div className={styles.updatedAt}>
-                                            Modificada: {new Date(h.updatedAt).toLocaleString()}
+                                            Modified: {new Date(h.updatedAt).toLocaleString()}
                                         </div>
+                                        {/* Action buttons for load and delete */}
                                         <div className={styles.buttonRow}>
                                             <button
                                                 className={`${styles.actionBtn} ${styles.loadBtn}`}
                                                 onClick={() => handleLoad(h.id)}
                                                 disabled={loading}
                                             >
-                                                🗂️ Cargar
+                                                🗂️ Load
                                             </button>
                                             <button
                                                 className={`${styles.actionBtn} ${styles.deleteBtn}`}
                                                 onClick={() => handleDelete(h.id)}
                                                 disabled={loading}
                                             >
-                                                🗑️ Eliminar
+                                                🗑️ Delete
                                             </button>
                                         </div>
                                     </div>
@@ -219,10 +308,11 @@ export default function HistoryPanel({
                             ))}
                     </div>
                 </div>
+                {/* Tab button to open/close the panel */}
                 <button
                     className={styles.historyTab}
                     onClick={() => setOpen((v) => !v)}
-                    aria-label={open ? "Cerrar historial" : "Mostrar historial"}
+                    aria-label={open ? "Close history" : "Show history"}
                     tabIndex={0}
                 >
                     <div className={styles.tabLines}>

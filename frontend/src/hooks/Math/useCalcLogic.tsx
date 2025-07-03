@@ -1,11 +1,14 @@
 import {useRef, useCallback, useEffect, useState} from 'react';
-import { useExpressionsState } from './useExpressionState.tsx';
-import { useCaretSelection } from './useCaretSelection.tsx';
+import { useExpressionsState } from './useExpressionState.tsx'; // Custom hook to manage expressions
+import { useCaretSelection } from './useCaretSelection.tsx';   // Custom hook to manage caret/selection for inputs
 import {
     evaluateSingleExpression,
     evaluateBatchExpressions,
-} from '../../services/mathService.ts';
+} from '../../services/mathService.ts'; // Math evaluation service
 
+/**
+ * Interface for the visible window in world coordinates for the graph.
+ */
 interface ViewWindow {
     origin: number;
     bound: number;
@@ -13,18 +16,31 @@ interface ViewWindow {
     top: number;
 }
 
+/**
+ * Represents a cached interval of computed points for efficient re-use.
+ */
 type IntervalData = {
-    from: number;
-    to: number;
-    points: Array<{ x: number; y: number }>;
+    from: number; // Start of interval
+    to: number;   // End of interval
+    points: Array<{ x: number; y: number }>; // Computed points in [from, to]
 };
 
+/**
+ * Options for inserting text into an expression.
+ */
 type InsertOptions = {
-    deltaCaret?: number;
-    selectLength?: number;
+    deltaCaret?: number;    // Caret movement after insert
+    selectLength?: number;  // Length of selection after insert
 };
 
+/**
+ * Main hook for calculator logic.
+ * Manages expressions, results, drawing, caret/selection, and graph view window.
+ * Handles evaluation and caching.
+ * @returns {object} All state and logic for calculator panel.
+ */
 export function useCalculatorLogic() {
+    // --- Expressions and Results State ---
     const {
         expressions,
         setExpressions,
@@ -38,6 +54,7 @@ export function useCalculatorLogic() {
         deleteRow,
     } = useExpressionsState();
 
+    // --- Caret and Selection for Text Input ---
     const {
         focusedIndex,
         setFocusedIndex,
@@ -47,6 +64,7 @@ export function useCalculatorLogic() {
         setSelectionLength
     } = useCaretSelection();
 
+    // --- Graph View Window State ---
     const [viewWindow, setViewWindow] = useState<ViewWindow>({
         origin: -10,
         bound: 10,
@@ -54,8 +72,13 @@ export function useCalculatorLogic() {
         top: 10,
     });
 
+    // Used to skip effect on initial render
     const isFirstRender = useRef(true);
 
+    /**
+     * Given a range [from, to], returns subintervals missing from the existing cache.
+     * Used to minimize API calls for points.
+     */
     const getMissingIntervals = useCallback(
         (from: number, to: number, existing: IntervalData[]) => {
             if (from >= to) return [];
@@ -78,6 +101,11 @@ export function useCalculatorLogic() {
         []
     );
 
+    /**
+     * Effect: Watch view window or expressions, and update points by evaluating missing intervals.
+     * - For each expression, if not disabled/empty, fetch missing point intervals.
+     * - Update results and cache.
+     */
     useEffect(() => {
         if (isFirstRender.current) {
             isFirstRender.current = false;
@@ -85,7 +113,7 @@ export function useCalculatorLogic() {
         }
         let mounted = true;
         const { origin, bound } = viewWindow;
-        const dec = '50';
+        const dec = '50'; // Number of points per interval
 
         expressions.forEach((expr, idx) => {
             if (disabledFlags[idx] || expr.trim() === '') {
@@ -101,6 +129,7 @@ export function useCalculatorLogic() {
             const existing = cacheRef.current[idx] || [];
             const missing = getMissingIntervals(origin, bound, existing);
             if (missing.length === 0) {
+                // All points already cached for this window
                 const pts: Array<{ x: number; y: number }> = [];
                 existing
                     .filter(iv => iv.to > origin && iv.from < bound)
@@ -118,6 +147,7 @@ export function useCalculatorLogic() {
                 });
                 return;
             }
+            // Fetch missing intervals asynchronously
             (async () => {
                 for (const [f, t] of missing) {
                     try {
@@ -165,10 +195,16 @@ export function useCalculatorLogic() {
         };
     }, [viewWindow, expressions, disabledFlags, getMissingIntervals, setResults, cacheRef]);
 
+    /**
+     * Handles blur (focus loss) on an expression input.
+     * Evaluates the expression and updates results.
+     * Batch-evaluates assignments up to and including this index.
+     */
     const handleExpressionBlur = useCallback(
         async (index: number, expr: string) => {
             if (disabledFlags[index] || expr.trim() === '') return;
 
+            // Find batch indices for assignment expressions up to this index
             const batchIndices = expressions
                 .slice(0, index + 1)
                 .map((e, i) => ({ expr: e, i }))
@@ -216,10 +252,20 @@ export function useCalculatorLogic() {
         [expressions, results, disabledFlags, viewWindow, setResults, cacheRef]
     );
 
+    /**
+     * Handler for when the graph view window changes.
+     * Updates the state so re-evaluation can occur.
+     * @param {ViewWindow} vw - The new view window.
+     */
     const handleViewChange = useCallback((vw: ViewWindow) => {
         setViewWindow(vw);
     }, []);
 
+    /**
+     * Changes the color of an expression row.
+     * @param {number} i - Row index
+     * @param {string} color - New color hex
+     */
     const handleColorChange = useCallback((i: number, color: string) => {
         setColors(prev => {
             const u = [...prev];
@@ -228,7 +274,10 @@ export function useCalculatorLogic() {
         });
     }, []);
 
-
+    /**
+     * Toggles whether an expression row is enabled/disabled.
+     * @param {number} i - Row index
+     */
     const handleToggleDisabled = useCallback((i: number) => {
         setDisabledFlags(prev => {
             const u = [...prev];
@@ -237,10 +286,20 @@ export function useCalculatorLogic() {
         });
     }, []);
 
+    /**
+     * Deletes an expression row.
+     * @param {number} idx - Row index
+     */
     const handleDeleteRow = useCallback((idx: number) => {
         deleteRow(idx);
     }, [deleteRow]);
 
+    /**
+     * Inserts a string into the currently focused expression at the caret position.
+     * Optionally selects text or moves caret afterwards.
+     * @param {string} v - Value to insert
+     * @param {InsertOptions} [options] - Caret movement/selection options
+     */
     const insertIntoExpression = (v: string, options?: InsertOptions) => {
         if (focusedIndex === null) return;
         setExpressions(prev => {
@@ -273,6 +332,10 @@ export function useCalculatorLogic() {
         }
     };
 
+    /**
+     * Backspace/delete handler for the currently focused expression.
+     * Handles selection deletion or single character deletion.
+     */
     const backspace = () => {
         if (focusedIndex === null) return;
         setExpressions(prev => {
@@ -302,6 +365,9 @@ export function useCalculatorLogic() {
         }
     };
 
+    /**
+     * Clears all expressions, results, colors, disables, caret, and cache.
+     */
     const clearAll = () => {
         setExpressions(['']);
         setResults([{}]);
@@ -313,6 +379,9 @@ export function useCalculatorLogic() {
         setSelectionLength(0);
     };
 
+    /**
+     * Triggers evaluation of the currently focused or last non-empty expression.
+     */
     const evaluateExpression = () => {
         const li = focusedIndex !== null ? focusedIndex : expressions.length - 1;
         if (expressions[li].trim() !== '' && !disabledFlags[li]) {
@@ -320,12 +389,17 @@ export function useCalculatorLogic() {
         }
     };
 
+    /**
+     * Combines expression drawing points and color for all rows, for graph rendering.
+     * Disabled rows are gray, enabled rows use assigned color.
+     */
     const allDrawingSets = expressions.map((_, i) =>
         disabledFlags[i]
             ? { points: [], color: '#666666' }
             : { points: results[i]?.drawingPoints || [], color: colors[i] }
     );
 
+    // Return all logic and state for calculator
     return {
         expressions,
         setExpressions,
