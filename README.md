@@ -24,8 +24,8 @@ The Aleph-Zero Graphing Calculator offers a set of advanced and innovative featu
 For more information on deploying the application, detailed features, and user manual, check the application's [official wiki](/../../wiki/).
 
 ## Authors
-- Rafael Francisco Jiménez Rayo: [GitHub](https://github.com/Sinbelisk)
-- Pablo Martinez Pedrosa: [GitHub](https://github.com/lPhiNix)
+- Rafael Francisco Jiménez Rayo: [@Sinbelisk](https://github.com/Sinbelisk)
+- Pablo Martinez Pedrosa: [PhiNix](https://github.com/lPhiNix)
 
 ---
 
