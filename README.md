@@ -6,6 +6,8 @@
 # Aleph-Zero Graphic Calculator
 <img width="1024" height="1024" alt="loginIlu" src="https://github.com/user-attachments/assets/f9ad1262-48d6-4867-9a40-2f7aead0b28d" />
 
+---
+
 Aleph-Zero is an open-source web graphing calculator that allows you to represent mathematical expressions in a simple and convenient way.
 
 All calculations are performed server-side, making this application perfect for users who want a self-hosted open-source solution for plotting functions or for companies with high-computing-capacity servers.
