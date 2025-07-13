@@ -31,4 +31,4 @@ For more information on deploying the application, detailed features, and user m
 
 ---
 
-<img width="2000" height="300" alt="alephzeroLogo3" src="https://github.com/user-attachments/assets/4e05165e-65fc-4fda-b4ef-dc735318d66d" />
+<img width="1024" height="1024" alt="registerIlu" src="https://github.com/user-attachments/assets/c4d0220d-8bc9-46b3-99a8-63f9f6cd9448" />
