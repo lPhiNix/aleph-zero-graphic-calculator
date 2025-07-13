@@ -4,7 +4,7 @@
 ![image](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white)
 ![image](https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white)
 # Aleph-Zero Graphic Calculator
-![455264535-d0759a0f-80d6-4456-950e-ad3fcf28afe8](https://github.com/user-attachments/assets/19d67ed8-9548-4828-b2a9-656fdbf94395)
+<img width="1024" height="1024" alt="alephzeroLogo" src="https://github.com/user-attachments/assets/4e239d40-a834-4c36-b794-35525083cfe3" />
 
 Aleph-Zero is an open-source web graphing calculator that allows you to represent mathematical expressions in a simple and convenient way.
 
@@ -29,4 +29,4 @@ For more information on deploying the application, detailed features, and user m
 
 ---
 
-![455270960-e80abc3d-ac13-4b17-b85b-867f9c6e87d0](https://github.com/user-attachments/assets/a525fdc6-7f4f-4c12-adf0-15d32941e1d5)
+<img width="2000" height="300" alt="alephzeroLogo3" src="https://github.com/user-attachments/assets/4e05165e-65fc-4fda-b4ef-dc735318d66d" />
