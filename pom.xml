@@ -30,6 +30,9 @@
         <antlr4.version>4.13.0</antlr4.version>
         <springdoc.version>2.8.6</springdoc.version>
         <lombok.version>1.18.38</lombok.version>
+
+        <!-- Build variables -->
+        <skip.frontend>false</skip.frontend> <!-- Set to true to skip frontend build -->
     </properties>
 
     <dependencies>
@@ -103,6 +106,11 @@
             <groupId>org.matheclipse</groupId>
             <artifactId>matheclipse-core</artifactId>
             <version>3.0.0</version>
+        </dependency>        <!-- Matheclipse core library for symbolic math -->
+        <dependency>
+            <groupId>org.matheclipse</groupId>
+            <artifactId>matheclipse-core</artifactId>
+            <version>3.0.0</version>
         </dependency>
 
         <!-- Logging with Log4j2 -->
@@ -161,12 +169,18 @@
             <scope>provided</scope> <!-- Annotation processor -->
         </dependency>
 
-        <!-- Lombok for boilerplate code reduction -->
+        <!-- Lombok + MapsTruct binding for boilerplate code reduction -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
             <scope>provided</scope> <!-- Provided by IDE/build -->
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok-mapstruct-binding</artifactId>
+            <version>0.2.0</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Springdoc OpenAPI UI for API documentation -->
@@ -179,44 +193,15 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-authorization-server</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok-mapstruct-binding</artifactId>
-            <version>0.2.0</version>
-            <scope>provided</scope>
-        </dependency>
-
     </dependencies>
 
     <build>
         <plugins>
-            <!-- Maven Compiler Plugin with annotation processors -->
+            <!-- Maven Clean Plugin-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
-                <configuration>
-                    <source>${java.version}</source> <!-- Java source version -->
-                    <target>${java.version}</target> <!-- Java target version -->
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.mapstruct</groupId>
-                            <artifactId>mapstruct-processor</artifactId>
-                            <version>${org.mapstruct.version}</version>
-                        </path>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${lombok.version}</version>
-                        </path>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok-mapstruct-binding</artifactId>
-                            <version>0.2.0</version>
-                        </path>
-                    </annotationProcessorPaths>
-                </configuration>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.3.2</version>
             </plugin>
 
             <!-- Maven Jar Plugin to configure manifest -->
@@ -247,6 +232,134 @@
                 </executions>
             </plugin>
 
+            <!-- Frontend Maven Plugin to build React frontend -->
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <version>1.15.4</version>
+                <configuration>
+                    <skip>${skip.frontend}</skip>
+                    <workingDirectory>${project.basedir}/react-frontend</workingDirectory>
+                    <nodeVersion>v25.2.1</nodeVersion>
+                    <npmVersion>11.6.2</npmVersion>
+                </configuration>
+                <executions>
+                    <!-- Install Node and NPM -->
+                    <execution>
+                        <id>install node amd npm</id>
+                        <goals><goal>install-node-and-npm</goal></goals>
+                        <phase>generate-resources</phase>
+                    </execution>
+                    <!-- Install frontend dependencies -->
+                    <execution>
+                        <id>npm-install</id>
+                        <goals><goal>npm</goal></goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <arguments>install</arguments>
+                        </configuration>
+                    </execution>
+                    <!-- Build the frontend -->
+                    <execution>
+                        <id>npm-build</id>
+                        <goals><goal>npm</goal></goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <arguments>run build</arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Dependency handler: create /lib folder with dependencies -->
+            <!-- This project does not bundle a fat jar, but uses a lib folder instead -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.6.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals><goal>copy-dependencies</goal></goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/build/lib</outputDirectory>
+                            <includeScope>runtime</includeScope>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Copy built react page to /build/html  -->
+            <!-- Also copy application.properties to /build -->
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <executions>
+                    <!-- Copy "frontend/dist/*" to build/html -->
+                    <execution>
+                        <id>copy-frontend-dist</id>
+                        <phase>package</phase>
+                        <goals><goal>copy-resources</goal></goals>
+                        <configuration>
+                            <skip>${skip.frontend}</skip>
+                            <outputDirectory>${project.build.directory}/build/html</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>frontend/dist</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+
+                    <!-- Copy application.properties to /build -->
+                    <execution>
+                        <id>copy-frontend-resources</id>
+                        <phase>package</phase>
+                        <goals><goal>copy-resources</goal></goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/build</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources</directory>
+                                    <includes>
+                                        <include>application-dev.properties</include>
+                                        <include>application.properties</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Maven Compiler Plugin with annotation processors -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>${java.version}</source> <!-- Java source version -->
+                    <target>${java.version}</target> <!-- Java target version -->
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${org.mapstruct.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok-mapstruct-binding</artifactId>
+                            <version>0.2.0</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
