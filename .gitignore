@@ -16,6 +16,8 @@ build/
 # === Frontend build (e.g., Vite, React) ===
 frontend/dist/
 frontend/node_modules/
+frontend/node/
+react-frontend/
 
 # === Docker volumes / mounted folders ===
 db-data/

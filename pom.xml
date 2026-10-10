@@ -106,11 +106,6 @@
             <groupId>org.matheclipse</groupId>
             <artifactId>matheclipse-core</artifactId>
             <version>3.0.0</version>
-        </dependency>        <!-- Matheclipse core library for symbolic math -->
-        <dependency>
-            <groupId>org.matheclipse</groupId>
-            <artifactId>matheclipse-core</artifactId>
-            <version>3.0.0</version>
         </dependency>
 
         <!-- Logging with Log4j2 -->
@@ -239,21 +234,21 @@
                 <version>1.15.4</version>
                 <configuration>
                     <skip>${skip.frontend}</skip>
-                    <workingDirectory>${project.basedir}/react-frontend</workingDirectory>
+                    <workingDirectory>${project.basedir}/frontend</workingDirectory>
                     <nodeVersion>v25.2.1</nodeVersion>
-                    <npmVersion>11.6.2</npmVersion>
+                    <pnpmVersion>11.28.5</pnpmVersion>
                 </configuration>
                 <executions>
-                    <!-- Install Node and NPM -->
+                    <!-- Install Node and pnpm -->
                     <execution>
-                        <id>install node amd npm</id>
-                        <goals><goal>install-node-and-npm</goal></goals>
+                        <id>install-node-and-pnpm</id>
+                        <goals><goal>install-node-and-pnpm</goal></goals>
                         <phase>generate-resources</phase>
                     </execution>
                     <!-- Install frontend dependencies -->
                     <execution>
-                        <id>npm-install</id>
-                        <goals><goal>npm</goal></goals>
+                        <id>pnpm-install</id>
+                        <goals><goal>pnpm</goal></goals>
                         <phase>generate-resources</phase>
                         <configuration>
                             <arguments>install</arguments>
@@ -261,8 +256,8 @@
                     </execution>
                     <!-- Build the frontend -->
                     <execution>
-                        <id>npm-build</id>
-                        <goals><goal>npm</goal></goals>
+                        <id>pnpm-build</id>
+                        <goals><goal>pnpm</goal></goals>
                         <phase>generate-resources</phase>
                         <configuration>
                             <arguments>run build</arguments>
