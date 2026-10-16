@@ -4,10 +4,12 @@ services:
     image: sinbelisk/alephzero-backend:1.0.0
     container_name: backend
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/mysqldb
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root
-      FRONTEND_URL: http://localhost
+      ALEPHZERO_DB_URL: jdbc:mysql://db:3306/mysqldb
+      ALEPHZERO_DB_USERNAME: ${ALEPHZERO_DB_USERNAME:-root}
+      ALEPHZERO_DB_PASSWORD: ${ALEPHZERO_DB_PASSWORD:-root}
+      ALEPHZERO_FRONTEND_URL: ${ALEPHZERO_FRONTEND_URL:-http://localhost}
+      ALEPHZERO_JWT_SECRET: ${ALEPHZERO_JWT_SECRET:-change-me-this-secret-must-be-at-least-32-bytes-long!!}
+      ALEPHZERO_JWT_COOKIE_SECURE: ${ALEPHZERO_JWT_COOKIE_SECURE:-false}
     depends_on:
       db:
         condition: service_healthy # Wait for DB container to start
