@@ -3,7 +3,7 @@
     height: 100vh;
     justify-content: center;
     align-items: center;
-    background: var(--login-background-color);
+    background: var(--login-background);
 }
 
 .toast {
@@ -44,10 +44,19 @@
 .right {
     flex: 1.5;
     background-color: var(--app-secondary-color);
-    background-image: url('../../assets/react.svg');
-    background-size: contain;
+    background-size: 118%;
     background-position: center;
     background-repeat: no-repeat;
+}
+
+/* Illustration shown on the login variant of the auth layout. */
+.rightLogin {
+    background-image: url('../../assets/auth/loginIlu.png');
+}
+
+/* Illustration shown on the register variant of the auth layout. */
+.rightRegister {
+    background-image: url('../../assets/auth/registerIlu.png');
 }
 
 .title {
@@ -130,4 +139,25 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
+}
+
+.label {
+    align-self: flex-start;
+    margin-bottom: 4px;
+    font-size: 0.85rem;
+    color: var(--color-gray-muted);
+}
+
+.error {
+    width: 80%;
+    margin-top: 6px;
+    color: #ff4d4d;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: var(--color-button);
 }

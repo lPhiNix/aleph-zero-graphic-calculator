@@ -1,4 +1,14 @@
-import axios, { AxiosError, AxiosInstance } from "axios"; // Import axios and typings for error and instance
+import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
+import type { AuthTokens } from "../types/auth";
+import { clearTokens, getAccessToken, getRefreshToken, setTokens } from "./tokenStorage";
+
+/** Request config with a flag to avoid retrying the same request twice. */
+interface RetryableRequestConfig extends InternalAxiosRequestConfig {
+    _retry?: boolean;
+}
+
+/** Auth endpoints must not trigger the automatic refresh/retry logic. */
+const AUTH_ENDPOINT_PREFIX = "/api/v1/auth/";
 
 /**
  * AxiosConfig
@@ -8,6 +18,33 @@ import axios, { AxiosError, AxiosInstance } from "axios"; // Import axios and ty
 class AxiosConfig {
 	// Static property to hold the singleton instance
 	private static instance: AxiosInstance;
+	// In-flight refresh, shared so concurrent 401s only refresh once.
+	private static refreshPromise: Promise<string> | null = null;
+
+	/**
+	 * Requests a new access token using the stored refresh token.
+	 * Uses a bare axios call (no interceptors) to avoid recursion.
+	 * @param baseURL the backend base URL.
+	 * @returns the new access token.
+	 */
+	private static async requestNewAccessToken(baseURL: string): Promise<string> {
+		const refreshToken = getRefreshToken();
+		if (!refreshToken) {
+			throw new Error("No refresh token available");
+		}
+
+		const { data } = await axios.post<AuthTokens>(
+			`${baseURL}/api/v1/auth/refresh`,
+			{ refreshToken },
+		);
+
+		if (!data?.accessToken) {
+			throw new Error("Refresh did not return an access token");
+		}
+
+		setTokens(data.accessToken, data.refreshToken);
+		return data.accessToken;
+	}
 
 	/**
 	 * Returns the singleton Axios instance, creating it if it does not exist.
@@ -17,55 +54,67 @@ class AxiosConfig {
 	public static getInstance(): AxiosInstance {
 		// If the instance does not exist, create a new one with default config
 		if (!AxiosConfig.instance) {
+			const baseURL =
+				window.ENV?.VITE_BACKEND_URL || "http://localhost:8080"; // Use ENV backend URL or fallback to localhost
+
 			AxiosConfig.instance = axios.create({
-				baseURL:
-					window.ENV?.VITE_BACKEND_URL || "http://localhost:8080", // Use ENV backend URL or fallback to localhost
+				baseURL,
 				timeout: 5000, // Timeout in milliseconds for requests
 				headers: {
 					"Content-Type": "application/json", // Default content-type for requests
 				},
 			});
-		}
 
-		// Attach a request interceptor to add Authorization header if access_token is present in sessionStorage
-		AxiosConfig.instance.interceptors.request.use((config) => {
-			const token = sessionStorage.getItem("access_token");
-			if (token) {
-				config.headers["Authorization"] = `Bearer ${token}`; // Attach Bearer token for authentication
-			}
-			return config;
-		});
-
-		/**
-		 * Attach a response interceptor for error handling.
-		 * - If response is 401 (Unauthorized), always redirect to /login.
-		 * - If response is 403 (Forbidden) and there is no token, redirect to /login.
-		 * - If response is 403 but there is a token, do not redirect (let frontend handle it).
-		 * - Always reject the error so calling code can handle it as well.
-		 */
-		AxiosConfig.instance.interceptors.response.use(
-			(response) => response, // Pass through successful responses
-			(error: AxiosError) => {
-				if (error.response) {
-					const { status } = error.response;
-					const token = sessionStorage.getItem("access_token");
-
-					if (status === 401) {
-						// Not authenticated → always redirect
-						window.location.href = "/login";
-					} else if (
-						status === 403 &&
-						(!token || token.trim() === "")
-					) {
-						// Forbidden without token → redirect
-						window.location.href = "/login";
-					}
-					// If 403 but a token exists → do not redirect (frontend may handle this)
+			// Attach the access token (if any) as a Bearer header.
+			AxiosConfig.instance.interceptors.request.use((config) => {
+				const token = getAccessToken();
+				if (token) {
+					config.headers["Authorization"] = `Bearer ${token}`;
 				}
+				return config;
+			});
 
-				return Promise.reject(error); // Reject the promise so errors propagate to calling code
-			},
-		);
+			/**
+			 * Response interceptor.
+			 * - On 401 for a non-auth endpoint: try to refresh the access token once
+			 *   (shared across concurrent requests) and replay the original request.
+			 * - If the refresh fails: clear the session and redirect to /login.
+			 * - Auth endpoints (login/register/refresh/logout) are never retried here,
+			 *   so their errors propagate to the caller.
+			 */
+			AxiosConfig.instance.interceptors.response.use(
+				(response) => response, // Pass through successful responses
+				async (error: AxiosError) => {
+					const original = error.config as RetryableRequestConfig | undefined;
+					const status = error.response?.status;
+					const url = original?.url ?? "";
+					const isAuthEndpoint = url.includes(AUTH_ENDPOINT_PREFIX);
+
+					if (status === 401 && original && !original._retry && !isAuthEndpoint) {
+						original._retry = true;
+						try {
+							if (!AxiosConfig.refreshPromise) {
+								AxiosConfig.refreshPromise = AxiosConfig
+									.requestNewAccessToken(baseURL)
+									.finally(() => {
+										AxiosConfig.refreshPromise = null;
+									});
+							}
+
+							const newToken = await AxiosConfig.refreshPromise;
+							original.headers.set("Authorization", `Bearer ${newToken}`);
+							return AxiosConfig.instance(original);
+						} catch (refreshError) {
+							clearTokens();
+							window.location.href = "/login";
+							return Promise.reject(refreshError);
+						}
+					}
+
+					return Promise.reject(error); // Reject so calling code can handle it too
+				},
+			);
+		}
 		return AxiosConfig.instance;
 	}
 }

@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"; // Import routing utilities from react-router-dom
-import Login from "./pages/Login"; // Import Login page component
-import Callback from "./pages/Callback"; // Import Callback page component (OAuth2 callback)
+import LoginPage from "./pages/LoginPage"; // Import Login page component
+import RegisterPage from "./pages/RegisterPage"; // Import Register page component
 import Dashboard from "./pages/Dashboard"; // Import Dashboard page component (landing or splash page)
 import Calculator from "./pages/Calculator"; // Import Calculator page component (main calculator UI)
 import ProtectedRoute from "./routes/ProtectedRoute"; // Import ProtectedRoute for authenticated access
@@ -16,9 +16,9 @@ function App() {
         <Router>
             <Routes>
                 {/* Route for login page */}
-                <Route path="/login" element={<Login />} />
-                {/* Route for OAuth2 provider callback */}
-                <Route path="/oauth2/callback" element={<Callback />} />
+                <Route path="/login" element={<LoginPage />} />
+                {/* Route for register page */}
+                <Route path="/register" element={<RegisterPage />} />
                 {/* Route for dashboard (landing) page */}
                 <Route path="/" element={<Dashboard />} />
                 {/* Protected route for calculator, requires authentication */}

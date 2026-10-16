@@ -1,5 +1,5 @@
 :root {
-    --login-background-color: var(--color-white);
+    --login-background: linear-gradient(150deg, var(--color-white), var(--highlight-thirty-color));
     --login-component-primary-color: var(--primary-color);
     --login-component-secondary-color: var(--secondary-color);
     --login-text-color: var(--fourth-color);

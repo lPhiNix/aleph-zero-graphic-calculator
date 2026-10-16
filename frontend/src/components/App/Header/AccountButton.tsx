@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react'; // Import React hooks for component state, refs, and side effects
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for redirecting to /login after logout
 import buttonStyles from '../../../styles/modules/accountButton.module.css'; // Import custom CSS module for button styling
 import styles from '../../../styles/modules/mathkeyboard.module.css'; // Import custom CSS module for keyboard styling
 import AxiosConfig from '../../../services/axiosService.ts'; // Import Axios configuration singleton for HTTP requests
+import * as AuthService from '../../../services/authService.ts'; // Import auth service for logout
 import { useCurrentUser } from '../../../hooks/User/useCurrentUser.tsx'; // Import custom hook to get the current user
 
 /**
@@ -12,10 +14,6 @@ interface UserMenuCircularButtonProps {
     initial: string;
 }
 
-// Get backend URL from environment variable or use default localhost.
-// Used for redirections such as logout.
-const backendUrl = window.ENV?.VITE_BACKEND_URL || "http://localhost:8080";
-
 /**
  * UserMenuCircularButton
  * Renders a circular button that shows the user's initial and displays a dropdown menu with user actions when clicked.
@@ -23,6 +21,8 @@ const backendUrl = window.ENV?.VITE_BACKEND_URL || "http://localhost:8080";
  * @returns {JSX.Element} The rendered component.
  */
 export default function UserMenuCircularButton({ initial }: UserMenuCircularButtonProps) {
+    // useNavigate provides a function to imperatively change routes (used after logout)
+    const navigate = useNavigate();
     // State to track if the menu is open
     const [open, setOpen] = useState(false);
     // Ref for the button element to detect outside clicks
@@ -58,13 +58,12 @@ export default function UserMenuCircularButton({ initial }: UserMenuCircularButt
     }, [open]);
 
     /**
-     * Logs the user out by clearing relevant session storage items and redirecting to the backend logout endpoint.
+     * Logs the user out by revoking the refresh token on the backend and clearing
+     * the local session, then redirecting to the login page.
      */
-    const handleLogout = () => {
-        sessionStorage.removeItem('access_token'); // Remove access token from session storage
-        sessionStorage.removeItem('code_challenge'); // Remove PKCE code challenge if present
-        sessionStorage.removeItem('code_verifier'); // Remove PKCE code verifier if present
-        window.location.href = `${backendUrl}/logout`; // Redirect to backend logout endpoint
+    const handleLogout = async () => {
+        await AuthService.logout(); // Revoke refresh token + clear stored tokens
+        navigate('/login', { replace: true }); // Redirect to the login page
     };
 
     /**
@@ -78,10 +77,8 @@ export default function UserMenuCircularButton({ initial }: UserMenuCircularButt
         } catch (e) {
             // optional: error notification (not implemented)
         }
-        sessionStorage.removeItem('access_token'); // Clear session storage credentials
-        sessionStorage.removeItem('code_challenge');
-        sessionStorage.removeItem('code_verifier');
-        window.location.href = `${backendUrl}/logout`; // Redirect to backend logout endpoint
+        await AuthService.logout(); // Revoke refresh token + clear stored tokens
+        navigate('/login', { replace: true }); // Redirect to the login page
     };
 
     // Render the circular user menu button and dropdown menu when open

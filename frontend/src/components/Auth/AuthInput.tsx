@@ -7,6 +7,7 @@ import styles from '../../styles/modules/dialog.module.css'; // Import form/dial
  */
 interface AuthInputProps extends InputHTMLAttributes<HTMLInputElement> {
     label: string; // Label to display above the input
+    error?: string; // Optional validation message to display below the input
 }
 
 /**
@@ -15,13 +16,15 @@ interface AuthInputProps extends InputHTMLAttributes<HTMLInputElement> {
  * @param {AuthInputProps} props - Props including label and standard input props.
  * @returns {JSX.Element} The rendered input group.
  */
-export function AuthInput({ label, ...props }: AuthInputProps) {
+export function AuthInput({ label, error, ...props }: AuthInputProps) {
     return (
         <div className={styles.inputGroup}>
             {/* Render the label above the input */}
             <label className={styles.label}>{label}</label>
             {/* Render the input, spreading all other props */}
-            <input className={styles.input} {...props} />
+            <input className={styles.input} aria-invalid={error ? true : undefined} {...props} />
+            {/* Render the validation message, if any */}
+            {error && <span className={styles.error}>{error}</span>}
         </div>
     );
 }

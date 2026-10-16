@@ -6,11 +6,13 @@ import * as React from "react"; // Import React for types and JSX
  * @property {string} title - The main title for the authentication box.
  * @property {React.ReactNode} children - The main content (usually a form).
  * @property {React.ReactNode} [subtitle] - Optional subtitle or description.
+ * @property {"login" | "register"} [illustration] - Which illustration to show on the right panel.
  */
 interface AuthLayoutProps {
     title: string;
     children: React.ReactNode;
     subtitle?: React.ReactNode;
+    illustration?: "login" | "register";
 }
 
 /**
@@ -19,7 +21,12 @@ interface AuthLayoutProps {
  * @param {AuthLayoutProps} props - Layout properties including title, children, and optional subtitle.
  * @returns {JSX.Element} The rendered authentication layout.
  */
-export function AuthLayout({ title, children, subtitle }: AuthLayoutProps) {
+export function AuthLayout({ title, children, subtitle, illustration }: AuthLayoutProps) {
+    // Pick the illustration class based on the requested variant.
+    const illustrationClass =
+        illustration === "register" ? styles.rightRegister :
+        illustration === "login" ? styles.rightLogin : "";
+
     return (
         <div className={styles.container}>
             <div className={styles.loginBox}>
@@ -29,8 +36,8 @@ export function AuthLayout({ title, children, subtitle }: AuthLayoutProps) {
                     {subtitle}
                     {children}
                 </div>
-                {/* Right side: for illustration, decoration, or left blank */}
-                <div className={styles.right}></div>
+                {/* Right side: illustration for the current auth variant */}
+                <div className={`${styles.right} ${illustrationClass}`}></div>
             </div>
         </div>
     );

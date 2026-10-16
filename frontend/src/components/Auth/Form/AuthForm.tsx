@@ -24,16 +24,22 @@ export interface AuthFormField {
  * @template T - The type of data managed by the form.
  * @property {T} initialState - The initial values for the form fields.
  * @property {AuthFormField[]} fields - The fields to render in the form.
- * @property {(data: T) => void} onSubmit - Callback fired when the form is submitted.
+ * @property {(data: T) => void | Promise<void>} onSubmit - Callback fired when the form is submitted.
  * @property {React.ReactNode} [extraOptions] - Optional additional content (e.g., checkboxes, links).
  * @property {string} buttonText - The label for the submit button.
+ * @property {boolean} [loading] - Disables the submit button and shows a loading label.
+ * @property {string} [error] - General error message shown above the submit button.
+ * @property {Record<string, string>} [fieldErrors] - Per-field validation messages.
  */
 interface AuthFormProps<T> {
     initialState: T;
     fields: AuthFormField[];
-    onSubmit: (data: T) => void;
+    onSubmit: (data: T) => void | Promise<void>;
     extraOptions?: React.ReactNode;
     buttonText: string;
+    loading?: boolean;
+    error?: string;
+    fieldErrors?: Record<string, string>;
 }
 
 /**
@@ -48,7 +54,10 @@ export function AuthForm<T extends Record<string, any>>({
                                                             fields,
                                                             onSubmit,
                                                             extraOptions,
-                                                            buttonText
+                                                            buttonText,
+                                                            loading = false,
+                                                            error,
+                                                            fieldErrors = {}
                                                         }: AuthFormProps<T>) {
     /**
      * State for the form's input values.
@@ -77,7 +86,7 @@ export function AuthForm<T extends Record<string, any>>({
      */
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSubmit(formData);
+        void onSubmit(formData);
     };
 
     // Render the form with fields, extra options, and a submit button
@@ -95,6 +104,7 @@ export function AuthForm<T extends Record<string, any>>({
                         required={field.required}
                         value={formData[field.name]}
                         onChange={handleChange}
+                        error={fieldErrors[field.name]}
                     />
                 ))}
             </div>
@@ -102,10 +112,13 @@ export function AuthForm<T extends Record<string, any>>({
             {/* Render extra options if provided, e.g., checkboxes, links */}
             {extraOptions && <div className={styles.formOptions}>{extraOptions}</div>}
 
+            {/* Render the general error message, if any */}
+            {error && <div className={styles.error}>{error}</div>}
+
             <div className={styles.formMain}>
                 {/* Submit button for the form */}
-                <button type="submit" className={styles.button}>
-                    {buttonText}
+                <button type="submit" className={styles.button} disabled={loading}>
+                    {loading ? 'Please wait…' : buttonText}
                 </button>
             </div>
         </form>
