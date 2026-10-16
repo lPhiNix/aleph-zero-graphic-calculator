@@ -24,11 +24,13 @@ public class UserController {
 	private final UserMapper userMapper;
 
 	/**
-	 * Retrieves a user by their ID.
+	 * Retrieves a user by their ID. Restricted to administrators, since it can
+	 * access any user (avoiding user enumeration by regular users).
 	 *
 	 * @param id the ID of the user to retrieve
 	 * @return a response entity containing the user data in a {@link UserDto}
 	 */
+	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping("/{id}")
 	public ResponseEntity<UserDto> getUserById(@PathVariable int id) {
 		User user = userService.findUserById(id);
@@ -47,12 +49,14 @@ public class UserController {
 	}
 
 	/**
-	 * Deletes a user by their ID.
+	 * Deletes a user by their ID. Restricted to administrators, since it can delete
+	 * any user.
 	 *
 	 * @param id the ID of the user to delete
 	 * @return a response entity indicating that the operation was successful with
 	 *         no content
 	 */
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/delete/{id}")
 	public ResponseEntity<Void> deleteUserById(@PathVariable int id) {
 		userService.deleteById(id);

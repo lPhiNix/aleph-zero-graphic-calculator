@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -98,5 +99,20 @@ public class HTTPExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleNoResourceFound(NoResourceFoundException ex) {
 		logger.debug("No resource found for path: {}", ex.getResourcePath());
 		return ErrorResponseBuilder.notFound().title("Resource not found").build();
+	}
+
+	/**
+	 * Handles authorization failures raised by method security (e.g. a
+	 * {@code @PreAuthorize} expression that evaluates to false). Returns 403
+	 * instead of letting the generic handler turn it into a 500.
+	 *
+	 * @param ex Exception thrown when an authenticated user lacks permission.
+	 * @return A {@link ResponseEntity} containing an {@link ErrorResponse} with
+	 *         FORBIDDEN status.
+	 */
+	@ExceptionHandler(AccessDeniedException.class)
+	public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
+		logger.warn("Access denied: {}", ex.getMessage());
+		return ErrorResponseBuilder.forbidden().build();
 	}
 }
