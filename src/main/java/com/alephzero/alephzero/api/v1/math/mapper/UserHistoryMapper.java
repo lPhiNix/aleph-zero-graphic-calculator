@@ -1,126 +1,121 @@
 package com.alephzero.alephzero.api.v1.math.mapper;
 
-import com.alephzero.alephzero.api.v1.math.dto.request.history.UserHistoryCreationDto;
-import com.alephzero.alephzero.api.v1.math.dto.SimpleUserHistoryDto;
-import com.alephzero.alephzero.core.services.math.persistence.SnapshotUtils;
-import com.alephzero.alephzero.commons.mapper.BaseMapper;
-import com.alephzero.alephzero.commons.mapper.MappingContext;
-import com.alephzero.alephzero.commons.mapper.MappingContextException;
-import com.alephzero.alephzero.api.v1.math.dto.UserHistoryDto;
-import com.alephzero.alephzero.api.v1.user.mapper.UserMapper;
-import com.alephzero.alephzero.core.models.*;
-import org.mapstruct.*;
-
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
+
+import com.alephzero.alephzero.api.v1.math.dto.SimpleUserHistoryDto;
+import com.alephzero.alephzero.api.v1.math.dto.UserHistoryDto;
+import com.alephzero.alephzero.api.v1.math.dto.request.history.UserHistoryCreationDto;
+import com.alephzero.alephzero.api.v1.user.mapper.UserMapper;
+import com.alephzero.alephzero.core.models.HistoryExpression;
+import com.alephzero.alephzero.core.models.User;
+import com.alephzero.alephzero.core.models.UserHistory;
+import com.alephzero.alephzero.core.services.math.persistence.SnapshotUtils;
+import com.alephzero.alephzero.infrastructure.config.GlobalMapperConfig;
 
 /**
  * MapStruct mapper for {@link UserHistory} ==> DTOs.
  */
-@Mapper(componentModel = "spring", uses = {HistoryExpressionMapper.class, UserMapper.class, MathExpressionMapper.class})
-public interface UserHistoryMapper extends BaseMapper<UserHistory, UserHistoryDto> {
+@Mapper(config = GlobalMapperConfig.class, uses = { HistoryExpressionMapper.class, UserMapper.class })
+public interface UserHistoryMapper {
 
-    /**
-     * Converts a {@link UserHistory} into a response {@link UserHistoryDto} with a transformed snapshot field.
-     *
-     * @param entity the {@link UserHistory} entity to convert
-     * @return a mapped {@link UserHistoryDto}
-     */
-    @Override
-    @Mapping(source = "snapshot", target = "snapshot", qualifiedByName = "parseSnapshotToUrl")
-    UserHistoryDto toResponseDtoFromEntity(UserHistory entity);
+	/**
+	 * Converts a {@link UserHistory} into a response {@link UserHistoryDto} with a
+	 * transformed snapshot field.
+	 *
+	 * @param entity the {@link UserHistory} entity to convert
+	 * @return a mapped {@link UserHistoryDto}
+	 */
+	@Mapping(source = "snapshot", target = "snapshot", qualifiedByName = "parseSnapshotToUrl")
+	UserHistoryDto toResponseDtoFromEntity(UserHistory entity);
 
-    /**
-     * Maps a {@link UserHistoryCreationDto} into a {@link UserHistory} entity.
-     * The user, snapshot UUID, and expression mapper must be provided through the {@link MappingContext}.
-     *
-     * @param creationDto the incoming DTO for creation
-     * @param context     mapping context containing auxiliary data
-     * @return a mapped {@link UserHistory} entity
-     */
-    @Mapping(source = "snapshot", target = "snapshot", qualifiedByName = "parseSnapshotToUrl")
-    UserHistory toEntityFromCreationDto(UserHistoryCreationDto creationDto, @Context MappingContext context);
+	/**
+	 * Maps a {@link UserHistoryCreationDto} into a {@link UserHistory} entity.
+	 * <p>
+	 * The owning {@link User} and the generated snapshot UUID are provided as extra
+	 * source parameters,
+	 * so no mapping context is required. The {@code snapshot} of the DTO is
+	 * intentionally ignored:
+	 * the entity stores the generated {@code snapshotUuid} instead.
+	 *
+	 * @param creationDto  the incoming DTO for creation
+	 * @param user         the owner of the history entry
+	 * @param snapshotUuid the generated snapshot identifier to persist
+	 * @return a mapped {@link UserHistory} entity
+	 */
+	@Mapping(target = "id", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	@Mapping(target = "user", source = "user")
+	@Mapping(target = "snapshot", source = "snapshotUuid")
+	@Mapping(target = "historyExpressions", source = "creationDto.mathExpressions")
+	UserHistory toEntityFromCreationDto(UserHistoryCreationDto creationDto, User user, String snapshotUuid);
 
-    /**
-     * Maps a {@link UserHistory} into a simplified version {@link SimpleUserHistoryDto},
-     * including only the first math expression as the description.
-     *
-     * @param entity the entity to convert
-     * @return a simplified DTO
-     */
-    @Mapping(source = "historyExpressions", target = "description", qualifiedByName = "getFirst")
-    @Mapping(source = "snapshot", target = "snapshot", qualifiedByName = "parseSnapshotToUrl")
-    SimpleUserHistoryDto toSimpleResponseDtoFromEntity(UserHistory entity);
+	/**
+	 * Maps a {@link UserHistory} into a simplified version
+	 * {@link SimpleUserHistoryDto},
+	 * including only the first math expression as the description.
+	 *
+	 * @param entity the entity to convert
+	 * @return a simplified DTO
+	 */
+	@Mapping(source = "historyExpressions", target = "description", qualifiedByName = "getFirst")
+	@Mapping(source = "snapshot", target = "snapshot", qualifiedByName = "parseSnapshotToUrl")
+	SimpleUserHistoryDto toSimpleResponseDtoFromEntity(UserHistory entity);
 
-    /**
-     * Maps a list of {@link UserHistory} entities into a list of simplified DTOs.
-     *
-     * @param entities list of user history entities
-     * @return list of simplified DTOs
-     */
-    List<SimpleUserHistoryDto> toSimpleResponseDtoListFromEntityList(List<UserHistory> entities);
+	/**
+	 * Maps a list of {@link UserHistory} entities into a list of simplified DTOs.
+	 *
+	 * @param entities list of user history entities
+	 * @return list of simplified DTOs
+	 */
+	List<SimpleUserHistoryDto> toSimpleResponseDtoListFromEntityList(List<UserHistory> entities);
 
-    /**
-     * Extracts the expression string from the first {@link HistoryExpression} in the set.
-     *
-     * @param historyExpressions a set of history expressions
-     * @return the expression string of the first entry, or null if empty
-     */
-    @Named("getFirst")
-    default String getFirst(Set<HistoryExpression> historyExpressions) {
-        return historyExpressions.stream()
-                .map(xpr -> xpr.getMathExpression().getExpression())
-                .findFirst()
-                .orElse(null);
-    }
+	/**
+	 * Links each mapped {@link HistoryExpression} back to its owning
+	 * {@link UserHistory}.
+	 *
+	 * @param entity the freshly mapped user history
+	 */
+	@AfterMapping
+	default void linkBackReferences(@MappingTarget UserHistory entity) {
+		entity.getHistoryExpressions().forEach(expression -> expression.setUserHistory(entity));
+	}
 
-    /**
-     * Transforms a snapshot UUID into a complete URL.
-     *
-     * @param snapshot the snapshot UUID
-     * @return the full URL string, or null if input is null or empty
-     */
-    @Named("parseSnapshotToUrl")
-    default String parseSnapshotToUrl(String snapshot) {
-        if (snapshot == null || snapshot.isEmpty()) {
-            return null;
-        }
-        return SnapshotUtils.getSnapshotUrl(snapshot);
-    }
+	/**
+	 * Extracts the expression string of the {@link HistoryExpression} with the
+	 * lowest {@code indexOrder}.
+	 *
+	 * @param historyExpressions a set of history expressions
+	 * @return the expression string of the first entry, or null if empty
+	 */
+	@Named("getFirst")
+	default String getFirst(Set<HistoryExpression> historyExpressions) {
+		return historyExpressions.stream()
+				.min(Comparator.comparing(HistoryExpression::getIndexOrder,
+						Comparator.nullsLast(Comparator.naturalOrder())))
+				.map(expression -> expression.getMathExpression().getExpression())
+				.orElse(null);
+	}
 
-    /**
-     * Performs additional setup after mapping a {@link UserHistory} from a creation DTO.
-     * This method sets the user, snapshot UUID, and builds the {@link HistoryExpression} set
-     * using the provided context.
-     *
-     * @param entity     the entity being populated
-     * @param dto        the creation DTO
-     * @param context    mapping context containing user, snapshot UUID, and a mapper
-     */
-    @AfterMapping
-    default void afterMappingFromCreation(@MappingTarget UserHistory entity, UserHistoryCreationDto dto, @Context MappingContext context) {
-        User user = context.getContextData(User.class)
-                .orElseThrow(() -> new MappingContextException("User not found in context for UserHistory creation"));
-        String snapshotUuid = context.getContextData(String.class)
-                .orElseThrow(() -> new MappingContextException("Snapshot UUID not found in context for UserHistory creation"));
-        MathExpressionMapper mathExpressionMapper = context.getContextData(MathExpressionMapper.class)
-                .orElseThrow(() -> new MappingContextException("MathExpressionMapper not found in context for UserHistory creation"));
-
-        entity.setUser(user);
-        entity.setSnapshot(snapshotUuid);
-
-        Set<HistoryExpression> historyExpressions = dto.mathExpressions().stream()
-                .map(exprDto -> {
-                    MathExpression expr = mathExpressionMapper.toEntityFromCreationDto(exprDto);
-                    HistoryExpression hx = new HistoryExpression();
-                    hx.setMathExpression(expr);
-                    hx.setUserHistory(entity);
-                    hx.setIndexOrder(exprDto.orderIndex());
-                    return hx;
-                })
-                .collect(Collectors.toSet());
-
-        entity.setHistoryExpressions(historyExpressions);
-    }
+	/**
+	 * Transforms a snapshot UUID into a complete URL.
+	 *
+	 * @param snapshot the snapshot UUID
+	 * @return the full URL string, or null if input is null or empty
+	 */
+	@Named("parseSnapshotToUrl")
+	default String parseSnapshotToUrl(String snapshot) {
+		if (snapshot == null || snapshot.isEmpty()) {
+			return null;
+		}
+		return SnapshotUtils.getSnapshotUrl(snapshot);
+	}
 }
