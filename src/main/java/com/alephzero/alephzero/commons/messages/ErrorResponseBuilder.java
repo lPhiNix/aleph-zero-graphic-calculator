@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Builder for constructing {@link ErrorResponse} (error) objects.
  * <p>
- * Provides a fluent API for setting error code, title, summary, and details,
+ * Provides a fluent API for setting error code, title, and details,
  * as well as chainable convenience methods for common error cases.
  * </p>
  *
@@ -18,8 +18,107 @@ import java.util.List;
 public class ErrorResponseBuilder {
 	private AppCode code;
 	private String errorTitle;
-	private String errorSummary;
 	private List<? extends ApiErrorDetail> errorDetails;
+
+	private ErrorResponseBuilder() {
+	}
+
+	/**
+	 * Creates an empty builder for manual configuration.
+	 *
+	 * @return a new builder instance
+	 */
+	public static ErrorResponseBuilder create() {
+		return new ErrorResponseBuilder();
+	}
+
+	/**
+	 * Configures this builder for a 400 Bad Request error.
+	 *
+	 * @return this builder instance for chaining
+	 */
+	public static ErrorResponseBuilder badRequest() {
+		return create()
+				.code(AppCode.BAD_REQUEST)
+				.title(AppCode.BAD_REQUEST.getSimpleMessage());
+	}
+
+	/**
+	 * Configures this builder for a 401 Unauthorized error.
+	 *
+	 * @return this builder instance for chaining
+	 */
+	public static ErrorResponseBuilder unauthorized() {
+		return create()
+				.code(AppCode.UNAUTHORIZED)
+				.title(AppCode.UNAUTHORIZED.getSimpleMessage());
+	}
+
+	/**
+	 * Configures this builder for a 403 Forbidden error.
+	 *
+	 * @return this builder instance for chaining
+	 */
+	public static ErrorResponseBuilder forbidden() {
+		return create()
+				.code(AppCode.FORBIDDEN)
+				.title(AppCode.FORBIDDEN.getSimpleMessage());
+	}
+
+	/**
+	 * Configures this builder for a 404 Not Found error.
+	 *
+	 * @return this builder instance for chaining
+	 */
+	public static ErrorResponseBuilder notFound() {
+		return create()
+				.code(AppCode.NOT_FOUND)
+				.title(AppCode.NOT_FOUND.getSimpleMessage());
+	}
+
+	/**
+	 * Configures this builder for a 409 Conflict error.
+	 *
+	 * @return this builder instance for chaining
+	 */
+	public static ErrorResponseBuilder conflict() {
+		return create()
+				.code(AppCode.CONFLICT)
+				.title(AppCode.CONFLICT.getSimpleMessage());
+	}
+
+	/**
+	 * Configures this builder for a 400 Validation Error.
+	 *
+	 * @return this builder instance for chaining
+	 */
+	public static ErrorResponseBuilder validation() {
+		return create()
+				.code(AppCode.VALIDATION_ERROR)
+				.title(AppCode.VALIDATION_ERROR.getSimpleMessage());
+	}
+
+	/**
+	 * Configures this builder for a 500 Internal Server Error.
+	 *
+	 * @return this builder instance for chaining
+	 */
+	public static ErrorResponseBuilder internal() {
+		return create()
+				.code(AppCode.INTERNAL_ERROR)
+				.title(AppCode.INTERNAL_ERROR.getSimpleMessage());
+	}
+
+	/**
+	 * Configures this builder for a 503 Service Unavailable error.
+	 *
+	 * @return this builder instance for chaining
+	 */
+	public static ErrorResponseBuilder serviceUnavailable() {
+		return create()
+				.code(AppCode.SERVICE_UNAVAILABLE)
+				.title(AppCode.SERVICE_UNAVAILABLE.getSimpleMessage());
+	}
 
 	/**
 	 * Sets the application error code for this error response.
@@ -44,17 +143,6 @@ public class ErrorResponseBuilder {
 	}
 
 	/**
-	 * Sets the error summary for this error response.
-	 *
-	 * @param errorSummary a brief explanation of the error
-	 * @return this builder instance for chaining
-	 */
-	public ErrorResponseBuilder summary(String errorSummary) {
-		this.errorSummary = errorSummary;
-		return this;
-	}
-
-	/**
 	 * Adds a single error detail to this error response.
 	 *
 	 * @param detail the {@link ApiErrorDetail} to add
@@ -73,112 +161,6 @@ public class ErrorResponseBuilder {
 	 */
 	public ErrorResponseBuilder details(List<? extends ApiErrorDetail> details) {
 		this.errorDetails = List.copyOf(details);
-		return this;
-	}
-
-	// --- Predefined error cases ---
-
-	/**
-	 * Configures this builder for a 400 Bad Request error.
-	 *
-	 * @param summary a brief explanation of the error
-	 * @return this builder instance for chaining
-	 */
-	public ErrorResponseBuilder badRequest(String summary) {
-		this.code = AppCode.BAD_REQUEST;
-		this.errorTitle = AppCode.BAD_REQUEST.getSimpleMessage();
-		this.errorSummary = summary;
-		return this;
-	}
-
-	/**
-	 * Configures this builder for a 401 Unauthorized error.
-	 *
-	 * @param summary a brief explanation of the error
-	 * @return this builder instance for chaining
-	 */
-	public ErrorResponseBuilder unauthorized(String summary) {
-		this.code = AppCode.UNAUTHORIZED;
-		this.errorTitle = AppCode.UNAUTHORIZED.getSimpleMessage();
-		this.errorSummary = summary;
-		return this;
-	}
-
-	/**
-	 * Configures this builder for a 403 Forbidden error.
-	 *
-	 * @param summary a brief explanation of the error
-	 * @return this builder instance for chaining
-	 */
-	public ErrorResponseBuilder forbidden(String summary) {
-		this.code = AppCode.FORBIDDEN;
-		this.errorTitle = AppCode.FORBIDDEN.getSimpleMessage();
-		this.errorSummary = summary;
-		return this;
-	}
-
-	/**
-	 * Configures this builder for a 404 Not Found error.
-	 *
-	 * @param summary a brief explanation of the error
-	 * @return this builder instance for chaining
-	 */
-	public ErrorResponseBuilder notFound(String summary) {
-		this.code = AppCode.NOT_FOUND;
-		this.errorTitle = AppCode.NOT_FOUND.getSimpleMessage();
-		this.errorSummary = summary;
-		return this;
-	}
-
-	/**
-	 * Configures this builder for a 409 Conflict error.
-	 *
-	 * @param summary a brief explanation of the error
-	 * @return this builder instance for chaining
-	 */
-	public ErrorResponseBuilder conflict(String summary) {
-		this.code = AppCode.CONFLICT;
-		this.errorTitle = AppCode.CONFLICT.getSimpleMessage();
-		this.errorSummary = summary;
-		return this;
-	}
-
-	/**
-	 * Configures this builder for a 400 Validation Error.
-	 *
-	 * @param summary a brief explanation of the validation error
-	 * @return this builder instance for chaining
-	 */
-	public ErrorResponseBuilder validation(String summary) {
-		this.code = AppCode.VALIDATION_ERROR;
-		this.errorTitle = AppCode.VALIDATION_ERROR.getSimpleMessage();
-		this.errorSummary = summary;
-		return this;
-	}
-
-	/**
-	 * Configures this builder for a 500 Internal Server Error.
-	 *
-	 * @param summary a brief explanation of the error
-	 * @return this builder instance for chaining
-	 */
-	public ErrorResponseBuilder internal(String summary) {
-		this.code = AppCode.INTERNAL_ERROR;
-		this.errorTitle = AppCode.INTERNAL_ERROR.getSimpleMessage();
-		this.errorSummary = summary;
-		return this;
-	}
-
-	/**
-	 * Configures this builder for a 503 Service Unavailable error.
-	 *
-	 * @param summary a brief explanation of the error
-	 * @return this builder instance for chaining
-	 */
-	public ErrorResponseBuilder serviceUnavailable(String summary) {
-		this.code = AppCode.SERVICE_UNAVAILABLE;
-		this.errorTitle = AppCode.SERVICE_UNAVAILABLE.getSimpleMessage();
-		this.errorSummary = summary;
 		return this;
 	}
 
