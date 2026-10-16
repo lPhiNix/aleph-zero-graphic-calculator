@@ -10,7 +10,7 @@ services:
       # Values come from the .env file when present, otherwise from the defaults.
       # See .env.example for the full, documented list of settings.
       ALEPHZERO_PORT: ${ALEPHZERO_PORT:-8080}
-      ALEPHZERO_DB_URL: ${ALEPHZERO_DB_URL:-jdbc:mysql://localhost:3306/mysqldb}
+      ALEPHZERO_DB_URL: ${ALEPHZERO_DB_URL:-jdbc:mysql://db:3306/alephzero}
       ALEPHZERO_DB_USERNAME: ${ALEPHZERO_DB_USERNAME:-root}
       ALEPHZERO_DB_PASSWORD: ${ALEPHZERO_DB_PASSWORD:-root}
       ALEPHZERO_JWT_SECRET: ${ALEPHZERO_JWT_SECRET:-change-me-this-secret-must-be-at-least-32-bytes-long!!}
@@ -31,17 +31,21 @@ services:
   # installing MySQL. The application does NOT depend on this service: start it
   # only if you need it and point the app at it with the following in your .env:
   #
-  #     ALEPHZERO_DB_URL=jdbc:mysql://db:3306/mysqldb
+  #     ALEPHZERO_DB_URL=jdbc:mysql://db:3306/alephzero
   #
   # If you already have a MySQL instance, ignore/remove this service and just
   # set ALEPHZERO_DB_URL to point at yours.
   # ---------------------------------------------------------------------------
   db:
-    image: mysql:8
+    # Pinned to 8.0: Flyway 10.20.1 (bundled by Spring Boot 3.4.4) only supports MySQL up to 8.1.
+    image: mysql:8.0
     container_name: alephzero-db
     environment:
       MYSQL_ROOT_PASSWORD: ${ALEPHZERO_DB_PASSWORD:-root}
-      MYSQL_DATABASE: mysqldb
+      MYSQL_DATABASE: alephzero
+      # Allow the root account to connect from any host (host machine, other
+      # containers). Only applied on first initialization of the data volume.
+      MYSQL_ROOT_HOST: '%'
     ports:
       # Exposed for convenience (e.g. connecting with a SQL client from the host).
       # Change the host port if you already run MySQL on 3306.
