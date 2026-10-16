@@ -257,67 +257,25 @@
                 </executions>
             </plugin>
 
-            <!-- Dependency handler: create /lib folder with dependencies -->
-            <!-- This project does not bundle a fat jar, but uses a lib folder instead -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.6.1</version>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/build/lib</outputDirectory>
-                            <includeScope>runtime</includeScope>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Copy built react page to /build/html  -->
-            <!-- Also copy application.properties to /build -->
+            <!-- Copy the built React app into the jar so it is fully self-contained.
+                 Output goes to classes/static, so it ends up as BOOT-INF/classes/static
+                 inside the fat jar and Spring Boot serves it from the classpath. -->
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>3.3.1</version>
                 <executions>
-                    <!-- Copy "frontend/dist/*" to build/html -->
                     <execution>
                         <id>copy-frontend-dist</id>
-                        <phase>package</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
                             <skip>${skip.frontend}</skip>
-                            <outputDirectory>${project.build.directory}/build/html</outputDirectory>
+                            <outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>frontend/dist</directory>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-
-                    <!-- Copy application.properties to /build -->
-                    <execution>
-                        <id>copy-frontend-resources</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/build</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>src/main/resources</directory>
-                                    <includes>
-                                        <include>application-dev.properties</include>
-                                        <include>application.properties</include>
-                                    </includes>
                                 </resource>
                             </resources>
                         </configuration>

@@ -42,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        // Early return: no header or not a Bearer token -> nothing to authenticate
+        // No header or not a Bearer token -> nothing to authenticate
         if (header == null || !header.startsWith(BEARER_PREFIX)) {
             filterChain.doFilter(request, response);
             return;

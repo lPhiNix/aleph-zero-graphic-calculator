@@ -39,10 +39,13 @@ public class SecurityConstants {
                 "/favicon.ico",
                 "/favicon.png",
                 "/favicons/**",
+                "/assets/**",
                 "/styles/**",
                 "/scripts/**",
                 "/snapshots/**",
-                "/img/**"
+                "/img/**",
+                "/env.js",
+                "/index.html"
         );
     }
 }
