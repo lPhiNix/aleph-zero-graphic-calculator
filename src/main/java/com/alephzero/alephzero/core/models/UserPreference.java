@@ -14,7 +14,7 @@ import java.util.Map;
 @NoArgsConstructor
 @Entity
 @Deprecated(since = "NOT YET IMPLEMENTED")
-@Table(name = "user_preferences", schema = "mysqldb")
+@Table(name = "user_preferences")
 public class UserPreference {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

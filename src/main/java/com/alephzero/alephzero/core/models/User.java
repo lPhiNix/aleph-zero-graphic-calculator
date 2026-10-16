@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Lazy;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "user", schema = "mysqldb")
+@Table(name = "user")
 public class User {
 	@Id
 	@Column(name = "id", nullable = false)

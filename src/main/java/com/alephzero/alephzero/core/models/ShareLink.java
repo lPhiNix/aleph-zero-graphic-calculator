@@ -10,7 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Deprecated(since = "NOT YET IMPLEMENTED")
-@Table(name = "share_link", schema = "mysqldb")
+@Table(name = "share_link")
 public class ShareLink {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -9,7 +9,7 @@ import org.hibernate.annotations.ColumnDefault;
 @Getter
 @Setter
 @Entity
-@Table(name = "history_expression", schema = "mysqldb")
+@Table(name = "history_expression")
 public class HistoryExpression {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

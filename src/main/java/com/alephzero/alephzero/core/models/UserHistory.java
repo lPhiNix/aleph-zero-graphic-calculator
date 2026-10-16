@@ -13,7 +13,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@Table(name = "user_history", schema = "mysqldb")
+@Table(name = "user_history")
 public class UserHistory {
 
     @Id

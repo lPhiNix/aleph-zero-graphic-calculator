@@ -12,7 +12,7 @@ import org.hibernate.type.SqlTypes;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "math_expression", schema = "mysqldb")
+@Table(name = "math_expression")
 public class MathExpression {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

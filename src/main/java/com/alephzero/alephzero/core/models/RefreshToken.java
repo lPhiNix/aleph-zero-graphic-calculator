@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "refresh_token", schema = "mysqldb")
+@Table(name = "refresh_token")
 public class RefreshToken {
 
     @Id
