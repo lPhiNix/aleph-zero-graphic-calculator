@@ -1,159 +1,83 @@
 package com.alephzero.alephzero.infrastructure.security;
 
-import com.alephzero.alephzero.infrastructure.security.CustomAccessDeniedHandler;
-import com.alephzero.alephzero.infrastructure.security.CustomAuthenticationEntryPoint;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import com.alephzero.alephzero.core.services.auth.JWTService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
-import org.springframework.http.MediaType;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.util.Set;
 
-
 /**
- * Security configuration class for defining security filter chains and authentication mechanisms.
- * DO NOT TOUCH.
+ * Security configuration for the stateless token-based authentication system.
+ * <p>
+ * A single filter chain protects the API ({@code /api/**}) and leaves the rest
+ * (the SPA shell and its static assets, served by the same application in
+ * production) publicly accessible. Access tokens are validated by
+ * {@link JwtAuthenticationFilter}; there is no HTTP session, no OAuth2 and no
+ * form login.
  */
 @Profile("default")
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     /**
-     * Configures the security filter chain for the OAuth2 Authorization Server.
-     *
-     * @param http the {@link HttpSecurity} to configure
-     * @return the configured {@link SecurityFilterChain}
-     * @throws Exception if an error occurs during configuration
+     * Password encoder used to hash user passwords and to verify credentials at login.
      */
     @Bean
-    @Order(Ordered.HIGHEST_PRECEDENCE)
-    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
-        OAuth2AuthorizationServerConfigurer authServer = OAuth2AuthorizationServerConfigurer.authorizationServer();
-
-        http
-                .cors(Customizer.withDefaults()) // Enable default CORS configuration
-                .securityMatcher(authServer.getEndpointsMatcher()) // Apply this filter chain to authorization server endpoints
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated()) // Require authentication for all requests
-                .with(authServer, configurer -> {
-                    configurer.oidc(Customizer.withDefaults()); // Enable OpenID Connect 1.0
-                })
-                .exceptionHandling(exceptions -> exceptions
-                        .defaultAuthenticationEntryPointFor(
-                                new LoginUrlAuthenticationEntryPoint("/login"), // Redirect to login page for HTML requests
-                                new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
-                        )
-                );
-
-        return http.build();
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     /**
-     * Configures the security filter chain for form-based login.
-     *
-     * @param http the {@link HttpSecurity} to configure
-     * @return the configured {@link SecurityFilterChain}
-     * @throws Exception if an error occurs during configuration
-     */
-    @Bean
-    @Order(Ordered.HIGHEST_PRECEDENCE + 1)
-    public SecurityFilterChain formLoginSecurityFilterChain(HttpSecurity http, @Value("${app.frontend.url}") String frontendUrl) throws Exception {
-        http
-                .securityMatcher("/login", "/register", "/login_process", "/css/**", "/js/**", "/images/**") // Apply this filter chain to specific endpoints
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()) // Allow all requests to these endpoints
-                .formLogin(form -> form
-                        .loginPage("/login") // Custom login page
-                        .loginProcessingUrl("/login_process") // Endpoint for processing login requests
-                        .defaultSuccessUrl(frontendUrl + "/")
-                        .failureUrl("/login?error=true") // Redirect to login page with error on failure
-                        .permitAll()
-                )
-                .logout(logout -> logout
-                        .logoutUrl("/logout") // Endpoint for logout
-                        .logoutSuccessUrl(frontendUrl + "/login?logout=true") // Redirect to login page on successful logout
-                        .invalidateHttpSession(true)
-                        .clearAuthentication(true)
-                        .deleteCookies("JSESSIONID")
-                );
-
-        return http.build();
-    }
-
-    /**
-     * Configures the security filter chain for the resource server.
+     * Configures the single security filter chain.
      *
      * @param http                     the {@link HttpSecurity} to configure
-     * @param allowedEndpoints         a set of endpoints that are publicly accessible
-     * @param allowedStaticEndpoints   a set of static resource endpoints that are publicly accessible
-     * @param accessDeniedHandler      a custom handler for access denied exceptions
-     * @param authenticationEntryPoint a custom entry point for authentication exceptions
+     * @param jwtService               the token service backing the authentication filter
+     * @param allowedEndpoints         publicly accessible API endpoints
+     * @param allowedStaticEndpoints   publicly accessible static resources
+     * @param accessDeniedHandler      custom JSON 403 handler
+     * @param authenticationEntryPoint custom JSON 401 handler
      * @return the configured {@link SecurityFilterChain}
-     * @throws Exception if an error occurs during configuration
+     * @throws Exception if configuration fails
      */
     @Bean
-    @Order(Ordered.HIGHEST_PRECEDENCE + 2)
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   JWTService jwtService,
                                                    Set<String> allowedEndpoints,
                                                    Set<String> allowedStaticEndpoints,
                                                    CustomAccessDeniedHandler accessDeniedHandler,
                                                    CustomAuthenticationEntryPoint authenticationEntryPoint) throws Exception {
+
+        // Built manually (instead of as a @Component) so Spring Boot does not also
+        // register it as a plain servlet filter outside the security chain.
+        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtService);
+
         return http
-                .csrf(AbstractHttpConfigurer::disable) // Disable CSRF protection
-                .cors(Customizer.withDefaults()) // Enable default CORS configuration
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Use stateless sessions
+                .csrf(AbstractHttpConfigurer::disable) // Stateless API: no CSRF token
+                .cors(Customizer.withDefaults()) // CORS for the dev frontend origin
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {
-                    allowedEndpoints.forEach(endpoint ->
-                            auth.requestMatchers(endpoint).permitAll() // Allow access to specified endpoints
-                    );
-                    allowedStaticEndpoints.forEach(staticEndpoint ->
-                            auth.requestMatchers(staticEndpoint).permitAll() // Allow access to static resources
-                    );
-                    auth.anyRequest().authenticated(); // Require authentication for all other requests
+                    allowedEndpoints.forEach(endpoint -> auth.requestMatchers(endpoint).permitAll());
+                    allowedStaticEndpoints.forEach(staticEndpoint -> auth.requestMatchers(staticEndpoint).permitAll());
+                    auth.requestMatchers("/api/**").authenticated(); // Everything under /api requires a valid access token
+                    auth.anyRequest().permitAll(); // SPA shell, assets and client-side routes
                 })
                 .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint(authenticationEntryPoint) // Custom entry point for authentication exceptions
-                        .accessDeniedHandler(accessDeniedHandler) // Custom handler for access denied exceptions
-                )
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(Customizer.withDefaults()) // Enable JWT-based authentication for the resource server
-                )
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler))
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
-    }
-
-    /**
-     * Configures the authentication manager with a DAO-based authentication provider.
-     *
-     * @param userDetailsService the {@link UserDetailsService} to use for retrieving user details
-     * @param passwordEncoder    the {@link PasswordEncoder} to use for password encoding
-     * @return the configured {@link AuthenticationManager}
-     */
-    @Bean
-    public AuthenticationManager authenticationManager(UserDetailsService userDetailsService,
-                                                       PasswordEncoder passwordEncoder) {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService); // Set the user details service
-        provider.setPasswordEncoder(passwordEncoder); // Set the password encoder
-        return new ProviderManager(provider);
     }
 }

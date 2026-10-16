@@ -12,12 +12,13 @@ import java.util.Set;
 @Configuration
 public class SecurityConstants {
     /**
-     * Allowed endpoints that do not require authentication.
+     * Public API endpoints that do not require authentication.
      * @return a {@link Set} of allowed endpoints.
      */
     @Bean
     public Set<String> allowedEndpoints() {
         return Set.of(
+                "/api/v1/auth/**",
                 "/api/public/**",
                 "/v3/api-docs/**",
                 "/swagger-ui/**",
@@ -45,4 +46,3 @@ public class SecurityConstants {
         );
     }
 }
-
