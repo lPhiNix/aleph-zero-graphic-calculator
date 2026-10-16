@@ -3,7 +3,6 @@ package com.alephzero.alephzero.core.services.math.persistence;
 import com.alephzero.alephzero.api.v1.math.dto.request.history.MathExpressionCreationDto;
 import com.alephzero.alephzero.core.services.common.AbstractCrudService;
 import com.alephzero.alephzero.api.v1.math.mapper.MathExpressionMapper;
-import com.alephzero.alephzero.api.v1.math.mapper.UserHistoryMapper;
 import com.alephzero.alephzero.core.models.MathExpression;
 import com.alephzero.alephzero.core.repositories.MathExpressionRepository;
 
@@ -15,12 +14,10 @@ public class MathExpressionPersistenceService extends AbstractCrudService<MathEx
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(MathExpressionPersistenceService.class);
 
     private final MathExpressionMapper mathExpressionMapper;
-    private final UserHistoryMapper userHistoryMapper;
 
-    public MathExpressionPersistenceService(MathExpressionRepository repository, MathExpressionMapper mathExpressionMapper, UserHistoryMapper userHistoryMapper) {
+    public MathExpressionPersistenceService(MathExpressionRepository repository, MathExpressionMapper mathExpressionMapper) {
         super(repository);
         this.mathExpressionMapper = mathExpressionMapper;
-        this.userHistoryMapper = userHistoryMapper;
     }
 
     /**

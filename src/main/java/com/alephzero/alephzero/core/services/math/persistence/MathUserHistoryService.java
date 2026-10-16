@@ -2,9 +2,7 @@ package com.alephzero.alephzero.core.services.math.persistence;
 
 import com.alephzero.alephzero.core.services.auth.AlephzeroUserDetailService;
 import com.alephzero.alephzero.api.v1.math.dto.request.history.UserHistoryCreationDto;
-import com.alephzero.alephzero.commons.mapper.MappingContext;
 import com.alephzero.alephzero.core.services.common.AbstractCrudService;
-import com.alephzero.alephzero.api.v1.math.mapper.MathExpressionMapper;
 import com.alephzero.alephzero.api.v1.math.mapper.UserHistoryMapper;
 import com.alephzero.alephzero.core.models.User;
 import com.alephzero.alephzero.core.models.UserHistory;
@@ -21,13 +19,11 @@ public class MathUserHistoryService extends AbstractCrudService<UserHistory, Int
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(MathUserHistoryService.class);
 
     private final UserHistoryMapper userHistoryMapper;
-    private final MathExpressionMapper mathExpressionMapper;
     private final AlephzeroUserDetailService alephzeroUserDetailService;
 
-    public MathUserHistoryService(UserHistoryRepository repository, UserHistoryMapper userHistoryMapper, MathExpressionMapper mathExpressionMapper, AlephzeroUserDetailService alephzeroUserDetailService) {
+    public MathUserHistoryService(UserHistoryRepository repository, UserHistoryMapper userHistoryMapper, AlephzeroUserDetailService alephzeroUserDetailService) {
         super(repository);
         this.userHistoryMapper = userHistoryMapper;
-        this.mathExpressionMapper = mathExpressionMapper;
         this.alephzeroUserDetailService = alephzeroUserDetailService;
     }
 
@@ -35,11 +31,10 @@ public class MathUserHistoryService extends AbstractCrudService<UserHistory, Int
     public UserHistory createUserHistory(UserHistoryCreationDto request) {
         User owner = alephzeroUserDetailService.getCurrentUser();
         String snapshotUUid = UUID.randomUUID().toString();
-        MappingContext context = MappingContext.builder().withAny(owner, snapshotUUid, mathExpressionMapper).build();
 
         logger.info("Creating user history for user: {}, image snapshot UUID: {}", owner.getUsername(), snapshotUUid);
 
-        UserHistory history = userHistoryMapper.toEntityFromCreationDto(request, context);
+        UserHistory history = userHistoryMapper.toEntityFromCreationDto(request, owner, snapshotUUid);
         UserHistory persisted = repository.save(history);
         SnapshotUtils.saveSnapshotToFile(request.snapshot(), snapshotUUid);
 

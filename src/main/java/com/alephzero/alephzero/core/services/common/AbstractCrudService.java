@@ -20,45 +20,45 @@ import java.util.List;
  * @param <R>  the concrete the JpaRepository for the entity
  */
 public abstract class AbstractCrudService<T, ID extends Serializable, R extends JpaRepository<T, ID>>
-        implements CrudService<T, ID> {
-    protected R repository;
-    protected Logger log = LoggerFactory.getLogger(this.getClass());
+		implements CrudService<T, ID> {
+	protected R repository;
+	protected Logger log = LoggerFactory.getLogger(this.getClass());
 
-    public AbstractCrudService(R repository) {
-        this.repository = repository;
-    }
+	public AbstractCrudService(R repository) {
+		this.repository = repository;
+	}
 
-    @Override
-    public T findById(ID id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("No such entity %s", id)));
-    }
+	@Override
+	public T findById(ID id) {
+		return repository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(String.format("No such entity %s", id)));
+	}
 
-    @Override
-    @Transactional(readOnly = true)
-    public T findByIdReadOnly(ID id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("No such entity %s", id)));
-    }
+	@Override
+	@Transactional(readOnly = true)
+	public T findByIdReadOnly(ID id) {
+		return repository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(String.format("No such entity %s", id)));
+	}
 
-    @Override
-    public List<T> findAll() {
-        return repository.findAll();
-    }
+	@Override
+	public List<T> findAll() {
+		return repository.findAll();
+	}
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<T> findAllReadOnly() {
-        return repository.findAll();
-    }
+	@Override
+	@Transactional(readOnly = true)
+	public List<T> findAllReadOnly() {
+		return repository.findAll();
+	}
 
-    @Override
-    public T save(T entity) {
-        return repository.save(entity);
-    }
+	@Override
+	public T save(T entity) {
+		return repository.save(entity);
+	}
 
-    @Override
-    public void deleteById(ID id) {
-        repository.deleteById(id);
-    }
+	@Override
+	public void deleteById(ID id) {
+		repository.deleteById(id);
+	}
 }
