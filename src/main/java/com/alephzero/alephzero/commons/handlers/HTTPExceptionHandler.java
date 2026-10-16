@@ -12,6 +12,7 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
  * Exception handler focused on handling HTTP-specific exceptions such as:
@@ -82,5 +83,20 @@ public class HTTPExceptionHandler {
 				.code(AppCode.NOT_ACCEPTABLE)
 				.title("The server cannot respond with a content type acceptable by the client.")
 				.build();
+	}
+
+	/**
+	 * Handles requests for a static resource that does not exist (and, in general,
+	 * any route that no handler maps). Returns 404 instead of letting the generic
+	 * exception handler turn it into a 500.
+	 *
+	 * @param ex Exception thrown when no resource/handler matches the request.
+	 * @return A {@link ResponseEntity} containing an {@link ErrorResponse} with
+	 *         NOT_FOUND status.
+	 */
+	@ExceptionHandler(NoResourceFoundException.class)
+	public ResponseEntity<ErrorResponse> handleNoResourceFound(NoResourceFoundException ex) {
+		logger.debug("No resource found for path: {}", ex.getResourcePath());
+		return ErrorResponseBuilder.notFound().title("Resource not found").build();
 	}
 }

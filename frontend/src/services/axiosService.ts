@@ -21,10 +21,10 @@ const AUTH_ENDPOINT_PREFIX = "/api/v1/auth/";
  * @returns the configured base URL (possibly empty for same-origin)
  */
 export function getApiBaseUrl(): string {
-	const configured = window.ENV?.VITE_BACKEND_URL;
-	// Use the configured value even when it is an empty string (same-origin);
-	// only fall back to the dev default when it is undefined.
-	return configured !== undefined ? configured : "http://localhost:8080";
+	// The application is served from the same origin as the API (single
+	// production image), so requests are relative by default. An explicit value
+	// can still be injected through window.ENV.VITE_BACKEND_URL when needed.
+	return window.ENV?.VITE_BACKEND_URL ?? "";
 }
 
 /**
