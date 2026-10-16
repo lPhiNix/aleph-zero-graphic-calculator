@@ -1,6 +1,6 @@
 package com.alephzero.alephzero.commons.handlers;
 
-import com.alephzero.alephzero.commons.messages.ApiResponseFactory;
+import com.alephzero.alephzero.commons.messages.ErrorResponseBuilder;
 import com.alephzero.alephzero.commons.messages.dto.error.ErrorCategory;
 import com.alephzero.alephzero.commons.messages.dto.error.details.ErrorDetail;
 import com.alephzero.alephzero.commons.messages.dto.error.ErrorResponse;
@@ -24,31 +24,25 @@ import java.util.List;
 @Order(Ordered.LOWEST_PRECEDENCE)
 public class ApiExceptionHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(ApiExceptionHandler.class);
+	private static final Logger logger = LoggerFactory.getLogger(ApiExceptionHandler.class);
 
-    private final ApiResponseFactory responseFactory;
+	/**
+	 * Handles MathEvaluationTimeoutException specifically.
+	 *
+	 * @param ex the exception instance
+	 * @return a ResponseEntity with an error response indicating a timeout error
+	 */
+	@ExceptionHandler(MathEvaluationTimeoutException.class)
+	public ResponseEntity<ErrorResponse> handleMathEvaluationTimeoutException(MathEvaluationTimeoutException ex) {
+		logger.error("Math evaluation timed out: {}", ex.getMessage(), ex);
 
-    public ApiExceptionHandler(ApiResponseFactory responseFactory) {
-        this.responseFactory = responseFactory;
-    }
-
-    /**
-     * Handles MathEvaluationTimeoutException specifically.
-     *
-     * @param ex the exception instance
-     * @return a ResponseEntity with an error response indicating a timeout error
-     */
-    @ExceptionHandler(MathEvaluationTimeoutException.class)
-    public ResponseEntity<ErrorResponse> handleMathEvaluationTimeoutException(MathEvaluationTimeoutException ex) {
-        logger.error("Math evaluation timed out: {}", ex.getMessage(), ex);
-        return responseFactory.error(
-                AppCode.TIMEOUT,
-                "Timeout during math evaluation",
-                List.of(new ErrorDetail(
-                        ErrorCategory.INTERNAL,
-                        ex.getMessage(),
-                        "The evaluation of the mathematical expression exceeded the maximum allowed time."
-                ))
-        );
-    }
+		return ErrorResponseBuilder.create()
+				.code(AppCode.TIMEOUT)
+				.title("Timeout during math evaluation")
+				.details(List.of(new ErrorDetail(
+						ErrorCategory.INTERNAL,
+						ex.getMessage(),
+						"The evaluation of the mathematical expression exceeded the maximum allowed time.")))
+				.build();
+	}
 }

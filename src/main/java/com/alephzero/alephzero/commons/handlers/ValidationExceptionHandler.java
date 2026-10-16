@@ -1,9 +1,10 @@
 package com.alephzero.alephzero.commons.handlers;
 
-import com.alephzero.alephzero.commons.messages.ApiMessageFactory;
 import com.alephzero.alephzero.commons.messages.ApiResponseUtils;
+import com.alephzero.alephzero.commons.messages.ErrorResponseBuilder;
 import com.alephzero.alephzero.commons.messages.dto.error.ErrorCategory;
 import com.alephzero.alephzero.commons.messages.dto.error.details.ValidationErrorDetail;
+import com.alephzero.alephzero.infrastructure.config.enums.AppCode;
 import com.alephzero.alephzero.commons.messages.dto.error.ErrorResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -32,83 +33,86 @@ import java.util.List;
 @Order(1)
 @RequiredArgsConstructor
 public class ValidationExceptionHandler {
-    private final ApiMessageFactory messageFactory;
 
+	Logger log = LoggerFactory.getLogger(ValidationExceptionHandler.class);
 
-    Logger log = LoggerFactory.getLogger(ValidationExceptionHandler.class);
+	/**
+	 * Handles {@link MethodArgumentNotValidException} thrown when method arguments
+	 * fail validation.
+	 *
+	 * @param ex the exception instance
+	 * @return a standardized {@link ErrorResponse} containing validation error
+	 *         details
+	 */
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
+			MethodArgumentNotValidException ex) {
+		log.warn("Validation failed for method arguments: {}", ex.getMessage(), ex);
+		List<ValidationErrorDetail> validationErrorDetails = ApiResponseUtils.getErrorDetails(ex.getBindingResult(),
+				ErrorCategory.VALIDATION);
+		return ErrorResponseBuilder.validation()
+				.title("Validation error in request body")
+				.details(validationErrorDetails)
+				.build();
+	}
 
-    /**
-     * Handles {@link MethodArgumentNotValidException} thrown when method arguments fail validation.
-     *
-     * @param ex      the exception instance
-     * @return a standardized {@link ErrorResponse} containing validation error details
-     */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
-            MethodArgumentNotValidException ex
-    ) {
-        log.warn("Validation failed for method arguments: {}", ex.getMessage(), ex);
-        List<ValidationErrorDetail> validationErrorDetails = ApiResponseUtils.getErrorDetails(ex.getBindingResult(), ErrorCategory.VALIDATION);
-        return messageFactory.error()
-                .validation("One or more fields in the request failed validation.")
-                .title("Validation error in request body")
-                .details(validationErrorDetails)
-                .build();
-    }
+	/**
+	 * Handles {@link ConstraintViolationException} thrown when validation
+	 * constraints are violated.
+	 *
+	 * @param ex the exception instance
+	 * @return a standardized {@link ErrorResponse} containing constraint violation
+	 *         details
+	 */
+	@ExceptionHandler(ConstraintViolationException.class)
+	public ResponseEntity<ErrorResponse> handleConstraintViolationException(
+			ConstraintViolationException ex) {
+		log.warn("Constraint violations detected: {}", ex.getMessage(), ex);
+		List<ValidationErrorDetail> validationErrorDetails = ApiResponseUtils
+				.getErrorDetails(ex.getConstraintViolations(), ErrorCategory.VALIDATION);
+		return ErrorResponseBuilder.validation()
+				.title("Validation error in request parameters")
+				.details(validationErrorDetails)
+				.build();
+	}
 
-    /**
-     * Handles {@link ConstraintViolationException} thrown when validation constraints are violated.
-     *
-     * @param ex      the exception instance
-     * @return a standardized {@link ErrorResponse} containing constraint violation details
-     */
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ErrorResponse> handleConstraintViolationException(
-            ConstraintViolationException ex
-    ) {
-        log.warn("Constraint violations detected: {}", ex.getMessage(), ex);
-        List<ValidationErrorDetail> validationErrorDetails = ApiResponseUtils.getErrorDetails(ex.getConstraintViolations(), ErrorCategory.VALIDATION);
-        return messageFactory.error()
-                .validation("Validation constraints were not met for one or more request parameters")
-                .title("Validation error in request parameters")
-                .details(validationErrorDetails)
-                .build();
-    }
+	/**
+	 * Handles {@link BindException} thrown when binding request parameters to an
+	 * object fails.
+	 *
+	 * @param ex the exception instance
+	 * @return a standardized {@link ErrorResponse} containing data binding error
+	 *         details
+	 */
+	@ExceptionHandler(BindException.class)
+	public ResponseEntity<ErrorResponse> handleBindException(
+			BindException ex) {
+		log.warn("Data binding failed: {}", ex.getMessage(), ex);
+		List<ValidationErrorDetail> validationErrorDetails = ApiResponseUtils.getErrorDetails(ex.getBindingResult(),
+				ErrorCategory.VALIDATION);
+		return ErrorResponseBuilder.validation()
+				.title("Data binding error")
+				.details(validationErrorDetails)
+				.build();
+	}
 
-    /**
-     * Handles {@link BindException} thrown when binding request parameters to an object fails.
-     *
-     * @param ex      the exception instance
-     * @return a standardized {@link ErrorResponse} containing data binding error details
-     */
-    @ExceptionHandler(BindException.class)
-    public ResponseEntity<ErrorResponse> handleBindException(
-            BindException ex
-    ) {
-        log.warn("Data binding failed: {}", ex.getMessage(), ex);
-        List<ValidationErrorDetail> validationErrorDetails = ApiResponseUtils.getErrorDetails(ex.getBindingResult(), ErrorCategory.VALIDATION);
-        return messageFactory.error()
-                .validation("Failed to bind request parameters to the target object.")
-                .title("Data binding error")
-                .details(validationErrorDetails)
-                .build();
-    }
-
-    /**
-     * Handles {@link MissingServletRequestParameterException} thrown when a required request parameter is missing.
-     *
-     * @param ex      the exception instance
-     * @return a standardized {@link ErrorResponse} containing information about the missing parameter
-     */
-    @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<ErrorResponse> handleMissingServletRequestParameterException(
-            MissingServletRequestParameterException ex
-    ) {
-        log.warn("Missing required request parameter: {}", ex.getParameterName(), ex);
-        ValidationErrorDetail detail = new ValidationErrorDetail(ErrorCategory.VALIDATION, ex.getParameterName(), ex.getMessage(), "null");
-        return messageFactory.error().validation(String.format("The required request parameter '%s' is missing.", ex.getParameterName()))
-                .title("Missing request parameter")
-                .detail(detail)
-                .build();
-    }
+	/**
+	 * Handles {@link MissingServletRequestParameterException} thrown when a
+	 * required request parameter is missing.
+	 *
+	 * @param ex the exception instance
+	 * @return a standardized {@link ErrorResponse} containing information about the
+	 *         missing parameter
+	 */
+	@ExceptionHandler(MissingServletRequestParameterException.class)
+	public ResponseEntity<ErrorResponse> handleMissingServletRequestParameterException(
+			MissingServletRequestParameterException ex) {
+		log.warn("Missing required request parameter: {}", ex.getParameterName(), ex);
+		ValidationErrorDetail detail = new ValidationErrorDetail(ErrorCategory.VALIDATION, ex.getParameterName(),
+				ex.getMessage(), "null");
+		return ErrorResponseBuilder.validation()
+				.title("Missing request parameter")
+				.detail(detail)
+				.build();
+	}
 }
