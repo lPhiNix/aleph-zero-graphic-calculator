@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
-import type { AuthTokens } from "../types/auth";
-import { clearTokens, getAccessToken, getRefreshToken, setTokens } from "./tokenStorage";
+import type { AuthResponse } from "../types/auth";
+import { clearTokens, getAccessToken, setAccessToken } from "./tokenStorage";
 
 /** Request config with a flag to avoid retrying the same request twice. */
 interface RetryableRequestConfig extends InternalAxiosRequestConfig {
@@ -9,6 +9,23 @@ interface RetryableRequestConfig extends InternalAxiosRequestConfig {
 
 /** Auth endpoints must not trigger the automatic refresh/retry logic. */
 const AUTH_ENDPOINT_PREFIX = "/api/v1/auth/";
+
+/**
+ * Resolves the backend base URL.
+ * <p>
+ * In production the Java application also serves the React build (single
+ * binary), so backend and frontend share the same origin: the API base URL is
+ * empty and requests are relative. In development {@code VITE_BACKEND_URL}
+ * points at the backend origin.
+ *
+ * @returns the configured base URL (possibly empty for same-origin)
+ */
+export function getApiBaseUrl(): string {
+	const configured = window.ENV?.VITE_BACKEND_URL;
+	// Use the configured value even when it is an empty string (same-origin);
+	// only fall back to the dev default when it is undefined.
+	return configured !== undefined ? configured : "http://localhost:8080";
+}
 
 /**
  * AxiosConfig
@@ -22,27 +39,24 @@ class AxiosConfig {
 	private static refreshPromise: Promise<string> | null = null;
 
 	/**
-	 * Requests a new access token using the stored refresh token.
-	 * Uses a bare axios call (no interceptors) to avoid recursion.
+	 * Requests a new access token. The refresh token lives in an HttpOnly cookie,
+	 * so only credentials need to be included. A bare axios call is used to avoid
+	 * the interceptors (and any recursion).
 	 * @param baseURL the backend base URL.
 	 * @returns the new access token.
 	 */
 	private static async requestNewAccessToken(baseURL: string): Promise<string> {
-		const refreshToken = getRefreshToken();
-		if (!refreshToken) {
-			throw new Error("No refresh token available");
-		}
-
-		const { data } = await axios.post<AuthTokens>(
+		const { data } = await axios.post<AuthResponse>(
 			`${baseURL}/api/v1/auth/refresh`,
-			{ refreshToken },
+			{},
+			{ withCredentials: true },
 		);
 
 		if (!data?.accessToken) {
 			throw new Error("Refresh did not return an access token");
 		}
 
-		setTokens(data.accessToken, data.refreshToken);
+		setAccessToken(data.accessToken);
 		return data.accessToken;
 	}
 
@@ -54,12 +68,12 @@ class AxiosConfig {
 	public static getInstance(): AxiosInstance {
 		// If the instance does not exist, create a new one with default config
 		if (!AxiosConfig.instance) {
-			const baseURL =
-				window.ENV?.VITE_BACKEND_URL || "http://localhost:8080"; // Use ENV backend URL or fallback to localhost
+			const baseURL = getApiBaseUrl();
 
 			AxiosConfig.instance = axios.create({
 				baseURL,
 				timeout: 5000, // Timeout in milliseconds for requests
+				withCredentials: true, // send/receive the HttpOnly refresh cookie
 				headers: {
 					"Content-Type": "application/json", // Default content-type for requests
 				},
@@ -76,8 +90,9 @@ class AxiosConfig {
 
 			/**
 			 * Response interceptor.
-			 * - On 401 for a non-auth endpoint: try to refresh the access token once
-			 *   (shared across concurrent requests) and replay the original request.
+			 * - On 401 for a non-auth endpoint: refresh the access token once (shared
+			 *   across concurrent requests) and replay the original request, without
+			 *   reloading the page.
 			 * - If the refresh fails: clear the session and redirect to /login.
 			 * - Auth endpoints (login/register/refresh/logout) are never retried here,
 			 *   so their errors propagate to the caller.

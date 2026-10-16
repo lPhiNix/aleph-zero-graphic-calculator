@@ -1,11 +1,12 @@
 /**
- * Types for the token-based authentication API (refresh token + access token).
+ * Types for the token-based authentication API (refresh token in HttpOnly cookie
+ * + short-lived access token).
  */
 
-/** Pair of tokens returned by the authentication endpoints. */
-export interface AuthTokens {
+/** Response body returned by the login/refresh endpoints. */
+export interface AuthResponse {
     accessToken: string;
-    refreshToken: string;
+    tokenType: string;
     expiresIn: number;
 }
 

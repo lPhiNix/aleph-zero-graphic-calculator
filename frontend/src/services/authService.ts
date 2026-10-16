@@ -1,7 +1,7 @@
 import { isAxiosError } from "axios";
 import AxiosConfig from "./axiosService";
-import { clearTokens, getRefreshToken, setTokens } from "./tokenStorage";
-import type { ApiErrorResponse, AuthTokens } from "../types/auth";
+import { clearTokens, setAccessToken } from "./tokenStorage";
+import type { ApiErrorResponse, AuthResponse } from "../types/auth";
 import type { LoginFormData } from "../types/login";
 import type { RegisterFormData } from "../types/register";
 
@@ -47,11 +47,14 @@ export function parseAuthError(error: unknown): AuthError {
     };
 }
 
-/** Authenticates the user and stores the returned token pair. */
+/**
+ * Authenticates the user. The refresh token is set by the backend in an HttpOnly
+ * cookie (not readable here); only the access token is stored locally.
+ */
 export async function login(data: LoginFormData): Promise<void> {
     const axios = AxiosConfig.getInstance();
-    const res = await axios.post<AuthTokens>("/api/v1/auth/login", data);
-    setTokens(res.data.accessToken, res.data.refreshToken);
+    const res = await axios.post<AuthResponse>("/api/v1/auth/login", data);
+    setAccessToken(res.data.accessToken);
 }
 
 /** Registers a new user. */
@@ -61,18 +64,15 @@ export async function register(data: RegisterFormData): Promise<void> {
 }
 
 /**
- * Revokes the current refresh token on the backend (best effort) and always
- * clears the locally stored tokens.
+ * Revokes the refresh token on the backend (clearing the HttpOnly cookie) and
+ * clears the locally stored access token.
  */
 export async function logout(): Promise<void> {
-    const refreshToken = getRefreshToken();
     try {
-        if (refreshToken) {
-            const axios = AxiosConfig.getInstance();
-            await axios.post("/api/v1/auth/logout", { refreshToken });
-        }
+        const axios = AxiosConfig.getInstance();
+        await axios.post("/api/v1/auth/logout");
     } catch {
-        // Ignore network/refresh failures: the local session is cleared anyway.
+        // Ignore network failures: the local session is cleared anyway.
     } finally {
         clearTokens();
     }
