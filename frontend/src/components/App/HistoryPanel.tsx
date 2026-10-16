@@ -130,7 +130,7 @@ export default function HistoryPanel({
         setLoading(true);
         AxiosConfig.getInstance()
             .get("/api/v1/math/history/summary")
-            .then((res) => setHistory(res.data.content))
+            .then((res) => setHistory(res.data))
             .finally(() => setLoading(false));
     }, [open]);
 
@@ -173,7 +173,7 @@ export default function HistoryPanel({
         try {
             await AxiosConfig.getInstance().post("/api/v1/math/history", payload);
             const res = await AxiosConfig.getInstance().get("/api/v1/math/history/summary");
-            setHistory(res.data.content);
+            setHistory(res.data);
         } catch (e) {
             // Optionally handle error here (e.g. show notification)
         }
@@ -205,7 +205,7 @@ export default function HistoryPanel({
         setLoading(true);
         try {
             const res = await AxiosConfig.getInstance().get(`/api/v1/math/history/${id}`);
-            const exprs = Array.from(res.data.content.expressions)
+            const exprs = Array.from(res.data.expressions)
                 .sort((a: any, b: any) => a.indexOrder - b.indexOrder);
             const exp = exprs.map((e: any) => e.mathExpression.expression);
             const cols = exprs.map((e: any) => e.mathExpression.preferences.color);

@@ -31,15 +31,10 @@ export interface MathExpressionEvaluationDto {
 
 /**
  * Wrapper for the full API response.
- * Contains the status code, message, path, and a content object with the evaluations array.
+ * The backend returns the evaluation result directly (no code/message/content envelope).
  */
 export interface MathApiResponse {
-    code: string; // Status code from the backend
-    message: string; // Human-readable message from the backend
-    path: string; // The API path that was called
-    content: {
-        expressionEvaluations: MathExpressionEvaluationDto[]; // Array of evaluated expressions
-    };
+    expressionEvaluations: MathExpressionEvaluationDto[]; // Array of evaluated expressions
 }
 
 /**

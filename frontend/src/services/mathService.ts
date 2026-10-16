@@ -73,7 +73,7 @@ async function evaluateSingleExpression(
         );
         // Extract the first evaluation DTO from the API response
         const evalDto: MathExpressionEvaluationDto =
-            response.data.content.expressionEvaluations[0];
+            response.data.expressionEvaluations[0];
 
         // Initialize the result object
         const result: ExpressionResult = {
@@ -145,7 +145,7 @@ export async function evaluateBatchExpressions(
             { headers: { 'Content-Type': 'application/json' } }
         );
         // Extract the DTOs from the API response
-        const dtos = response.data.content.expressionEvaluations;
+        const dtos = response.data.expressionEvaluations;
 
         // Map each DTO to an ExpressionResult object
         return dtos.map((evalDto) => {
@@ -228,14 +228,10 @@ export interface MathExpressionEvaluationDto {
 
 /**
  * DTO for the overall batch API response.
+ * The backend returns the evaluation result directly (no wrapper).
  */
 export interface MathApiResponse {
-    code: string; // Status or error code
-    message: string; // Human-readable message
-    path: string; // API path
-    content: {
-        expressionEvaluations: MathExpressionEvaluationDto[]; // Array of evaluated expressions
-    };
+    expressionEvaluations: MathExpressionEvaluationDto[]; // Array of evaluated expressions
 }
 
 /**

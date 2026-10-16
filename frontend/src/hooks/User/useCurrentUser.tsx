@@ -26,7 +26,7 @@ export function useCurrentUser() {
                 const axios = AxiosConfig.getInstance();
                 const res = await axios.get('/api/user');
                 console.log("Respuesta /api/user:", res.data); // For debugging
-                setUser(res.data?.content);
+                setUser(res.data);
             } catch (e) {
                 setUser(null);
             } finally {
