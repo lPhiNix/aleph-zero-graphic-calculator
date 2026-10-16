@@ -198,7 +198,7 @@ public class ErrorResponseBuilder {
 			errorTitle = code.getSimpleMessage();
 		}
 
-		ErrorResponse error = new ErrorResponse(errorTitle, errorSummary, errorDetails);
+		ErrorResponse error = new ErrorResponse(code.toString(), errorTitle, errorDetails);
 
 		return ResponseEntity.status(code.getStatus()).body(error);
 	}
