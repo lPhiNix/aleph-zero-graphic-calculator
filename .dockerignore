@@ -1,5 +1,14 @@
-frontend/node_modules
+# === Ignore build artifacts, tooling and secrets ===
 target
 .git
 .github
 snapshots
+
+# Never ship secrets into the image: injected at runtime instead.
+.env
+
+# Frontend: rebuilt inside the image, so ignore its artifacts and tooling.
+frontend/dist
+frontend/node
+frontend/node_modules
+**/node_modules
